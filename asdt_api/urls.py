@@ -20,10 +20,7 @@ from user.views import Authenticate
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('authenticate/', Authenticate.as_view()),
+    path('authenticate', Authenticate.as_view()),
     path('user/', include('user.urls')),
 ]
 
-
-print(include('user.urls'))
-print(urlpatterns)
