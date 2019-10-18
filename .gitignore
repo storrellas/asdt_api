@@ -1,0 +1,17 @@
+*__pycache__*
+#*migrations*
+*venv*
+docker_pro/persistance/*
+db.sqlite3
+.env
+credentials.txt
+node_modules
+package-lock.json
+*dist*
+*.pyc
+tutorial.txt
+deploy/rsa/*
+*localsettings.py
+*config.json
+#test/*
+*/media/picture/
