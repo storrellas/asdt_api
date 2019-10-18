@@ -15,7 +15,13 @@ from django.conf import settings
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import authentication
+from rest_framework import exceptions
+from rest_framework.permissions import IsAuthenticated
 
+# Project imports
+from asdt_api.utils import get_logger
+
+logger = get_logger()
 
 # Create MongoClient
 client = MongoClient('localhost', 27017)
@@ -24,16 +30,32 @@ db = client.asdt
 class ASDTUser:
   username = 'sergi'
   password = 'torrellas'
+  def is_authenticated(self):
+    return True
 
 class ASDTAuthentication(authentication.BaseAuthentication):
     def authenticate(self, request):
 
-      print("authentication")
-      return (ASDTUser(), None)
+      # Decoded header
+      authorization_header = request.META.get('HTTP_AUTHORIZATION')
+      encoded_jwt = authorization_header.split(' ')[1]
+      try:
+        decoded_jwt = jwt.decode(encoded_jwt, settings.SECRET_KEY, algorithms=['HS256'])
+
+        user = db.users.find_one({'id':decoded_jwt['id']})
+        logger.info("Sergi")
+        print(user)
+        print(decoded_jwt)
+
+
+        return (ASDTUser(), None)
+      except jwt.ExpiredSignatureError:
+        return (None, None)
+
+      
 
 
 class Authenticate(APIView):
-    authentication_classes = [ASDTAuthentication]
 
     def post(self, request):
       if 'email' not in request.data or 'password' not in request.data:
@@ -67,6 +89,10 @@ class Authenticate(APIView):
         return Response({"success": False, "error": "WRONG_PASSWORD"})
 
 class UserInfo(APIView):
+    authentication_classes = [ASDTAuthentication]
+    permission_classes = (IsAuthenticated,)
+
+
     def get(self, request):
         data = {
           'success': True,
@@ -74,6 +100,7 @@ class UserInfo(APIView):
             'token': '123'
           }
         }
+        print(request.user.username)
         return Response(data)
 
 class AllowedTools(APIView):
