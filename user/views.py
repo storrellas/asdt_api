@@ -24,44 +24,11 @@ from rest_framework.permissions import IsAuthenticated
 
 # Project imports
 from asdt_api.utils import get_logger
+from asdt_api.authentication import *
 
 logger = get_logger()
 
-# Create MongoClient
-client = MongoClient('localhost', 27017)
-db = client.asdt
-
-class ASDTUser:
-  data = {}
-  def __init__(self, data):
-    self.data = data
-
-  def is_authenticated(self):
-    return True
-
-class ASDTAuthentication(authentication.BaseAuthentication):
-    def authenticate(self, request):
-
-      # Decoded header
-      authorization_header = request.META.get('HTTP_AUTHORIZATION')
-      encoded_jwt = authorization_header.split(' ')[1]
-      try:
-        decoded_jwt = jwt.decode(encoded_jwt, settings.SECRET_KEY, algorithms=['HS256'])
-        user = db.users.find_one({'_id':ObjectId(decoded_jwt['id'])})
-        if user is None:
-          return (None, None)
-        else:
-          return (ASDTUser(data=user), None)
-      except Exception as e:
-        print(e)
-        return (None, None)
-      except jwt.ExpiredSignatureError as e:
-        print("Expired ", str(e))
-        return (None, None)
-
-      
-
-
+     
 class Authenticate(APIView):
 
     def post(self, request):
@@ -71,7 +38,7 @@ class Authenticate(APIView):
       # Checking password
       email = request.data['email']
       password = request.data['password']
-      user = db.users.find_one({'email':email})
+      user = settings.MONGO.asdt.users.find_one({'email':email})
       if bcrypt.checkpw(password.encode(), user['password'].encode()):
 
         # Generate payload
@@ -112,8 +79,6 @@ class UserInfo(APIView):
             'role' : request.user.data['role'],
           }
         } 
-        logger.info("In view")
-        print(request.user.data)
         return Response(data)
 
 class AllowedTools(APIView):
@@ -146,79 +111,79 @@ class AllowedTools(APIView):
       }
       return Response(data)
 
-class DisplayOptions(APIView):
+# class DisplayOptions(APIView):
 
-    authentication_classes = [ASDTAuthentication]
-    permission_classes = (IsAuthenticated,)
+#     authentication_classes = [ASDTAuthentication]
+#     permission_classes = (IsAuthenticated,)
 
-    def displayOptionsResponse(self, displayOptions):
-      # Dump displayOptions
-      displayOptions_bson = json_util.dumps(displayOptions)
-      displayOptions_json = json.loads( displayOptions_bson )
+#     def displayOptionsResponse(self, displayOptions):
+#       # Dump displayOptions
+#       displayOptions_bson = json_util.dumps(displayOptions)
+#       displayOptions_json = json.loads( displayOptions_bson )
       
-      print(displayOptions_json)
+#       print(displayOptions_json)
 
-      # JSON values
-      zone_json = displayOptions_json['zone']
-      circleZone_json = displayOptions_json['circleZone']
-      # Remove Id
-      for item in circleZone_json:
-        item.pop('_id', None)
-      print(displayOptions_json)
-      return {
-        'success': True,
-        'data': {
-          "mapType": displayOptions['mapType'],
-          "zone": zone_json,
-          "circleZone": circleZone_json
-        }
-      }
+#       # JSON values
+#       zone_json = displayOptions_json['zone']
+#       circleZone_json = displayOptions_json['circleZone']
+#       # Remove Id
+#       for item in circleZone_json:
+#         item.pop('_id', None)
+#       print(displayOptions_json)
+#       return {
+#         'success': True,
+#         'data': {
+#           "mapType": displayOptions['mapType'],
+#           "zone": zone_json,
+#           "circleZone": circleZone_json
+#         }
+#       }
 
-    def displayOptionsUpdate(self, user, displayOptions):
-      # Update one
-      if 'mapType' in displayOptions:
-        db.users.update_one({'_id': user.data['_id']}, 
-                            {
-                              '$set':{'displayOptions.mapType': displayOptions['mapType']}
-                            })
-      if 'zone' in displayOptions:
-        db.users.update_one({'_id': user.data['_id']}, 
-                            {
-                              '$set':{'displayOptions.zone': displayOptions['zone']}
-                            })
-      if 'circleZone' in displayOptions:
-        db.users.update_one({'_id': user.data['_id']}, 
-                            {
-                              '$set':{'displayOptions.circleZone': displayOptions['circleZone']}
-                            })
+#     def displayOptionsUpdate(self, user, displayOptions):
+#       # Update one
+#       if 'mapType' in displayOptions:
+#         db.users.update_one({'_id': user.data['_id']}, 
+#                             {
+#                               '$set':{'displayOptions.mapType': displayOptions['mapType']}
+#                             })
+#       if 'zone' in displayOptions:
+#         db.users.update_one({'_id': user.data['_id']}, 
+#                             {
+#                               '$set':{'displayOptions.zone': displayOptions['zone']}
+#                             })
+#       if 'circleZone' in displayOptions:
+#         db.users.update_one({'_id': user.data['_id']}, 
+#                             {
+#                               '$set':{'displayOptions.circleZone': displayOptions['circleZone']}
+#                             })
 
 
 
-    def get(self, request):
+#     def get(self, request):
 
-      # Prepare response
-      data = self.displayOptionsResponse(request.user.data['displayOptions'])
-      return Response(data)
+#       # Prepare response
+#       data = self.displayOptionsResponse(request.user.data['displayOptions'])
+#       return Response(data)
 
-    def put(self, request):
+#     def put(self, request):
 
-      # Update 
-      self.displayOptionsUpdate(request.user, request.data)
+#       # Update 
+#       self.displayOptionsUpdate(request.user, request.data)
 
-      # Prepare response
-      user = db.users.find_one({'_id': request.user.data['_id']})
-      data = self.displayOptionsResponse(user['displayOptions'])
-      return Response(data)
+#       # Prepare response
+#       user = db.users.find_one({'_id': request.user.data['_id']})
+#       data = self.displayOptionsResponse(user['displayOptions'])
+#       return Response(data)
 
-    def post(self, request):
+#     def post(self, request):
 
-      # Update 
-      self.displayOptionsUpdate(request.user, request.data)
+#       # Update 
+#       self.displayOptionsUpdate(request.user, request.data)
 
-      # Prepare response
-      user = db.users.find_one({'_id': request.user.data['_id']})
-      data = self.displayOptionsResponse(user['displayOptions'])
-      return Response(data)
+#       # Prepare response
+#       user = db.users.find_one({'_id': request.user.data['_id']})
+#       data = self.displayOptionsResponse(user['displayOptions'])
+#       return Response(data)
 
 
 
