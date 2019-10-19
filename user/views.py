@@ -1,11 +1,12 @@
 import bcrypt
 import jwt
 import time
+import json
 
 # pymongo
 from pymongo import MongoClient
 from bson.objectid import ObjectId
-from bson.json_util import dumps
+from bson import json_util
 
 
 # Django import
@@ -112,10 +113,6 @@ class UserInfo(APIView):
         print(request.user.data)
         return Response(data)
 
-
-
-
-
 class AllowedTools(APIView):
 
     authentication_classes = [ASDTAuthentication]
@@ -145,3 +142,51 @@ class AllowedTools(APIView):
         'data': self.allowed_tools[ request.user.data['role'] ]
       }
       return Response(data)
+
+class DisplayOptions(APIView):
+
+    authentication_classes = [ASDTAuthentication]
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+
+      # Dump displayOptions
+      displayOptions_bson = json_util.dumps(request.user.data['displayOptions'])
+      displayOptions_json = json.loads( displayOptions_bson )
+      
+      # JSON values
+      zone_json = displayOptions_json['zone']
+      circleZone_json = displayOptions_json['circleZone']
+      # Remove Id
+      for item in circleZone_json:
+        del item['_id']
+      print(displayOptions_json)
+      data = {
+        'success': True,
+        'data': {
+          "zone": zone_json,
+          "circleZone": circleZone_json
+        }
+      }
+      return Response(data)
+
+# //Funcions per guardar la informacio que ve del display visualitzador
+# router.get('/me/displayOptions', require('../middlewares/authUser'), async function (req, res) {
+# 	try {
+# 		if (req.user.id == undefined) {
+# 			sendError(res, "WRONG_PARAMETERS")
+# 			return;
+# 		}
+
+# 		let result = await User.findById(req.user.id).select('displayOptions').exec();
+# 		result = utils.removeIDUnderbar(result);
+# 		res.send({ success: true, data: result.displayOptions });
+# 		res.end();
+# 		console.log(result.displayOptions)
+# 		return;
+
+# 	} catch (err) {
+# 		console.error(err);
+# 		sendError(res, "DATABASE_ERROR");
+# 	}
+# })
