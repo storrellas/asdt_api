@@ -112,12 +112,36 @@ class UserInfo(APIView):
         print(request.user.data)
         return Response(data)
 
+
+
+
+
 class AllowedTools(APIView):
+
+    authentication_classes = [ASDTAuthentication]
+    permission_classes = (IsAuthenticated,)
+
+    allowed_tools = {
+      'ADMIN': {
+        'USER':    True, 'REAL_TIME': True, 'TOOLS':      True, 
+        'FLIGHTS': True, 'LAYERS':    True, 'ALARM':      True,
+        'STATS':   True, 'SETTING':   True, 'INHIBITORS': True
+      },
+      'EMPOWERED': {
+        'USER':    True,  'REAL_TIME': True,  'TOOLS':      True, 
+        'FLIGHTS': True,  'LAYERS':    False, 'ALARM':      True,
+        'STATS':   False, 'SETTING':   False, 'INHIBITORS': True
+      },
+      'VIEWER': {
+        'USER':    True,  'REAL_TIME': True,  'TOOLS':      True, 
+        'FLIGHTS': True,  'LAYERS':    False, 'ALARM':      True,
+        'STATS':   False, 'SETTING':   False, 'INHIBITORS': False
+      }
+    }
+
     def get(self, request):
-        data = {
-          'success': True,
-          'data':{
-            'token': '123'
-          }
-        }
-        return Response(data)
+      data = {
+        'success': True,
+        'data': self.allowed_tools[ request.user.data['role'] ]
+      }
+      return Response(data)
