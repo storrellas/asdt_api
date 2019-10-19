@@ -48,7 +48,10 @@ class ASDTAuthentication(authentication.BaseAuthentication):
       try:
         decoded_jwt = jwt.decode(encoded_jwt, settings.SECRET_KEY, algorithms=['HS256'])
         user = db.users.find_one({'_id':ObjectId(decoded_jwt['id'])})
-        return (ASDTUser(data=user), None)
+        if user is None:
+          return (None, None)
+        else:
+          return (ASDTUser(data=user), None)
       except Exception as e:
         print(e)
         return (None, None)
@@ -148,45 +151,74 @@ class DisplayOptions(APIView):
     authentication_classes = [ASDTAuthentication]
     permission_classes = (IsAuthenticated,)
 
-    def get(self, request):
-
+    def displayOptionsResponse(self, displayOptions):
       # Dump displayOptions
-      displayOptions_bson = json_util.dumps(request.user.data['displayOptions'])
+      displayOptions_bson = json_util.dumps(displayOptions)
       displayOptions_json = json.loads( displayOptions_bson )
       
+      print(displayOptions_json)
+
       # JSON values
       zone_json = displayOptions_json['zone']
       circleZone_json = displayOptions_json['circleZone']
       # Remove Id
       for item in circleZone_json:
-        del item['_id']
+        item.pop('_id', None)
       print(displayOptions_json)
-      data = {
+      return {
         'success': True,
         'data': {
+          "mapType": displayOptions['mapType'],
           "zone": zone_json,
           "circleZone": circleZone_json
         }
       }
+
+    def displayOptionsUpdate(self, user, displayOptions):
+      # Update one
+      if 'mapType' in displayOptions:
+        db.users.update_one({'_id': user.data['_id']}, 
+                            {
+                              '$set':{'displayOptions.mapType': displayOptions['mapType']}
+                            })
+      if 'zone' in displayOptions:
+        db.users.update_one({'_id': user.data['_id']}, 
+                            {
+                              '$set':{'displayOptions.zone': displayOptions['zone']}
+                            })
+      if 'circleZone' in displayOptions:
+        db.users.update_one({'_id': user.data['_id']}, 
+                            {
+                              '$set':{'displayOptions.circleZone': displayOptions['circleZone']}
+                            })
+
+
+
+    def get(self, request):
+
+      # Prepare response
+      data = self.displayOptionsResponse(request.user.data['displayOptions'])
       return Response(data)
 
-# //Funcions per guardar la informacio que ve del display visualitzador
-# router.get('/me/displayOptions', require('../middlewares/authUser'), async function (req, res) {
-# 	try {
-# 		if (req.user.id == undefined) {
-# 			sendError(res, "WRONG_PARAMETERS")
-# 			return;
-# 		}
+    def put(self, request):
 
-# 		let result = await User.findById(req.user.id).select('displayOptions').exec();
-# 		result = utils.removeIDUnderbar(result);
-# 		res.send({ success: true, data: result.displayOptions });
-# 		res.end();
-# 		console.log(result.displayOptions)
-# 		return;
+      # Update 
+      self.displayOptionsUpdate(request.user, request.data)
 
-# 	} catch (err) {
-# 		console.error(err);
-# 		sendError(res, "DATABASE_ERROR");
-# 	}
-# })
+      # Prepare response
+      user = db.users.find_one({'_id': request.user.data['_id']})
+      data = self.displayOptionsResponse(user['displayOptions'])
+      return Response(data)
+
+    def post(self, request):
+
+      # Update 
+      self.displayOptionsUpdate(request.user, request.data)
+
+      # Prepare response
+      user = db.users.find_one({'_id': request.user.data['_id']})
+      data = self.displayOptionsResponse(user['displayOptions'])
+      return Response(data)
+
+
+
