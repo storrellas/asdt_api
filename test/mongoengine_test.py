@@ -25,6 +25,8 @@ class ASDTDocument(Document):
 # GROUP
 ###############################
 
+
+
 class Group(ASDTDocument):
   meta = {'collection': 'groups'}
 
@@ -37,18 +39,26 @@ class Group(ASDTDocument):
 ###############################
 # DETECTOR
 ###############################
+class DetectorLocation(EmbeddedDocument):
+  lat = FloatField(default=41.778443)
+  lon = FloatField(default=1.890383)
+  height = FloatField(default=10.0)
+
 class Detector(ASDTDocument):
   meta = {'collection': 'detectors'}
+
   name = StringField(required=True, unique=True, default='')
-  parent = ReferenceField("self", reverse_delete_rule = NULLIFY)
-  childs = ListField(ReferenceField("self", reverse_delete_rule = NULLIFY))
-  users = ListField(LazyReferenceField('Users'), reverse_delete_rule = NULLIFY)
+  password = StringField(required=True, default='')
+  location = EmbeddedDocumentField(DetectorLocation)
+  groups = ListField(ReferenceField(Group, reverse_delete_rule = NULLIFY))
+
+
 
 ###############################
 # USER
 ###############################
 
-class Location(EmbeddedDocument):
+class UserLocation(EmbeddedDocument):
   lat = FloatField()
   lon = FloatField()
 
@@ -79,7 +89,7 @@ class User(ASDTDocument):
   name = StringField(required=True, default='')
   password = StringField(required=True, default='')
   displayOptions = EmbeddedDocumentField(DisplayOptions, default=DisplayOptions())
-  location = EmbeddedDocumentField(Location)
+  location = EmbeddedDocumentField(UserLocation)
   role = StringField(choices=['MASTER', 'ADMIN', 'EMPOWERED', 'VIEWER'], default='ADMIN')
   hasGroup = BooleanField(default=False)
   group = ReferenceField(Group, reverse_delete_rule = NULLIFY)
