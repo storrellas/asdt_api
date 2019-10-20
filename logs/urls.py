@@ -1,5 +1,6 @@
 # Django imports
-from django.conf.urls import url, include
+from django.conf.urls import url
+from django.urls import path, include
 
 
 # Project imports
@@ -7,7 +8,8 @@ from .views import *
 
 urlpatterns = [
     url(r'^getAll$', GetFlightAll.as_view()),
-    url(r'^single$', GetFlightByPage.as_view()),
-    url(r'^$', GetFlightByPage.as_view()),
+    path('<str:log_id>', LogById.as_view()),
+    url(r'^$', LogByPage.as_view()) 
+    
 ]
 

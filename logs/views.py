@@ -7,6 +7,7 @@ from datetime import datetime,timedelta
 from django.shortcuts import render
 
 # rest framework import
+from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import authentication
@@ -17,19 +18,20 @@ from rest_framework.permissions import IsAuthenticated
 from asdt_api.authentication import ASDTAuthentication
 from .models import *
 
-class GetFlight(APIView):
+class LogById(APIView):
     authentication_classes = [ASDTAuthentication]
     permission_classes = (IsAuthenticated,)
 
 
-    def get(self, request):
+    def post(self, request, log_id = None):
+        print('logbyid')
         data = { 'success': True } 
         return Response(data)
 
-class GetFlightByPage(APIView):
+
+class LogByPage(APIView):
     authentication_classes = [ASDTAuthentication]
     permission_classes = (IsAuthenticated,)
-
 
     def post(self, request):
 
