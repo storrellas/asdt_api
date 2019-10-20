@@ -16,6 +16,7 @@ from rest_framework.permissions import IsAuthenticated
 
 # Project imports
 from asdt_api.authentication import ASDTAuthentication
+from bson.objectid import ObjectId
 from .models import *
 
 class LogById(APIView):
@@ -23,9 +24,39 @@ class LogById(APIView):
     permission_classes = (IsAuthenticated,)
 
 
-    def post(self, request, log_id = None):
-        print('logbyid')
-        data = { 'success': True } 
+    def get(self, request, log_id = None):
+
+        pipeline = [
+            {
+                "$match": { "_id": ObjectId(log_id) }
+            },
+            {
+                "$project": {
+                    "_id": {  "$toString": "$_id" },
+                    "dateIni": { "$dateToString": { "format": "%Y-%m-%d", "date": "$dateIni" } },
+                    "dateFin": { "$dateToString": { "format": "%Y-%m-%d", "date": "$dateIni" } },
+                    "productId": { "$ifNull": [ "$productId", "undef" ] },
+                    "sn": { "$ifNull": [ "$sn", "undef" ] },
+                    "model": { "$ifNull": [ "$model", "undef" ] },
+                    "owner": { "$ifNull": [ "$owner", "undef" ] },
+                    "maxHeight": { "$ifNull": [ "$maxHeight", "undef" ] },
+                    "distanceTraveled": { "$ifNull": [ "$distanceTraveled", "undef" ] },
+                    "distanceToDetector": { "$ifNull": [ "$distanceToDetector", "undef" ] },
+                    "driverLocation": { "$ifNull": [ "$driverLocation", "undef" ] },
+                    "homeLocation": { "$ifNull": [ "$homeLocation", "undef" ] },
+                    "id": {  "$toString": "$_id" },
+                    "route": { "lat": 1, "lon": 1, "aHeight": 1, "fHeight": 1, "time": { "$dateToString": { "format": "%Y-%m-%dT%H:%M:%S:%L", "date": "$dateIni" } }  },
+                    "detectors" : { "id": { "$toString": "$_id" } },
+                }
+            }
+        ]
+
+        # Iterate cursor
+        log_dict = Log.objects.aggregate(*pipeline)
+        data = { 
+            'success': True,
+            'data': log_dict 
+        } 
         return Response(data)
 
 
@@ -47,16 +78,7 @@ class LogByPage(APIView):
         if 'sn' in request.data:
             sn = request.data['sn']
 
-        # # Querying all objects
-        # # for item in Log.objects:
-        # #     print(item.to_mongo())
-        # #print(Log.objects.all().as_pymongo())
-
-        # # sons = [ob.to_mongo() for ob in Log.objects.all()]
-        # # for son in sons:
-        # #     print(str(son.to_dict()))
-        # queryset_json = Log.objects.all().to_json()
-        # queryset_dict = json.loads(queryset_json)
+        # Querying all objects
         pipeline = [
             {
                 "$project": {
@@ -86,12 +108,11 @@ class LogByPage(APIView):
          } 
         return Response(data)
 
-class GetFlightAll(APIView):
-    authentication_classes = [ASDTAuthentication]
-    permission_classes = (IsAuthenticated,)
+# class GetFlightAll(APIView):
+#     authentication_classes = [ASDTAuthentication]
+#     permission_classes = (IsAuthenticated,)
 
-
-    def post(self, request):
-        print(request.user.data)
-        data = { 'success -all': True } 
-        return Response(data)        
+#     def post(self, request):
+#         print(request.user.data)
+#         data = { 'success -all': True } 
+#         return Response(data)        
