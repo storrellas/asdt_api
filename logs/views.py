@@ -46,16 +46,15 @@ class GetFlightByPage(APIView):
             sn = request.data['sn']
 
         # # Querying all objects
-        # for item in Log.objects:
-        #     print(item.to_mongo())
-        #print(Log.objects.all().as_pymongo())
+        # # for item in Log.objects:
+        # #     print(item.to_mongo())
+        # #print(Log.objects.all().as_pymongo())
 
-        # sons = [ob.to_mongo() for ob in Log.objects.all()]
-        # for son in sons:
-        #     print(str(son.to_dict()))
-        queryset_json = Log.objects.all().to_json()
-        queryset_dict = json.loads(queryset_json)
-        #queryset = Log.objects.only('dateIni', 'dateFin', 'model')
+        # # sons = [ob.to_mongo() for ob in Log.objects.all()]
+        # # for son in sons:
+        # #     print(str(son.to_dict()))
+        # queryset_json = Log.objects.all().to_json()
+        # queryset_dict = json.loads(queryset_json)
         pipeline = [
             {
                 "$project": {
