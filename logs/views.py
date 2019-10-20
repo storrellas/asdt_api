@@ -89,17 +89,16 @@ class LogByPage(APIView):
         if sn is not None:
             query = { "$and": [ {"dateIni": {"$gt": dateIni }}, {"dateFin": {"$lte": dateFin }}, { "sn": sn }] }
 
+        queryset = Log.objects.filter(dateIni__gt=dateIni, dateFin__lte=dateFin)
+        if sn is not None:
+            queryset = queryset.filter(sn=sn)
+
+        # Apply paging        
+        queryset = queryset.skip(self.page_size * page)
+        queryset = queryset.limit(self.page_size)
+        
         # Querying all objects
         pipeline = [
-            {
-                "$match": query
-            },
-            {
-                "$skip": self.page_size * page
-            },
-            {
-                "$limit": self.page_size
-            },
             {
                 "$project": {
                     "_id": {  "$toString": "$_id" },
@@ -118,7 +117,8 @@ class LogByPage(APIView):
                 }
             }
         ]
-        cursor = Log.objects.aggregate(*pipeline)
+        #cursor = Log.objects.aggregate(*pipeline)
+        cursor = queryset.aggregate(*pipeline)
         data = { 
             'success': True,
             'data': cursor
