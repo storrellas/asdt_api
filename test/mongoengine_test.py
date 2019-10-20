@@ -1,5 +1,6 @@
 from mongoengine import *
 import datetime
+import mongoengine
 
 connect('asdt')
 
@@ -23,8 +24,12 @@ class ASDTDocument(Document):
 # ###############################
 # # GROUP
 # ###############################
-# class Groups(ASDTDocument):
-#   childs = ListField(ReferenceField("self", reverse_delete_rule = NULLIFY))
+
+class Groups(ASDTDocument):
+  name = StringField(required=True, unique=True, default='')
+  parent = ReferenceField("self", reverse_delete_rule = NULLIFY)
+  childs = ListField(ReferenceField("self", reverse_delete_rule = NULLIFY))
+  users = ListField(LazyReferenceField('Users'), reverse_delete_rule = NULLIFY)
 
 
 ###############################
@@ -40,7 +45,7 @@ class CircleZoneCenter(EmbeddedDocument):
   latitude = FloatField()
 
 class CircleZone(EmbeddedDocument):
-  #_id = ObjectIdField(required=True, db_field="_id")
+  _id = ObjectIdField()
   center = EmbeddedDocumentField(CircleZoneCenter)
   radius = IntField(default=0)
   color = StringField(default='')
@@ -63,7 +68,7 @@ class Users(ASDTDocument):
   location = EmbeddedDocumentField(Location)
   role = StringField(choices=['MASTER', 'ADMIN', 'EMPOWERED', 'VIEWER'], default='ADMIN')
   hasGroup = BooleanField(default=False)
-  #group
+  group = ReferenceField(Groups, reverse_delete_rule = NULLIFY)
 
   # timestamps
   createdAt = DateTimeField()
@@ -88,12 +93,12 @@ user = Users(email='storrellas@gmail.com',
               name='Sergi', 
               password='Torrellas', 
               displayOptions=DisplayOptions())
-print(user)
 user.save()
 
-
-# for user in Users.objects:
-#   print(user)
+# Querying all objects
+for user in Users.objects:
+  print(str(user))
+  print(user.to_mongo())
 
 # # jwt_payload = jwt.encode({
 # #     'exp': int(time.time()) + 2
