@@ -68,8 +68,6 @@ class LogByPage(APIView):
 
     def post(self, request):
 
-
-
         # Get dateIni / dateFin / sn / page
         dateIni = datetime.datetime.now() - timedelta(days=4)
         if 'dateIni' in request.data:
@@ -96,6 +94,9 @@ class LogByPage(APIView):
         # Apply paging        
         queryset = queryset.skip(self.page_size * page)
         queryset = queryset.limit(self.page_size)
+
+        # print("MyTets")
+        # print(request.user.group)
 
         # Querying all objects
         pipeline = [

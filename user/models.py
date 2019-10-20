@@ -11,8 +11,23 @@ import datetime
 # GROUP
 ###############################
 
+class Inhibitor(ASDTDocument):
+  meta = {'collection': 'inhibitors'}
+  name = StringField(required=True, unique=True, default='')
+
+class Zone(ASDTDocument):
+  meta = {'collection': 'zones'}
+  name = StringField(required=True, unique=True, default='')
+
+class Drone(ASDTDocument):
+  meta = {'collection': 'drones'}
+  sn = StringField(required=True, unique=True, default='')
+
 class GroupDevices(EmbeddedDocument):
   detectors = ListField(LazyReferenceField('Detector'), reverse_delete_rule = NULLIFY)
+  inhibitors = ListField(ReferenceField(Inhibitor), reverse_delete_rule = NULLIFY)
+  zones = ListField(ReferenceField(Zone), reverse_delete_rule = NULLIFY)
+  friendDrones = ListField(ReferenceField(Drone), reverse_delete_rule = NULLIFY)
 
 
 class Group(ASDTDocument):
@@ -21,7 +36,7 @@ class Group(ASDTDocument):
   name = StringField(required=True, unique=True, default='')
   parent = ReferenceField("self", reverse_delete_rule = NULLIFY)
   childs = ListField(ReferenceField("self", reverse_delete_rule = NULLIFY))
-  users = ListField(LazyReferenceField('Users'), reverse_delete_rule = NULLIFY)  
+  users = ListField(LazyReferenceField('User'), reverse_delete_rule = NULLIFY)  
   devices = EmbeddedDocumentField(GroupDevices)
 
 
