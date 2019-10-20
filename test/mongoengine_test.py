@@ -53,7 +53,7 @@ class CircleZone(EmbeddedDocument):
 class DisplayOptions(EmbeddedDocument):
   mapType = StringField(default='')
   zone = ListField(ListField(IntField()))
-  # circleZone = EmbeddedDocumentListField(CircleZone)
+  circleZone = EmbeddedDocumentListField(CircleZone, default=[])
 
 class Users(ASDTDocument):
   email = StringField(required=True, unique=True, default='')
@@ -83,6 +83,7 @@ user = Users.objects(email='storrellas@gmail.com')
 if user:
   user.delete()
 
+# Create new user
 user = Users(email='storrellas@gmail.com', 
               name='Sergi', 
               password='Torrellas', 
