@@ -96,7 +96,7 @@ class LogByPage(APIView):
         # Apply paging        
         queryset = queryset.skip(self.page_size * page)
         queryset = queryset.limit(self.page_size)
-        
+
         # Querying all objects
         pipeline = [
             {
@@ -117,7 +117,6 @@ class LogByPage(APIView):
                 }
             }
         ]
-        #cursor = Log.objects.aggregate(*pipeline)
         cursor = queryset.aggregate(*pipeline)
         data = { 
             'success': True,
