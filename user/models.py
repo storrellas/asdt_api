@@ -11,13 +11,18 @@ import datetime
 # GROUP
 ###############################
 
+class GroupDevices(EmbeddedDocument):
+  detectors = ListField(LazyReferenceField('Detector'), reverse_delete_rule = NULLIFY)
+
+
 class Group(ASDTDocument):
   meta = {'collection': 'groups'}
 
   name = StringField(required=True, unique=True, default='')
   parent = ReferenceField("self", reverse_delete_rule = NULLIFY)
   childs = ListField(ReferenceField("self", reverse_delete_rule = NULLIFY))
-  users = ListField(LazyReferenceField('Users'), reverse_delete_rule = NULLIFY)
+  users = ListField(LazyReferenceField('Users'), reverse_delete_rule = NULLIFY)  
+  devices = EmbeddedDocumentField(GroupDevices)
 
 
 ###############################
@@ -25,12 +30,12 @@ class Group(ASDTDocument):
 ###############################
 
 class CircleZoneCenter(EmbeddedDocument):
-  longitude = FloatField()
-  latitude = FloatField()
+  longitude = FloatField(default=0.0)
+  latitude = FloatField(default=0.0)
 
 class CircleZone(EmbeddedDocument):
   _id = ObjectIdField()
-  center = EmbeddedDocumentField(CircleZoneCenter)
+  center = EmbeddedDocumentField(CircleZoneCenter, default=CircleZoneCenter())
   radius = IntField(default=0)
   color = StringField(default='')
   opacity = StringField(default='')
