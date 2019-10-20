@@ -21,16 +21,28 @@ class ASDTDocument(Document):
       self.mongooseVersion = 0
       return super().save(*args, **kwargs)
 
-# ###############################
-# # GROUP
-# ###############################
+###############################
+# GROUP
+###############################
 
-class Groups(ASDTDocument):
+class Group(ASDTDocument):
+  meta = {'collection': 'groups'}
+
   name = StringField(required=True, unique=True, default='')
   parent = ReferenceField("self", reverse_delete_rule = NULLIFY)
   childs = ListField(ReferenceField("self", reverse_delete_rule = NULLIFY))
   users = ListField(LazyReferenceField('Users'), reverse_delete_rule = NULLIFY)
 
+
+###############################
+# DETECTOR
+###############################
+class Detector(ASDTDocument):
+  meta = {'collection': 'detectors'}
+  name = StringField(required=True, unique=True, default='')
+  parent = ReferenceField("self", reverse_delete_rule = NULLIFY)
+  childs = ListField(ReferenceField("self", reverse_delete_rule = NULLIFY))
+  users = ListField(LazyReferenceField('Users'), reverse_delete_rule = NULLIFY)
 
 ###############################
 # USER
@@ -60,7 +72,9 @@ class DisplayOptions(EmbeddedDocument):
   zone = ListField(ListField(IntField()))
   circleZone = EmbeddedDocumentListField(CircleZone, default=[])
 
-class Users(ASDTDocument):
+class User(ASDTDocument):
+  meta = {'collection': 'users'}
+
   email = StringField(required=True, unique=True, default='')
   name = StringField(required=True, default='')
   password = StringField(required=True, default='')
@@ -68,7 +82,7 @@ class Users(ASDTDocument):
   location = EmbeddedDocumentField(Location)
   role = StringField(choices=['MASTER', 'ADMIN', 'EMPOWERED', 'VIEWER'], default='ADMIN')
   hasGroup = BooleanField(default=False)
-  group = ReferenceField(Groups, reverse_delete_rule = NULLIFY)
+  group = ReferenceField(Group, reverse_delete_rule = NULLIFY)
 
   # timestamps
   createdAt = DateTimeField()
@@ -84,19 +98,19 @@ class Users(ASDTDocument):
   #     return super().save(*args, **kwargs)
 
 # Delete if exists
-user = Users.objects(email='storrellas@gmail.com')
+user = User.objects(email='storrellas@gmail.com')
 if user:
   user.delete()
 
 # Create new user
-user = Users(email='storrellas@gmail.com', 
+user = User(email='storrellas@gmail.com', 
               name='Sergi', 
               password='Torrellas', 
               displayOptions=DisplayOptions())
 user.save()
 
 # Querying all objects
-for user in Users.objects:
+for user in User.objects:
   print(str(user))
   print(user.to_mongo())
 
