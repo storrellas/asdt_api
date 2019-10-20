@@ -22,5 +22,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('authenticate', Authenticate.as_view()),
     path('user/', include('user.urls')),
+    path('logs/', include('logs.urls')),
 ]
 
