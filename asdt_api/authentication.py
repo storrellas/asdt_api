@@ -20,8 +20,6 @@ class ASDTUser:
 
 class ASDTAuthentication(authentication.BaseAuthentication):
     def authenticate(self, request):
-      print("Authenticate")
-
       # Decoded header
       authorization_header = request.META.get('HTTP_AUTHORIZATION')
       encoded_jwt = authorization_header.split(' ')[1]
