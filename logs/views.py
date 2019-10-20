@@ -64,9 +64,13 @@ class LogByPage(APIView):
     authentication_classes = [ASDTAuthentication]
     permission_classes = (IsAuthenticated,)
 
+    page_size = 200
+
     def post(self, request):
 
-        # Get dateIni / dateFin / sn
+
+
+        # Get dateIni / dateFin / sn / page
         dateIni = datetime.datetime.now() - timedelta(days=4)
         if 'dateIni' in request.data:
             dateIni = datetime.datetime.strptime(request.data['dateIni'], "%Y-%m-%dT%H:%M:%S.%fZ")
@@ -76,6 +80,9 @@ class LogByPage(APIView):
         sn = None
         if 'sn' in request.data:
             sn = request.data['sn']
+        page = 0
+        if 'page' in request.data:
+            page = request.data['page']
 
         # Select query to apply
         query = { "$and": [ {"dateIni": {"$gt": dateIni }}, {"dateFin": {"$lte": dateFin }}] }
@@ -86,6 +93,12 @@ class LogByPage(APIView):
         pipeline = [
             {
                 "$match": query
+            },
+            {
+                "$skip": self.page_size * page
+            },
+            {
+                "$limit": self.page_size
             },
             {
                 "$project": {
@@ -105,10 +118,10 @@ class LogByPage(APIView):
                 }
             }
         ]
-        log_dict = Log.objects.aggregate(*pipeline)
+        cursor = Log.objects.aggregate(*pipeline)
         data = { 
             'success': True,
-            'data': log_dict
+            'data': cursor
          } 
         return Response(data)
 
