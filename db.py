@@ -10,8 +10,6 @@ from logs.models import *
 import mongoengine
 mongoengine.connect('asdt')
 
-
-
 # Querying all objects
 for item in User.objects:
   print(item.to_mongo())
