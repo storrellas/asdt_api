@@ -42,32 +42,36 @@ class Authenticate(APIView):
       password = request.data['password']
 
       # Check whether user exists
-      queryset = User.objects(email=email)
-      if len(queryset) != 1:        
-        return Response({"success": False, "error": "WRONG_PASSWORD"})
-      user = queryset.first()
-      if bcrypt.checkpw(password.encode(), user.password.encode()):
+      try:
+        user = User.objects.get(email=email)
+        if bcrypt.checkpw(password.encode(), user.password.encode()):
 
-        # Generate payload
-        iat = int(time.time()) 
-        exp = int(time.time()) + 6 * 3600        
-        payload = {
-          'type': 'user',
-          'id': str(user.id),
-          'iss': 'ASDT', 
-          'iat': iat,
-          'exp': exp
-        }
-        encoded = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
-        data = {
-          'success': True,
-          'data':{
-            'token': encoded
+          # Generate payload
+          iat = int(time.time()) 
+          exp = int(time.time()) + 6 * 3600        
+          payload = {
+            'type': 'user',
+            'id': str(user.id),
+            'iss': 'ASDT', 
+            'iat': iat,
+            'exp': exp
           }
-        }
-        return Response(data)
-      else:
-        return Response({"success": False, "error": "WRONG_PASSWORD"})
+          encoded = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
+          data = {
+            'success': True,
+            'data':{
+              'token': encoded
+            }
+          }
+          return Response(data)
+        else:
+          return Response({"success": False, "error": "WRONG_PASSWORD"})
+      except Exception as e:
+        print(e)
+        return Response({"success": False, "error": "DOES_NOT_EXIST"})
+
+
+
       
 
 class UserInfo(APIView):
@@ -76,17 +80,31 @@ class UserInfo(APIView):
 
 
     def get(self, request):
+        # data = {
+        #   'success': True,
+        #   'data': {
+        #     'id': str(request.user.data['_id']),
+        #     'email': request.user.data['email'],
+        #     'name': request.user.data['name'],
+        #     'detectors' : [],
+        #     'inhibitors' : [],
+        #     'role' : request.user.data['role'],
+        #   }
+        # } 
+
         data = {
           'success': True,
           'data': {
-            'id': str(request.user.data['_id']),
-            'email': request.user.data['email'],
-            'name': request.user.data['name'],
+            'id': str(request.user.id),
+            'email': request.user.email,
+            'name': request.user.name,
             'detectors' : [],
             'inhibitors' : [],
-            'role' : request.user.data['role'],
+            'role' : request.user.role,
           }
         } 
+
+        
         return Response(data)
 
 class AllowedTools(APIView):
@@ -115,7 +133,7 @@ class AllowedTools(APIView):
     def get(self, request):
       data = {
         'success': True,
-        'data': self.allowed_tools[ request.user.data['role'] ]
+        'data': self.allowed_tools[ request.user.role ]
       }
       return Response(data)
 

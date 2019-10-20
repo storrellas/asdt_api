@@ -143,4 +143,5 @@ class User(ASDTDocument):
   hasGroup = BooleanField(default=False)
   group = ReferenceField(Group, reverse_delete_rule = NULLIFY)
 
-  
+  def is_authenticated(self):
+    return True
