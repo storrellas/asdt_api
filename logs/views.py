@@ -1,7 +1,7 @@
 import json
 
 # Python imports
-from datetime import datetime,timedelta
+from datetime import datetime, timedelta
 
 # Django imports
 from django.shortcuts import render
@@ -67,19 +67,26 @@ class LogByPage(APIView):
     def post(self, request):
 
         # Get dateIni / dateFin / sn
-        # query = {
-        #     'dateIni': { '$gt': datetime.now() - timedelta(days=30) },
-        #     'dateIni': { '$lt': datetime.now() },
-        # }
+        dateIni = datetime.datetime.now() - timedelta(days=4)
         if 'dateIni' in request.data:
-            dateIni = request.data['dateIni']
+            dateIni = datetime.datetime.strptime(request.data['dateIni'], "%Y-%m-%dT%H:%M:%S.%fZ")
+        dateFin = datetime.datetime.now()
         if 'dateFin' in request.data:
-            dateFin = request.data['dateIni']
+            dateFin = datetime.datetime.strptime(request.data['dateFin'], "%Y-%m-%dT%H:%M:%S.%fZ")
+        sn = None
         if 'sn' in request.data:
             sn = request.data['sn']
 
+        # Select query to apply
+        query = { "$and": [ {"dateIni": {"$gt": dateIni }}, {"dateFin": {"$lte": dateFin }}] }
+        if sn is not None:
+            query = { "$and": [ {"dateIni": {"$gt": dateIni }}, {"dateFin": {"$lte": dateFin }}, { "sn": sn }] }
+
         # Querying all objects
         pipeline = [
+            {
+                "$match": query
+            },
             {
                 "$project": {
                     "_id": {  "$toString": "$_id" },
@@ -98,10 +105,7 @@ class LogByPage(APIView):
                 }
             }
         ]
-        # See https://docs.mongodb.com/manual/reference/operator/aggregation/ifNull/
-        #{ $ifNull: [ "$description", "Unspecified" ] }
         log_dict = Log.objects.aggregate(*pipeline)
-
         data = { 
             'success': True,
             'data': log_dict
