@@ -26,6 +26,8 @@ from rest_framework.permissions import IsAuthenticated
 from asdt_api.utils import get_logger
 from asdt_api.authentication import *
 
+from .models import *
+
 logger = get_logger()
 
      
@@ -38,15 +40,20 @@ class Authenticate(APIView):
       # Checking password
       email = request.data['email']
       password = request.data['password']
-      user = settings.MONGO.asdt.users.find_one({'email':email})
-      if bcrypt.checkpw(password.encode(), user['password'].encode()):
+
+      # Check whether user exists
+      queryset = User.objects(email=email)
+      if len(queryset) != 1:        
+        return Response({"success": False, "error": "WRONG_PASSWORD"})
+      user = queryset.first()
+      if bcrypt.checkpw(password.encode(), user.password.encode()):
 
         # Generate payload
         iat = int(time.time()) 
         exp = int(time.time()) + 6 * 3600        
         payload = {
           'type': 'user',
-          'id': str(user['_id']),
+          'id': str(user.id),
           'iss': 'ASDT', 
           'iat': iat,
           'exp': exp
@@ -61,6 +68,7 @@ class Authenticate(APIView):
         return Response(data)
       else:
         return Response({"success": False, "error": "WRONG_PASSWORD"})
+      
 
 class UserInfo(APIView):
     authentication_classes = [ASDTAuthentication]
