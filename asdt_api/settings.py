@@ -121,9 +121,14 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-# Create MongoClient
-from pymongo import MongoClient
-MONGO = MongoClient('localhost', 27017)
-#db = client.asdt
-import mongoengine
-mongoengine.connect('asdt')
+# Enable mongoengine
+MONGO_DB=''
+MONGO_HOST=''
+MONGO_PORT=''
+
+
+# Import localsettings if any
+try:
+    from .localsettings import *
+except ImportError:
+    pass
