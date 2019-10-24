@@ -19,7 +19,7 @@ from asdt_api.authentication import ASDTAuthentication
 from bson.objectid import ObjectId
 from .models import *
 
-class Model(APIView):
+class ModelDetectorView(APIView):
     authentication_classes = [ASDTAuthentication]
     permission_classes = (IsAuthenticated,)
 
@@ -38,17 +38,16 @@ class Model(APIView):
         return Response(data)
 
 
-class ModelImg(APIView):
-    # authentication_classes = [ASDTAuthentication]
-    # permission_classes = (IsAuthenticated,)
+class ModelDetectorImgView(APIView):
+    authentication_classes = [ASDTAuthentication]
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request, model_id = None):
-      print("model_id", model_id)
       file_path = '{}/{}.png'.format(settings.MEDIA_ROOT, model_id)
       if os.path.exists(file_path):
         with open(file_path, 'rb') as fh:
           response = HttpResponse(fh.read(), content_type="image/png")
           response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
           return response
-      return HttpResponse('result')
+      return HttpResponse('failed')
       

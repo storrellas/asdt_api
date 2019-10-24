@@ -17,12 +17,15 @@ from django.contrib import admin
 from django.urls import path, include
 
 from user.views import Authenticate
+from modeldetectors.views import ModelDetectorView
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    #path('admin/', admin.site.urls),
     path('authenticate', Authenticate.as_view()),
     path('user/', include('user.urls')),
     path('logs/', include('logs.urls')),
+    path('model', ModelDetectorView.as_view()),
+    path('models/', include('modeldetectors.urls')),
     path('model/', include('modeldetectors.urls')),
 ]
 

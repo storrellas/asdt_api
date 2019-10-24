@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'modeldetectors'
 ]
 
+ADMIN_ENABLED = False
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
