@@ -131,7 +131,8 @@ Log.objects.create(dateIni=datetime.datetime.now(), dateFin=datetime.datetime.no
                   model='ABC', sn='123', productId=1234,
                   driverLocation=Location(lat=1.2,lon=3.4), homeLocation=Location(lat=1.2,lon=3.4),
                   maxHeight=12, distanceTravelled=12, distanceToDetector=12,
-                  centerPoint=LogCenterPoint(lat=1.0, lon=2.0, aHeight=1.2, fHeight=2.3))
+                  centerPoint=LogCenterPoint(lat=1.0, lon=2.0, aHeight=1.2, fHeight=2.3),
+                  boundingBox=LogBoundingBox(maxLat=1.0, maxLon=2.0, minLat=1.2, minLon=2.3))
 
 logger.info("Created {}. Done!".format(Log.objects.all().count()) )
 
