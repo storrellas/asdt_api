@@ -40,7 +40,7 @@ logger.info("Created {}. Done!".format(Group.objects.all().count()) )
 # Users
 ##############
 logger.info("Creating users ...")
-master = User.objects.create(email='master@asdt.com', name='master', role='MASTER')
+master = User.objects.create(email='master@asdt.eu', name='master', role='MASTER')
 master.set_password('asdt2019')
 
 # Create admin
@@ -48,16 +48,16 @@ circle_zone = CircleZone(center=CircleZoneCenter(longitude=1.2, latitude=2.3),
                          radius=1.0, color="blue", opacity="1.0", 
                          id="123", droneID=["456"], visible=True, active=False)
 display_options = DisplayOptions(mapType='MyMap', zone=[[2,3]],circleZone=[circle_zone])
-admin = User.objects.create(email='admin@asdt.com', name='admin', 
+admin = User.objects.create(email='admin@asdt.eu', name='admin', 
                             password='asdt2019', role='ADMIN',
                             displayOptions=display_options)
 admin.set_password('asdt2019')
 root_group.users.append(admin)
 root_group.save()
 
-empowered = User.objects.create(email='empowered@asdt.com', name='empowered', password='asdt2019', role='EMPOWERED')
+empowered = User.objects.create(email='empowered@asdt.eu', name='empowered', password='asdt2019', role='EMPOWERED')
 empowered.set_password('asdt2019')
-viewer = User.objects.create(email='viewer@asdt.com', name='viewer', password='asdt2019', role='VIEWER')
+viewer = User.objects.create(email='viewer@asdt.eu', name='viewer', password='asdt2019', role='VIEWER')
 viewer.set_password('asdt2019')
 logger.info("Created {}. Done!".format(User.objects.all().count()) )
 
