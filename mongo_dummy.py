@@ -9,6 +9,7 @@ from django.conf import settings
 # Project imports
 from user.models import *
 from logs.models import *
+from models.models import *
 from bson.objectid import ObjectId
 from asdt_api import utils
 
@@ -29,6 +30,7 @@ Group.objects.all().delete()
 Detector.objects.all().delete()
 Inhibitor.objects.all().delete()
 Log.objects.all().delete()
+Model.objects.all().delete()
 logger.info("Done!")
 
 # Groups
@@ -79,52 +81,7 @@ Detector.objects.create(name='canillas', password='asdt2019',
                         location=DetectorLocation(lat=0, lon=0, height=0))
 logger.info("Created {}. Done!".format(Detector.objects.all().count()) )
 
-
-# class LogCenterPoint(EmbeddedDocument):
-#   lat = FloatField(default=0.0)
-#   lon = FloatField(default=0.0)
-#   aHeight = FloatField(default=0.0)
-#   fHeight = FloatField(default=0.0)
-
-# class LogRoute(EmbeddedDocument):
-#   _id = ObjectIdField()
-#   time = DateTimeField(default=datetime.datetime.now)
-#   lat = FloatField(default=0.0)
-#   lon = FloatField(default=0.0)
-#   aHeight = FloatField(default=0.0)
-#   fHeight = FloatField(default=0.0)
-
-# class LogBoundingBox(EmbeddedDocument):
-#   maxLat = FloatField(default=0.0)
-#   maxLon = FloatField(default=0.0)
-#   minLat = FloatField(default=0.0)
-#   minLon = FloatField(default=0.0)
-
-
-# class Log(ASDTDocument):
-#   meta = {'collection': 'logs'}
-
-#   # timestamps
-#   dateIni = DateTimeField(default=datetime.datetime.now)
-#   dateFin = DateTimeField(default=datetime.datetime.now)
-#   sn = StringField(default='')
-
-#   detectors = ListField(ReferenceField(Detector, reverse_delete_rule = NULLIFY))
-
-#   model = StringField(default='')
-#   productId = IntField(default=-1)
-#   owner = StringField(default='')
-
-#   driverLocation = EmbeddedDocumentField(Location)
-#   homeLocation = EmbeddedDocumentField(Location)
-#   maxHeight = FloatField(default=0.0)
-#   distanceTravelled = FloatField(default=0.0)
-#   distanceToDetector = FloatField(default=0.0)
-#   centerPoint = EmbeddedDocumentField(LogCenterPoint, default=LogCenterPoint())
-#   boundingBox = EmbeddedDocumentField(LogBoundingBox, default=LogCenterPoint())
-#   route = EmbeddedDocumentListField(LogRoute, default=[])
-
-# Detectors
+# Logs
 ##############
 logger.info("Creating logs ...")
 route = [
@@ -159,3 +116,12 @@ Log.objects.create(dateIni=datetime.datetime.strptime('2019-10-22T23:00:00.000Z'
                   boundingBox=LogBoundingBox(maxLat=1.0, maxLon=2.0, minLat=1.2, minLon=2.3))                                    
 logger.info("Created {}. Done!".format(Log.objects.all().count()) )
 
+
+# Model
+##############
+logger.info("Creating models ...")
+Model.objects.create(name='Mavic', productId=16, imageType='image/png', image=True, imageCode=1)
+Model.objects.create(name='Phantom', productId=20, imageType='image/png', image=True, imageCode=1)
+Model.objects.create(name='Mavic Pro', productId=18, imageType='image/png', image=True, imageCode=1)
+Model.objects.create(name='DJI MAVIC PRO DUAL', productId=51, imageType='image/jpeg', image=True, imageCode=1)
+logger.info("Created {}. Done!".format(Model.objects.all().count()) )
