@@ -26,10 +26,11 @@ class LogById(APIView):
 
     def get(self, request, log_id = None):
 
+        queryset = Log.objects.filter(id=log_id)
         pipeline = [
-            {
-                "$match": { "_id": ObjectId(log_id) }
-            },
+            # {
+            #     "$match": { "_id": ObjectId(log_id) }
+            # },
             {
                 "$project": {
                     "_id": {  "$toString": "$_id" },
@@ -52,7 +53,8 @@ class LogById(APIView):
         ]
 
         # Iterate cursor
-        log_dict = Log.objects.aggregate(*pipeline)
+        #log_dict = Log.objects.aggregate(*pipeline)
+        log_dict = queryset.aggregate(*pipeline)
         data = { 
             'success': True,
             'data': log_dict 
@@ -97,6 +99,7 @@ class LogByPage(APIView):
 
         # print("MyTets")
         # print(request.user.group)
+        # print(request.user.group.to_json())
 
         # Querying all objects
         pipeline = [

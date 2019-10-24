@@ -18,10 +18,52 @@ mongoengine.connect('asdt')
 # for item in Log.objects:
 #   print(item.to_mongo())
 
-# Querying all objects
-for item in Group.objects:
-  print(item.to_mongo())
+# # Querying all objects
+# for item in Group.objects:
+#   print(item.to_mongo())
 
+# Get user
+user = User.objects.get(email='a@a.com')
+
+# 1. Print getting allowed detectors for user
+##
+print("Allowed detectors for user")
+
+# Grab user group
+group = user.group
+
+print("GroupId", group.id)
+print( "Detectors" )
+detector_list_for_user = []
+for detector in group.devices.detectors:
+  print(detector.fetch().id)
+  detector_list_for_user.append( detector.fetch() )
+
+
+# 2. Getting detectors for Log
+##
+print("Log detectors - Allowed")
+
+allowed = False
+log = Log.objects.get(sn='123')
+# for detector in group.devices.detectors:
+#   print(detector.fetch().to_mongo())
+for detector in log.detectors:
+  if detector in detector_list_for_user:
+    allowed = True
+
+print("allowed", allowed)
+
+print("Log detectors - NOT Allowed")
+allowed = False
+log = Log.objects.get(sn='456')
+# for detector in group.devices.detectors:
+#   print(detector.fetch().to_mongo())
+for detector in log.detectors:
+  if detector in detector_list_for_user:
+    allowed = True
+
+print("allowed", allowed)
 
 
 # pipeline = [
