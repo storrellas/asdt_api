@@ -1,4 +1,4 @@
-import os
+import os, sys, bcrypt
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "asdt_api.settings")
 
@@ -57,11 +57,31 @@ logger.info("Created {}. Done!".format(Group.objects.all().count()) )
 #   zone = ListField(ListField(IntField()))
 #   circleZone = EmbeddedDocumentListField(CircleZone, default=[])
 
+# password = b"super secret password"
+# hashed = bcrypt.hashpw(password, bcrypt.gensalt(10))
+# print(hashed)
+# print(bcrypt.checkpw(password, hashed))
+# sys.exit(0)
 
 # Users
 ##############
 logger.info("Creating users ...")
+print("Creating ...")
 master = User.objects.create(email='master@asdt.com', name='master', password='asdt2019', role='MASTER')
+print("Set password... ")
+master.set_password('mytest')
+# master.password='mytest'
+# master.save()
+
+print("after")
+password = b'asdt2019'
+print(password)
+print(master.password)
+
+
+print( bcrypt.checkpw(password, master.password.encode() ) ) 
+
+sys.exit(0)
 
 # Create admin
 circle_zone = CircleZone(center=CircleZoneCenter(longitude=1.2, latitude=2.3),

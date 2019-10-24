@@ -1,3 +1,5 @@
+import bcrypt 
+
 # Django import - useless
 from django.db import models
 
@@ -67,6 +69,8 @@ class DisplayOptions(EmbeddedDocument):
 class User(ASDTDocument):
   meta = {'collection': 'users'}
 
+  __original_password = None
+
   email = StringField(required=True, unique=True, default='')
   name = StringField(required=True, default='')
   password = StringField(required=True, default='')
@@ -75,6 +79,30 @@ class User(ASDTDocument):
   role = StringField(choices=['MASTER', 'ADMIN', 'EMPOWERED', 'VIEWER'], default='ADMIN')
   hasGroup = BooleanField(default=False)
   group = ReferenceField(Group, reverse_delete_rule = NULLIFY)
+
+  def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+    self.__original_password = self.password
+
+  def set_password(self, password):
+    self.password = bcrypt.hashpw(password.encode(), bcrypt.gensalt(10)).decode()
+    self.__original_password = self.password
+    print("saving password", self.password, self.__original_password)
+    return self.save()
+
+  def save(self, *args, **kwargs):
+
+    # Update password
+    print("before updating password", self.password, self.__original_password)
+    if self.password != self.__original_password:
+      print("updating password")
+      self.password = bcrypt.hashpw(self.password.encode(), bcrypt.gensalt(10))
+      self.__original_password = self.password
+    else:
+      print("not update", self.password, self.__original_password)
+
+    return super().save(*args, **kwargs)
+
 
   def is_authenticated(self):
     return True
