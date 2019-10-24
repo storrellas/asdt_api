@@ -75,6 +75,6 @@ class Log(ASDTDocument):
   distanceTravelled = FloatField(default=0.0)
   distanceToDetector = FloatField(default=0.0)
   centerPoint = EmbeddedDocumentField(LogCenterPoint, default=LogCenterPoint())
-  boundingBox = EmbeddedDocumentField(LogBoundingBox, default=LogCenterPoint())
+  boundingBox = EmbeddedDocumentField(LogBoundingBox, default=LogBoundingBox())
   route = EmbeddedDocumentListField(LogRoute, default=[])
 
