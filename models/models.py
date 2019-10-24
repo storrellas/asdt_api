@@ -10,9 +10,9 @@ from mongoengine import *
 from asdt_api.models import ASDTDocument, Location
 from user.models import Group
 
-class Model(ASDTDocument):
+class ModelDetector(ASDTDocument):
   meta = {'collection': 'models'}
-  
+
   name = StringField(default='')
   productId = IntField(default=-1)
   image = BooleanField(default=True)

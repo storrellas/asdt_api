@@ -30,7 +30,7 @@ Group.objects.all().delete()
 Detector.objects.all().delete()
 Inhibitor.objects.all().delete()
 Log.objects.all().delete()
-Model.objects.all().delete()
+ModelDetector.objects.all().delete()
 logger.info("Done!")
 
 # Groups
@@ -42,6 +42,9 @@ logger.info("Created {}. Done!".format(Group.objects.all().count()) )
 # Users
 ##############
 logger.info("Creating users ...")
+master = User.objects.create(email='a@a.com', name='admin', role='ADMIN')
+master.set_password('asdt2019')
+
 master = User.objects.create(email='master@asdt.eu', name='master', role='MASTER')
 master.set_password('asdt2019')
 
@@ -120,8 +123,8 @@ logger.info("Created {}. Done!".format(Log.objects.all().count()) )
 # Model
 ##############
 logger.info("Creating models ...")
-Model.objects.create(name='Mavic', productId=16, imageType='image/png', image=True, imageCode=1)
-Model.objects.create(name='Phantom', productId=20, imageType='image/png', image=True, imageCode=1)
-Model.objects.create(name='Mavic Pro', productId=18, imageType='image/png', image=True, imageCode=1)
-Model.objects.create(name='DJI MAVIC PRO DUAL', productId=51, imageType='image/jpeg', image=True, imageCode=1)
-logger.info("Created {}. Done!".format(Model.objects.all().count()) )
+ModelDetector.objects.create(name='Mavic', productId=16, imageType='image/png', image=True, imageCode=1)
+ModelDetector.objects.create(name='Phantom', productId=20, imageType='image/png', image=True, imageCode=1)
+ModelDetector.objects.create(name='Mavic Pro', productId=18, imageType='image/png', image=True, imageCode=1)
+ModelDetector.objects.create(name='DJI MAVIC PRO DUAL', productId=51, imageType='image/jpeg', image=True, imageCode=1)
+logger.info("Created {}. Done!".format(ModelDetector.objects.all().count()) )
