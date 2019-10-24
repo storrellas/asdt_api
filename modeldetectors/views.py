@@ -4,6 +4,7 @@ from django.shortcuts import render
 from django.utils.encoding import smart_str
 from django.http import HttpResponse
 from django.views import View
+from django.conf import settings
 
 # rest framework import
 from rest_framework import viewsets
@@ -41,11 +42,9 @@ class ModelImg(APIView):
     # authentication_classes = [ASDTAuthentication]
     # permission_classes = (IsAuthenticated,)
 
-
     def get(self, request, model_id = None):
       print("model_id", model_id)
-      #file_path = '/home/vagrant/workspace/asdt_api/tintin.jpg'
-      file_path = './tintin.jpg'
+      file_path = '{}/{}.png'.format(settings.MEDIA_ROOT, model_id)
       if os.path.exists(file_path):
         with open(file_path, 'rb') as fh:
           response = HttpResponse(fh.read(), content_type="image/png")

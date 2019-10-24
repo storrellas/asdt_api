@@ -9,7 +9,7 @@ from django.conf import settings
 # Project imports
 from user.models import *
 from logs.models import *
-from models.models import *
+from modeldetectors.models import *
 from bson.objectid import ObjectId
 from asdt_api import utils
 

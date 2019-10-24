@@ -23,6 +23,6 @@ urlpatterns = [
     path('authenticate', Authenticate.as_view()),
     path('user/', include('user.urls')),
     path('logs/', include('logs.urls')),
-    path('model/', include('models.urls')),
+    path('model/', include('modeldetectors.urls')),
 ]
 

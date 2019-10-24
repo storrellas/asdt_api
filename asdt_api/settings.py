@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'user',
     'logs',
-    'models'
+    'modeldetectors'
 ]
 
 MIDDLEWARE = [
