@@ -18,6 +18,7 @@ from rest_framework.permissions import IsAuthenticated
 from asdt_api.authentication import ASDTAuthentication
 from bson.objectid import ObjectId
 from .models import *
+from user.models import *
 
 class LogById(APIView):
     authentication_classes = [ASDTAuthentication]
@@ -31,12 +32,21 @@ class LogById(APIView):
         if len(queryset) != 1:
             return Response({"success": False, "error": "NOT_FOUND"})
 
-        # Allowed detector list
-        detector_list_for_user = []
-        for detector in request.user.group.devices.detectors:
-            detector_list_for_user.append( detector.fetch() )
-        queryset = queryset.filter(detectors__in=[detector_list_for_user])
 
+        # # Allowed detector list
+        # detector_list_for_user = []
+        # allowed = False
+        # for detector in request.user.group.devices.detectors:
+        #     detector_list_for_user.append( detector.fetch().id )
+
+        # log = queryset.first()        
+        # for detector in log.detectors:
+
+        # #queryset = queryset.filter(detectors__in=[detector_list_for_user])
+
+
+        
+        
         if len(queryset) != 1:
             return Response({"success": False, "error": "NOT_FOUND"})
 
@@ -108,11 +118,28 @@ class LogByPage(APIView):
         if sn is not None:
             queryset = queryset.filter(sn=sn)
 
-        # Allowed detector list
-        detector_list_for_user = []
-        for detector in request.user.group.devices.detectors:
-            detector_list_for_user.append( detector.fetch() )
-        queryset = queryset.filter(detectors__in=[detector_list_for_user])
+        # # Allowed detector list
+        # detector_list_for_user = []        
+        # for detector in request.user.group.devices.detectors:
+        #     detector_list_for_user.append( detector.fetch().id )
+        # print(detector_list_for_user)
+        # queryset = queryset.filter(detectors__in=[detector_list_for_user])
+
+        # ############################
+        # # user = User.objects.get(email='admin@asdt.eu')
+        # # user.group
+        # # queryset = Log.objects.all()
+        # # Allowed detector list
+        # detector_list_for_user = []
+        # for detector in request.user.group.devices.detectors:
+        #     detector_list_for_user.append( str(detector.fetch().id) )
+        # print(detector_list_for_user)
+        # queryset = queryset.filter(detectors__in=[detector_list_for_user])
+        # for item in queryset:
+        #     print(item)
+        # ############################
+
+        # queryset = Log.objects.all()
 
 
         # Apply paging        

@@ -55,7 +55,8 @@ circle_zone = CircleZone(center=CircleZoneCenter(longitude=1.2, latitude=2.3),
 display_options = DisplayOptions(mapType='MyMap', zone=[[2,3]],circleZone=[circle_zone])
 admin = User.objects.create(email='admin@asdt.eu', name='admin', 
                             password='asdt2019', role='ADMIN',
-                            displayOptions=display_options)
+                            displayOptions=display_options,
+                            group=root_group, hasGroup=True)
 admin.set_password('asdt2019')
 root_group.users.append(admin)
 root_group.save()
@@ -99,6 +100,7 @@ route = [
 Log.objects.create(dateIni=datetime.datetime.strptime('2019-09-01T23:00:00.000Z', "%Y-%m-%dT%H:%M:%S.%fZ"), 
                     dateFin=datetime.datetime.strptime('2019-09-01T23:00:00.000Z', "%Y-%m-%dT%H:%M:%S.%fZ"),
                     model='ABC', sn='123', productId=1234,
+                    detectors=[detector],
                     driverLocation=Location(lat=1.2,lon=3.4), homeLocation=Location(lat=1.2,lon=3.4),
                     maxHeight=12, distanceTravelled=12, distanceToDetector=12,
                     centerPoint=LogCenterPoint(lat=1.0, lon=2.0, aHeight=1.2, fHeight=2.3),
@@ -129,3 +131,25 @@ ModelDetector.objects.create(name='Mavic Pro', productId=18, imageType='image/pn
 ModelDetector.objects.create(name='DJI MAVIC PRO DUAL', productId=51, imageType='image/jpeg', image=True, imageCode=1)
 logger.info("Created {}. Done!".format(ModelDetector.objects.all().count()) )
 
+
+user = User.objects.get(email='admin@asdt.eu')
+user.group
+
+
+queryset = Log.objects.all()
+# Allowed detector list
+detector_list_for_user = []
+for detector in user.group.devices.detectors:
+    detector_list_for_user.append( detector.fetch() )
+
+print(len(detector_list_for_user) )
+for detector in detector_list_for_user:
+  print(detector)
+  print(detector.to_mongo().to_dict())
+
+#queryset = queryset.filter(detectors__in=[detector_list_for_user])
+for item in queryset:
+  print(item.detectors[0])
+  print(item.detectors[0].to_json())
+  print(item.detectors[0].as_pymongo())
+  print(item.detectors[0].to_mongo())
