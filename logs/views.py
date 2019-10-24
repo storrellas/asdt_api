@@ -41,15 +41,6 @@ class LogById(APIView):
             return Response({"success": False, "error": "NOT_FOUND"})
 
 
-        # # Check if permission
-        # allowed = False
-        # log = queryset.first()
-        # for detector in log.detectors:
-        #     if detector in detector_list_for_user:
-        #         allowed = True
-        # if allowed == False:
-        #     return Response({"success": False, "error": "NOT_ALLOWED"})
-
         # Prepare results
         pipeline = [
             {
