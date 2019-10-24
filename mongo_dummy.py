@@ -66,22 +66,8 @@ logger.info("Created {}. Done!".format(Group.objects.all().count()) )
 # Users
 ##############
 logger.info("Creating users ...")
-print("Creating ...")
-master = User.objects.create(email='master@asdt.com', name='master', password='asdt2019', role='MASTER')
-print("Set password... ")
-master.set_password('mytest')
-# master.password='mytest'
-# master.save()
-
-print("after")
-password = b'asdt2019'
-print(password)
-print(master.password)
-
-
-print( bcrypt.checkpw(password, master.password.encode() ) ) 
-
-sys.exit(0)
+master = User.objects.create(email='master@asdt.com', name='master', role='MASTER')
+master.set_password('asdt2019')
 
 # Create admin
 circle_zone = CircleZone(center=CircleZoneCenter(longitude=1.2, latitude=2.3),
@@ -91,11 +77,14 @@ display_options = DisplayOptions(mapType='MyMap', zone=[[2,3]],circleZone=[circl
 admin = User.objects.create(email='admin@asdt.com', name='admin', 
                             password='asdt2019', role='ADMIN',
                             displayOptions=display_options)
+admin.set_password('asdt2019')
 root_group.users.append(admin)
 root_group.save()
 
 empowered = User.objects.create(email='empowered@asdt.com', name='empowered', password='asdt2019', role='EMPOWERED')
+empowered.set_password('asdt2019')
 viewer = User.objects.create(email='viewer@asdt.com', name='viewer', password='asdt2019', role='VIEWER')
+viewer.set_password('asdt2019')
 logger.info("Created {}. Done!".format(User.objects.all().count()) )
 
 

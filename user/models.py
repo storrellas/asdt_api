@@ -87,20 +87,13 @@ class User(ASDTDocument):
   def set_password(self, password):
     self.password = bcrypt.hashpw(password.encode(), bcrypt.gensalt(10)).decode()
     self.__original_password = self.password
-    print("saving password", self.password, self.__original_password)
     return self.save()
 
   def save(self, *args, **kwargs):
-
     # Update password
-    print("before updating password", self.password, self.__original_password)
     if self.password != self.__original_password:
-      print("updating password")
-      self.password = bcrypt.hashpw(self.password.encode(), bcrypt.gensalt(10))
+      self.password = bcrypt.hashpw(self.password.encode(), bcrypt.gensalt(10)).decode()
       self.__original_password = self.password
-    else:
-      print("not update", self.password, self.__original_password)
-
     return super().save(*args, **kwargs)
 
 
