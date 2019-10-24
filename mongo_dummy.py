@@ -128,3 +128,14 @@ ModelDetector.objects.create(name='Phantom', productId=20, imageType='image/png'
 ModelDetector.objects.create(name='Mavic Pro', productId=18, imageType='image/png', image=True, imageCode=1)
 ModelDetector.objects.create(name='DJI MAVIC PRO DUAL', productId=51, imageType='image/jpeg', image=True, imageCode=1)
 logger.info("Created {}. Done!".format(ModelDetector.objects.all().count()) )
+
+
+
+print( type(ModelDetector.objects.all()) )
+print( ModelDetector.objects.all().fields(id=0).to_json() )
+print( type(ModelDetector.objects.all().fields(id=0).to_json() ) )
+print( ModelDetector.objects.all().fields(id=0) )
+print( type(ModelDetector.objects.all().fields(id=0) ) )
+
+for item in ModelDetector.objects.all().fields(id=0):
+  print(item.to_mongo().to_dict())

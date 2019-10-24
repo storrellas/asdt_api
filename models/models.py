@@ -10,7 +10,7 @@ from mongoengine import *
 from asdt_api.models import ASDTDocument, Location
 from user.models import Group
 
-class ModelDetector(ASDTDocument):
+class ModelDetector(Document):
   meta = {'collection': 'models'}
 
   name = StringField(default='')

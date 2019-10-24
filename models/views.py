@@ -1,4 +1,9 @@
+import os
+
 from django.shortcuts import render
+from django.utils.encoding import smart_str
+from django.http import HttpResponse
+from django.views import View
 
 # rest framework import
 from rest_framework import viewsets
@@ -19,25 +24,32 @@ class Model(APIView):
 
 
     def get(self, request, log_id = None):
-        model_list = ModelDetector.objects.exclude('id').all()
-        print(model_list.as_pymongo())
-        print(type(model_list.as_pymongo()))
-        print(type(model_list.as_pymongo().to_mongo()))
+        queryset = ModelDetector.objects.fields(id=0).all()
+
+        # Transform to queryset
+        data = []
+        for item in queryset:
+          data.append(item.to_mongo().to_dict())
         data = { 
             'success': True,
-            'data': model_list.as_pymongo()
+            'data': data
         } 
         return Response(data)
 
 
 class ModelImg(APIView):
-    authentication_classes = [ASDTAuthentication]
-    permission_classes = (IsAuthenticated,)
+    # authentication_classes = [ASDTAuthentication]
+    # permission_classes = (IsAuthenticated,)
 
 
-    def get(self, request, log_id = None):
-
-        data = { 
-            'success': True,
-        } 
-        return Response(data)
+    def get(self, request, model_id = None):
+      print("model_id", model_id)
+      #file_path = '/home/vagrant/workspace/asdt_api/tintin.jpg'
+      file_path = './tintin.jpg'
+      if os.path.exists(file_path):
+        with open(file_path, 'rb') as fh:
+          response = HttpResponse(fh.read(), content_type="image/png")
+          response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
+          return response
+      return HttpResponse('result')
+      
