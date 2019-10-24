@@ -39,7 +39,7 @@ class Group(ASDTDocument):
   parent = ReferenceField("self", reverse_delete_rule = NULLIFY)
   childs = ListField(ReferenceField("self", reverse_delete_rule = NULLIFY))
   users = ListField(LazyReferenceField('User'), reverse_delete_rule = NULLIFY)  
-  devices = EmbeddedDocumentField(GroupDevices)
+  devices = EmbeddedDocumentField(GroupDevices, default=GroupDevices())
 
 
 ###############################

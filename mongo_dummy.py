@@ -36,33 +36,6 @@ logger.info("Creating groups ...")
 root_group = Group.objects.create(name='ASDT')
 logger.info("Created {}. Done!".format(Group.objects.all().count()) )
 
-
-# class CircleZoneCenter(EmbeddedDocument):
-#   longitude = FloatField(default=0.0)
-#   latitude = FloatField(default=0.0)
-
-# class CircleZone(EmbeddedDocument):
-#   _id = ObjectIdField()
-#   center = EmbeddedDocumentField(CircleZoneCenter, default=CircleZoneCenter())
-#   radius = IntField(default=0)
-#   color = StringField(default='')
-#   opacity = StringField(default='')
-#   id = StringField(default='')
-#   droneID = ListField(StringField())
-#   visible = BooleanField(default=False)
-#   active = BooleanField(default=False)
-
-# class DisplayOptions(EmbeddedDocument):
-#   mapType = StringField(default='')
-#   zone = ListField(ListField(IntField()))
-#   circleZone = EmbeddedDocumentListField(CircleZone, default=[])
-
-# password = b"super secret password"
-# hashed = bcrypt.hashpw(password, bcrypt.gensalt(10))
-# print(hashed)
-# print(bcrypt.checkpw(password, hashed))
-# sys.exit(0)
-
 # Users
 ##############
 logger.info("Creating users ...")
@@ -91,8 +64,9 @@ logger.info("Created {}. Done!".format(User.objects.all().count()) )
 # Detectors
 ##############
 logger.info("Creating detectors ...")
-Detector.objects.create(name='moncloa', password='asdt2019', 
+detector = Detector.objects.create(name='moncloa', password='asdt2019', 
                         location=DetectorLocation(lat=0, lon=0, height=0))
+root_group.devices.detectors.append(detector)
 Detector.objects.create(name='zarzuela', password='asdt2019', 
                         location=DetectorLocation(lat=0, lon=0, height=0))
 Detector.objects.create(name='congreso', password='asdt2019', 
@@ -102,3 +76,4 @@ Detector.objects.create(name='cuatrovientos', password='asdt2019',
 Detector.objects.create(name='canillas', password='asdt2019', 
                         location=DetectorLocation(lat=0, lon=0, height=0))
 logger.info("Created {}. Done!".format(Detector.objects.all().count()) )
+
