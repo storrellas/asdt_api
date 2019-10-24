@@ -26,11 +26,32 @@ class LogById(APIView):
 
     def get(self, request, log_id = None):
 
+        # Get queryset
         queryset = Log.objects.filter(id=log_id)
+        if len(queryset) != 1:
+            return Response({"success": False, "error": "NOT_FOUND"})
+
+        # Allowed detector list
+        detector_list_for_user = []
+        for detector in request.user.group.devices.detectors:
+            detector_list_for_user.append( detector.fetch() )
+        queryset = queryset.filter(detectors__in=[detector_list_for_user])
+
+        if len(queryset) != 1:
+            return Response({"success": False, "error": "NOT_FOUND"})
+
+
+        # # Check if permission
+        # allowed = False
+        # log = queryset.first()
+        # for detector in log.detectors:
+        #     if detector in detector_list_for_user:
+        #         allowed = True
+        # if allowed == False:
+        #     return Response({"success": False, "error": "NOT_ALLOWED"})
+
+        # Prepare results
         pipeline = [
-            # {
-            #     "$match": { "_id": ObjectId(log_id) }
-            # },
             {
                 "$project": {
                     "_id": {  "$toString": "$_id" },
@@ -53,13 +74,16 @@ class LogById(APIView):
         ]
 
         # Iterate cursor
-        #log_dict = Log.objects.aggregate(*pipeline)
         log_dict = queryset.aggregate(*pipeline)
+        data = log_dict.next()
         data = { 
             'success': True,
-            'data': log_dict 
+            'data': data
         } 
         return Response(data)
+
+
+
 
 
 class LogByPage(APIView):
@@ -93,13 +117,17 @@ class LogByPage(APIView):
         if sn is not None:
             queryset = queryset.filter(sn=sn)
 
+        # Allowed detector list
+        detector_list_for_user = []
+        for detector in request.user.group.devices.detectors:
+            detector_list_for_user.append( detector.fetch() )
+        queryset = queryset.filter(detectors__in=[detector_list_for_user])
+
+
         # Apply paging        
         queryset = queryset.skip(self.page_size * page)
         queryset = queryset.limit(self.page_size)
 
-        # print("MyTets")
-        # print(request.user.group)
-        # print(request.user.group.to_json())
 
         # Querying all objects
         pipeline = [
