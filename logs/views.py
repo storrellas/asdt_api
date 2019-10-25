@@ -59,7 +59,7 @@ class LogById(APIView):
         pipeline = [
             {
                 "$project": {
-                    "_id": {  "$toString": "$_id" },
+                    #"_id": {  "$toString": "$_id" },
                     "dateIni": { "$dateToString": { "format": "%Y-%m-%dT%H:%M:%S", "date": "$dateIni" } },
                     "dateFin": { "$dateToString": { "format": "%Y-%m-%dT%H:%M:%S", "date": "$dateIni" } },
                     "productId": { "$ifNull": [ "$productId", "undef" ] },
@@ -71,7 +71,7 @@ class LogById(APIView):
                     "distanceToDetector": { "$ifNull": [ "$distanceToDetector", "undef" ] },
                     "driverLocation": { "$ifNull": [ "$driverLocation", "undef" ] },
                     "homeLocation": { "$ifNull": [ "$homeLocation", "undef" ] },
-                    "id": {  "$toString": "$_id" },
+                    #"id": {  "$toString": "$_id" },
                     "detectors" : { "id": { "$toString": "$_id" } },
                     "route": { "lat": 1, "lon": 1, "aHeight": 1, "fHeight": 1, "time": { "$dateToString": { "format": "%Y-%m-%dT%H:%M:%S:%L", "date": "$dateIni" } }  },
                 }
@@ -83,6 +83,8 @@ class LogById(APIView):
         data = log_dict.next()
 
         # NOTE: This needs to be improved
+        data['_id'] = str(data['_id'])
+        data['id'] = str(data['_id'])
         detectors_list = []
         for detector in item['detectors']:
             detectors_list.append(detector['id'])
@@ -158,7 +160,7 @@ class LogByPage(APIView):
         pipeline = [
             {
                 "$project": {
-                    "_id": {  "$toString": "$_id" },
+                    #"_id": {  "$toString": "$_id" },
                     "dateIni": { "$dateToString": { "format": "%Y-%m-%dT%H:%M:%S", "date": "$dateIni" } },
                     "dateFin": { "$dateToString": { "format": "%Y-%m-%dT%H:%M:%S", "date": "$dateIni" } },
                     "productId": { "$ifNull": [ "$productId", "undef" ] },
@@ -170,7 +172,7 @@ class LogByPage(APIView):
                     "distanceToDetector": { "$ifNull": [ "$distanceToDetector", "undef" ] },
                     "driverLocation": { "$ifNull": [ "$driverLocation", "undef" ] },
                     "homeLocation": { "$ifNull": [ "$homeLocation", "undef" ] },
-                    "id": {  "$toString": "$_id" },
+                    #"id": {  "$toString": "$_id" },
                     "detectors" : { "id": { "$toString": "$_id" } },
                 }
             }
@@ -180,6 +182,8 @@ class LogByPage(APIView):
         # NOTE: This needs to be improved
         data = []
         for item in cursor:
+            item['_id'] = str(item['_id'])
+            item['id'] = str(item['_id'])
             detectors_list = []
             for detector in item['detectors']:
                 detectors_list.append(detector['id'])
