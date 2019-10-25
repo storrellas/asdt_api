@@ -146,8 +146,9 @@ class LogByPage(APIView):
             queryset = queryset.filter(sn=sn)
 
 
-        # # Apply filtering            
-        # log_allowed = self.get_allowed(request.user, queryset)
+        # Apply filtering            
+        log_allowed = self.get_allowed(request.user, queryset)
+        print(log_allowed)
         # queryset = queryset.filter(id__in=log_allowed)
         # if queryset.count() == 0:
         #     return Response({"success": False, "error": "NOT_ALLOWED"})
