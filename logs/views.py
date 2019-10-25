@@ -72,7 +72,8 @@ class LogById(APIView):
                     "driverLocation": { "$ifNull": [ "$driverLocation", "undef" ] },
                     "homeLocation": { "$ifNull": [ "$homeLocation", "undef" ] },
                     #"id": {  "$toString": "$_id" },
-                    "detectors" : { "id": { "$toString": "$_id" } },
+                    #"detectors" : { "id": { "$toString": "$_id" } },
+                    "detectors" : { "id": { "$ifNull": [ "$_id", "undef" ] } },
                     "route": { "lat": 1, "lon": 1, "aHeight": 1, "fHeight": 1, "time": { "$dateToString": { "format": "%Y-%m-%dT%H:%M:%S:%L", "date": "$dateIni" } }  },
                 }
             }
@@ -87,7 +88,7 @@ class LogById(APIView):
         data['id'] = str(data['_id'])
         detectors_list = []
         for detector in item['detectors']:
-            detectors_list.append(detector['id'])
+            detectors_list.append(str(detector['id']))
         item['detectors'] = detectors_list
         data.append(item)
 
@@ -173,7 +174,8 @@ class LogByPage(APIView):
                     "driverLocation": { "$ifNull": [ "$driverLocation", "undef" ] },
                     "homeLocation": { "$ifNull": [ "$homeLocation", "undef" ] },
                     #"id": {  "$toString": "$_id" },
-                    "detectors" : { "id": { "$toString": "$_id" } },
+                    #"detectors" : { "id": { "$toString": "$_id" } },
+                    "detectors" : { "id": { "$ifNull": [ "$_id", "undef" ] } },
                 }
             }
         ]
@@ -186,7 +188,7 @@ class LogByPage(APIView):
             item['id'] = str(item['_id'])
             detectors_list = []
             for detector in item['detectors']:
-                detectors_list.append(detector['id'])
+                detectors_list.append(str(detector['id']))
             item['detectors'] = detectors_list
             data.append(item)
         data = { 
