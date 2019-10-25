@@ -81,16 +81,15 @@ class LogById(APIView):
 
         # Iterate cursor
         cursor = queryset.aggregate(*pipeline)
-        data = log_dict.next()
+        data = cursor.next()
 
         # NOTE: This needs to be improved
         data['_id'] = str(data['_id'])
         data['id'] = str(data['_id'])
         detectors_list = []
-        for detector in item['detectors']:
+        for detector in data['detectors']:
             detectors_list.append(str(detector['id']))
-        item['detectors'] = detectors_list
-        data.append(item)
+        data['detectors'] = detectors_list        
 
         data = { 
             'success': True,
