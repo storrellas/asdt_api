@@ -30,10 +30,10 @@ services:
       - MONGO_HOST=$MONGO_HOST
       - MONGO_PORT=$MONGO_PORT
       - MONGO_DB=$MONGO_DB
-    # logging:
-    #  driver: "syslog"
-    #  options:
-    #    tag: "asdt"
+    logging:
+     driver: "syslog"
+     options:
+       tag: "asdt"
   mongo_express:
     image: mongo-express:0.49
     restart: always
@@ -45,10 +45,10 @@ services:
       ME_CONFIG_SITE_BASEURL: '/me/'
     ports:
         - $ME_PORT:8081
-    # logging:
-    #  driver: "syslog"
-    #  options:
-    #    tag: "asdt"
+    logging:
+     driver: "syslog"
+     options:
+       tag: "asdt"
 
   # asdt_mongo:
   #   image: mongo:3.4-xenial
