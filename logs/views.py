@@ -111,7 +111,7 @@ class LogByPage(APIView):
             detector_set_for_user.add( str(detector.fetch().id) )
 
         # Check detector_set_for_user
-        print('detector_set_for_user', detector_set_for_user)
+        print('group detector_set_for_user', user.group.id, detector_set_for_user)
 
         # Check logs allowed
         log_allowed = []
@@ -158,9 +158,9 @@ class LogByPage(APIView):
         # Check detector_set_for_user
         print('log_allowed', log_allowed)
 
-        # queryset = queryset.filter(id__in=log_allowed)
-        # if queryset.count() == 0:
-        #     return Response({"success": False, "error": "NOT_ALLOWED"})
+        queryset = queryset.filter(id__in=log_allowed)
+        if queryset.count() == 0:
+            return Response({"success": False, "error": "NOT_ALLOWED"})
 
         # Apply paging        
         queryset = queryset.skip(self.page_size * page)
