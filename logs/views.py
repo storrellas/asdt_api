@@ -198,6 +198,7 @@ class LogByPage(APIView):
             detectors_list = []
             for detector in item['detectors']:
                 detectors_list.append(str(detector['id']))
+            print("log.id detector_list", log.id, detector_list)
             item['detectors'] = detectors_list
             data.append(item)
         data = { 
