@@ -48,11 +48,11 @@ class LogById(APIView):
             return Response({"success": False, "error": "NOT_FOUND"})
 
 
-        # Apply filtering            
-        log_allowed = self.get_allowed(request.user, queryset)
-        queryset = queryset.filter(id__in=log_allowed)
-        if queryset.count() == 0:
-            return Response({"success": False, "error": "NOT_ALLOWED"})
+        # # Apply filtering            
+        # log_allowed = self.get_allowed(request.user, queryset)
+        # queryset = queryset.filter(id__in=log_allowed)
+        # if queryset.count() == 0:
+        #     return Response({"success": False, "error": "NOT_ALLOWED"})
 
 
         # Prepare results
@@ -144,11 +144,11 @@ class LogByPage(APIView):
             queryset = queryset.filter(sn=sn)
 
 
-        # Apply filtering            
-        log_allowed = self.get_allowed(request.user, queryset)
-        queryset = queryset.filter(id__in=log_allowed)
-        if queryset.count() == 0:
-            return Response({"success": False, "error": "NOT_ALLOWED"})
+        # # Apply filtering            
+        # log_allowed = self.get_allowed(request.user, queryset)
+        # queryset = queryset.filter(id__in=log_allowed)
+        # if queryset.count() == 0:
+        #     return Response({"success": False, "error": "NOT_ALLOWED"})
 
         # Apply paging        
         queryset = queryset.skip(self.page_size * page)
