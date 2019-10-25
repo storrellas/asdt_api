@@ -60,8 +60,8 @@ class LogById(APIView):
             {
                 "$project": {
                     "_id": {  "$toString": "$_id" },
-                    "dateIni": { "$dateToString": { "format": "%Y-%m-%d", "date": "$dateIni" } },
-                    "dateFin": { "$dateToString": { "format": "%Y-%m-%d", "date": "$dateIni" } },
+                    "dateIni": { "$dateToString": { "format": "%Y-%m-%dT%H:%M:%S", "date": "$dateIni" } },
+                    "dateFin": { "$dateToString": { "format": "%Y-%m-%dT%H:%M:%S", "date": "$dateIni" } },
                     "productId": { "$ifNull": [ "$productId", "undef" ] },
                     "sn": { "$ifNull": [ "$sn", "undef" ] },
                     "model": { "$ifNull": [ "$model", "undef" ] },
@@ -72,15 +72,23 @@ class LogById(APIView):
                     "driverLocation": { "$ifNull": [ "$driverLocation", "undef" ] },
                     "homeLocation": { "$ifNull": [ "$homeLocation", "undef" ] },
                     "id": {  "$toString": "$_id" },
-                    "route": { "lat": 1, "lon": 1, "aHeight": 1, "fHeight": 1, "time": { "$dateToString": { "format": "%Y-%m-%dT%H:%M:%S:%L", "date": "$dateIni" } }  },
                     "detectors" : { "id": { "$toString": "$_id" } },
+                    "route": { "lat": 1, "lon": 1, "aHeight": 1, "fHeight": 1, "time": { "$dateToString": { "format": "%Y-%m-%dT%H:%M:%S:%L", "date": "$dateIni" } }  },
                 }
             }
         ]
 
         # Iterate cursor
-        log_dict = queryset.aggregate(*pipeline)
+        cursor = queryset.aggregate(*pipeline)
         data = log_dict.next()
+
+        # NOTE: This needs to be improved
+        detectors_list = []
+        for detector in item['detectors']:
+            detectors_list.append(detector['id'])
+        item['detectors'] = detectors_list
+        data.append(item)
+
         data = { 
             'success': True,
             'data': data
@@ -151,8 +159,8 @@ class LogByPage(APIView):
             {
                 "$project": {
                     "_id": {  "$toString": "$_id" },
-                    "dateIni": { "$dateToString": { "format": "%Y-%m-%d", "date": "$dateIni" } },
-                    "dateFin": { "$dateToString": { "format": "%Y-%m-%d", "date": "$dateIni" } },
+                    "dateIni": { "$dateToString": { "format": "%Y-%m-%dT%H:%M:%S", "date": "$dateIni" } },
+                    "dateFin": { "$dateToString": { "format": "%Y-%m-%dT%H:%M:%S", "date": "$dateIni" } },
                     "productId": { "$ifNull": [ "$productId", "undef" ] },
                     "sn": { "$ifNull": [ "$sn", "undef" ] },
                     "model": { "$ifNull": [ "$model", "undef" ] },
@@ -163,14 +171,23 @@ class LogByPage(APIView):
                     "driverLocation": { "$ifNull": [ "$driverLocation", "undef" ] },
                     "homeLocation": { "$ifNull": [ "$homeLocation", "undef" ] },
                     "id": {  "$toString": "$_id" },
+                    "detectors" : { "id": { "$toString": "$_id" } },
                 }
             }
         ]
         cursor = queryset.aggregate(*pipeline)        
 
+        # NOTE: This needs to be improved
+        data = []
+        for item in cursor:
+            detectors_list = []
+            for detector in item['detectors']:
+                detectors_list.append(detector['id'])
+            item['detectors'] = detectors_list
+            data.append(item)
         data = { 
             'success': True,
-            'data': cursor
+            'data': data
          } 
         return Response(data)
 
