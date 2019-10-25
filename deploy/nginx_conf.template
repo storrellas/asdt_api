@@ -2,7 +2,39 @@ server {
   listen 80;
   listen [::]:80;
   server_name {{domain}};
-  return 301 https://$host$request_uri;
+  #return 301 https://$host$request_uri;
+
+
+  
+  location /api {
+    proxy_pass http://127.0.0.1:8080;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host $host;
+    rewrite ^/api/?(.*) /$1 break;
+    proxy_redirect off;
+  }
+
+  location /authenticate {
+    proxy_pass http://127.0.0.1:8080/authenticate;
+    proxy_http_version 1.1;
+  }
+
+  location /detector {
+    proxy_pass http://127.0.0.1:8080/detector;
+    proxy_http_version 1.1;
+  }
+
+  location /api/v2/ {
+    proxy_pass http://127.0.0.1:9090/api/v2/;
+    include proxy_params;
+  }
+
+  location /me/ {
+    proxy_pass http://127.0.0.1:9091/me/;
+    include proxy_params;
+  }
 }
 
 server {
@@ -13,8 +45,6 @@ server {
   ssl_certificate_key {{ssl_key}};
   server_name {{domain}};
 
-
-  client_max_body_size 10m;
   # Eric Version
   #location ~ /(?<path>(static|ui|api|admin\b)+) {
   #  proxy_pass http://localhost:8080/$path/;
@@ -47,10 +77,10 @@ server {
     proxy_http_version 1.1;
   }
 
-  location / {
-    proxy_pass http://127.0.0.1:9090/;
-    include proxy_params;
-  }
+  #location / {
+  #  proxy_pass http://127.0.0.1:9090/;
+  #  include proxy_params;
+  #}
 
   location /me/ {
     proxy_pass http://127.0.0.1:9091/me/;
