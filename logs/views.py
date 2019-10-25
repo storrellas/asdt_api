@@ -72,8 +72,7 @@ class LogById(APIView):
                     "driverLocation": { "$ifNull": [ "$driverLocation", "undef" ] },
                     "homeLocation": { "$ifNull": [ "$homeLocation", "undef" ] },
                     #"id": {  "$toString": "$_id" },
-                    #"detectors" : { "id": { "$toString": "$_id" } },
-                    "detectors" : { "id": { "$ifNull": [ "$_id", "undef" ] } },
+                    "detectors" : "$detectors",
                     "route": { "lat": 1, "lon": 1, "aHeight": 1, "fHeight": 1, "time": { "$dateToString": { "format": "%Y-%m-%dT%H:%M:%S:%L", "date": "$dateIni" } }  },
                 }
             }
@@ -87,8 +86,8 @@ class LogById(APIView):
         data['_id'] = str(data['_id'])
         data['id'] = str(data['_id'])
         detectors_list = []
-        for detector in data['detectors']:
-            detectors_list.append(str(detector['id']))
+        for id in data['detectors']:
+            detectors_list.append(str(id))
         data['detectors'] = detectors_list        
 
         data = { 
@@ -105,6 +104,14 @@ class LogByPage(APIView):
     page_size = 200
 
     def get_allowed(self, user, queryset):
+        # Check existance of group
+        if user.group is None:
+            return []
+        if user.group.devices is None:
+            return []
+        if user.group.devices.detectors is None:
+            return []
+
         # Allowed detector list for user
         detector_set_for_user = set()
         for detector in user.group.devices.detectors:
@@ -182,9 +189,9 @@ class LogByPage(APIView):
                     "distanceToDetector": { "$ifNull": [ "$distanceToDetector", "undef" ] },
                     "driverLocation": { "$ifNull": [ "$driverLocation", "undef" ] },
                     "homeLocation": { "$ifNull": [ "$homeLocation", "undef" ] },
+                    "detectors" : "$detectors"
                     #"id": {  "$toString": "$_id" },
-                    #"detectors" : { "id": { "$toString": "$_id" } },
-                    "detectors" : { "id": { "$ifNull": [ "$_id", "undef" ] } },
+                 
                 }
             }
         ]
@@ -196,9 +203,8 @@ class LogByPage(APIView):
             item['_id'] = str(item['_id'])
             item['id'] = str(item['_id'])
             detectors_list = []
-            for detector in item['detectors']:
-                detectors_list.append(str(detector['id']))
-            print("log.id detector_list", item['id'], detectors_list)
+            for id in item['detectors']:
+                detectors_list.append(str(id))
             item['detectors'] = detectors_list
             data.append(item)
         data = { 
