@@ -34,6 +34,22 @@ services:
     #  driver: "syslog"
     #  options:
     #    tag: "asdt"
+  mongo_express:
+    image: mongo-express:0.49
+    restart: always
+    volumes:
+      - /home/vagrant/mongodocker/:/data/db/
+    environment:
+      ME_CONFIG_MONGODB_SERVER: $MONGO_HOST
+      ME_CONFIG_MONGODB_PORT: $MONGO_PORT
+      ME_CONFIG_SITE_BASEURL: '/me/'
+    ports:
+        - 8081:8081
+    # logging:
+    #  driver: "syslog"
+    #  options:
+    #    tag: "asdt"
+
   # asdt_mongo:
   #   image: mongo:3.4-xenial
   #   restart: always
