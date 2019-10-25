@@ -24,6 +24,21 @@ class LogById(APIView):
     authentication_classes = [ASDTAuthentication]
     permission_classes = (IsAuthenticated,)
 
+    def get_allowed(self, user, queryset):
+        # Allowed detector list for user
+        detector_set_for_user = set()
+        for detector in user.group.devices.detectors:
+            detector_set_for_user.add( str(detector.fetch().id) )
+
+        # Check logs allowed
+        log_allowed = []
+        for log in queryset:
+            detector_set = set()
+            for detector in log.detectors:
+                detector_set.add(str(detector.id))
+            if len( detector_set & detector_set_for_user ) > 0:
+                log_allowed.append(log['id'])
+        return log_allowed
 
     def get(self, request, log_id = None):
 
@@ -33,22 +48,11 @@ class LogById(APIView):
             return Response({"success": False, "error": "NOT_FOUND"})
 
 
-        # # Allowed detector list
-        # detector_list_for_user = []
-        # allowed = False
-        # for detector in request.user.group.devices.detectors:
-        #     detector_list_for_user.append( detector.fetch().id )
-
-        # log = queryset.first()        
-        # for detector in log.detectors:
-
-        # #queryset = queryset.filter(detectors__in=[detector_list_for_user])
-
-
-        
-        
-        if len(queryset) != 1:
-            return Response({"success": False, "error": "NOT_FOUND"})
+        # Apply filtering            
+        log_allowed = self.get_allowed(request.user, queryset)
+        queryset = queryset.filter(id__in=log_allowed)
+        if queryset.count() == 0:
+            return Response({"success": False, "error": "NOT_ALLOWED"})
 
 
         # Prepare results
@@ -90,6 +94,21 @@ class LogByPage(APIView):
 
     page_size = 200
 
+    def get_allowed(self, user, queryset):
+        # Allowed detector list for user
+        detector_set_for_user = set()
+        for detector in user.group.devices.detectors:
+            detector_set_for_user.add( str(detector.fetch().id) )
+
+        # Check logs allowed
+        log_allowed = []
+        for log in queryset:
+            detector_set = set()
+            for detector in log.detectors:
+                detector_set.add(str(detector.id))
+            if len( detector_set & detector_set_for_user ) > 0:
+                log_allowed.append(log['id'])
+        return log_allowed
 
     def post(self, request):
 
@@ -116,63 +135,16 @@ class LogByPage(APIView):
         if sn is not None:
             queryset = queryset.filter(sn=sn)
 
-        # Allowed detector list for user
-        detector_list_for_user = []        
-        for detector in request.user.group.devices.detectors:
-            detector_list_for_user.append( str(detector.fetch().id) )
 
-
-        log_list = []
-        for log in queryset:
-            detector_list = []
-            for detector in log.detectors:
-                detector_list.append(str(detector.id))
-            log_list.append({'id': str(log.id), 'detectors': detector_list}) 
-        
-        # Two lists
-        print(detector_list_for_user)            
-        print(log_list)
-
-        print("Analysing allowance ...")
-        log_allowed = []
-        for log in log_list:
-            print(log['id'])
-            print( set(log['detectors']) )
-            print( set(detector_list_for_user) )
-            if len( set(log['detectors']) & set(detector_list_for_user) ) > 0:
-                print("allowed")
-                log_allowed.append(log['id'])
-            else:
-                print("not allowed")
-
-        # Apply filtering        
+        # Apply filtering            
+        log_allowed = self.get_allowed(request.user, queryset)
         queryset = queryset.filter(id__in=log_allowed)
-        if len(queryset) != 1:
+        if queryset.count() == 0:
             return Response({"success": False, "error": "NOT_ALLOWED"})
-
-        # queryset = queryset.filter(detectors__in=[detector_list_for_user])
-
-        # ############################
-        # # user = User.objects.get(email='admin@asdt.eu')
-        # # user.group
-        # # queryset = Log.objects.all()
-        # # Allowed detector list
-        # detector_list_for_user = []
-        # for detector in request.user.group.devices.detectors:
-        #     detector_list_for_user.append( str(detector.fetch().id) )
-        # print(detector_list_for_user)
-        # queryset = queryset.filter(detectors__in=[detector_list_for_user])
-        # for item in queryset:
-        #     print(item)
-        # ############################
-
-        # queryset = Log.objects.all()
-
 
         # Apply paging        
         queryset = queryset.skip(self.page_size * page)
         queryset = queryset.limit(self.page_size)
-
 
         # Querying all objects
         pipeline = [

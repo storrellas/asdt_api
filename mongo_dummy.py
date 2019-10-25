@@ -90,10 +90,12 @@ detector5 = Detector.objects.create(name='canillas', password='asdt2019',
 logger.info("Created {}. Done!".format(Detector.objects.all().count()) )
 
 # Add to groups
-admin_group.devices.detectors.append(detector2)
+admin_group.devices.detectors = [detector2]
 admin_group.save()
-viewer_group.devices.detectors.append(detector3)
+viewer_group.devices.detectors = [detector3]
 viewer_group.save()
+
+
 
 # Logs
 ##############
@@ -109,7 +111,7 @@ route = [
 ]
 Log.objects.create(dateIni=datetime.datetime.strptime('2019-09-01T23:00:00.000Z', "%Y-%m-%dT%H:%M:%S.%fZ"), 
                     dateFin=datetime.datetime.strptime('2019-09-01T23:00:00.000Z', "%Y-%m-%dT%H:%M:%S.%fZ"),
-                    model='ABC', sn='123', productId=1234,
+                    model='ABC', sn='1', productId=1234,
                     detectors=[detector1, detector2],
                     driverLocation=Location(lat=1.2,lon=3.4), homeLocation=Location(lat=1.2,lon=3.4),
                     maxHeight=12, distanceTravelled=12, distanceToDetector=12,
@@ -117,7 +119,7 @@ Log.objects.create(dateIni=datetime.datetime.strptime('2019-09-01T23:00:00.000Z'
                     boundingBox=LogBoundingBox(maxLat=1.0, maxLon=2.0, minLat=1.2, minLon=2.3))
 Log.objects.create(dateIni=datetime.datetime.strptime('2019-10-21T23:00:00.000Z', "%Y-%m-%dT%H:%M:%S.%fZ"), 
                     dateFin=datetime.datetime.strptime('2019-10-21T23:00:00.000Z', "%Y-%m-%dT%H:%M:%S.%fZ"),
-                  model='ABC', sn='123', productId=1234,
+                  model='ABC', sn='2', productId=1234,
                   detectors=[detector1, detector2],
                   driverLocation=Location(lat=1.2,lon=3.4), homeLocation=Location(lat=1.2,lon=3.4),
                   maxHeight=12, distanceTravelled=12, distanceToDetector=12,
@@ -125,7 +127,7 @@ Log.objects.create(dateIni=datetime.datetime.strptime('2019-10-21T23:00:00.000Z'
                   boundingBox=LogBoundingBox(maxLat=1.0, maxLon=2.0, minLat=1.2, minLon=2.3))  
 Log.objects.create(dateIni=datetime.datetime.strptime('2019-10-22T23:00:00.000Z', "%Y-%m-%dT%H:%M:%S.%fZ"), 
                     dateFin=datetime.datetime.strptime('2019-10-22T23:00:00.000Z', "%Y-%m-%dT%H:%M:%S.%fZ"),
-                  model='ABC', sn='123', productId=1234,
+                  model='ABC', sn='3', productId=1234,
                   detectors=[detector1, detector3],
                   driverLocation=Location(lat=1.2,lon=3.4), homeLocation=Location(lat=1.2,lon=3.4),
                   maxHeight=12, distanceTravelled=12, distanceToDetector=12,
@@ -133,8 +135,8 @@ Log.objects.create(dateIni=datetime.datetime.strptime('2019-10-22T23:00:00.000Z'
                   boundingBox=LogBoundingBox(maxLat=1.0, maxLon=2.0, minLat=1.2, minLon=2.3))
 Log.objects.create(dateIni=datetime.datetime.strptime('2019-10-24T23:00:00.000Z', "%Y-%m-%dT%H:%M:%S.%fZ"), 
                     dateFin=datetime.datetime.strptime('2019-10-24T23:00:00.000Z', "%Y-%m-%dT%H:%M:%S.%fZ"),
-                  model='ABC', sn='123', productId=1234,
-                  detectors=[detector1, detector2],
+                  model='ABC', sn='4', productId=1234,
+                  detectors=[detector1, detector4],
                   driverLocation=Location(lat=1.2,lon=3.4), homeLocation=Location(lat=1.2,lon=3.4),
                   maxHeight=12, distanceTravelled=12, distanceToDetector=12,
                   centerPoint=LogCenterPoint(lat=1.0, lon=2.0, aHeight=1.2, fHeight=2.3),
