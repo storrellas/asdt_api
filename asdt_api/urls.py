@@ -20,9 +20,20 @@ from user.views import Authenticate
 from modeldetectors.views import ModelDetectorView
 from logs.views import LogByPage
 
+# urlpatterns = [
+#     path('admin/', admin.site.urls),
+#     path('authenticate', Authenticate.as_view()),
+#     path('user/', include('user.urls')),
+#     path('logs', LogByPage.as_view()),
+#     path('logs/', include('logs.urls')),
+#     path('model', ModelDetectorView.as_view()),
+#     path('models/', include('modeldetectors.urls')),
+#     path('model/', include('modeldetectors.urls')),
+# ]
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    #path('authenticate', Authenticate.as_view()),
     path('user/', include('user.urls')),
     path('logs', LogByPage.as_view()),
     path('logs/', include('logs.urls')),
