@@ -34,17 +34,17 @@ services:
     #  driver: "syslog"
     #  options:
     #    tag: "asdt"
-  asdt_mongo:
-    image: mongo:3.4-xenial
-    restart: always
-    volumes:
-      - /home/vagrant/mongodocker/:/data/db/
-    environment:
-      MONGO_INITDB_DATABASE: asdt
-    ports:
-        - 27017:27017
-    # logging:
-    #  driver: "syslog"
-    #  options:
-    #    tag: "asdt"
+  # asdt_mongo:
+  #   image: mongo:3.4-xenial
+  #   restart: always
+  #   volumes:
+  #     - /home/vagrant/mongodocker/:/data/db/
+  #   environment:
+  #     MONGO_INITDB_DATABASE: asdt
+  #   ports:
+  #       - 27017:27017
+  #   # logging:
+  #   #  driver: "syslog"
+  #   #  options:
+  #   #    tag: "asdt"
 
