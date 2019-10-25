@@ -110,12 +110,18 @@ class LogByPage(APIView):
         for detector in user.group.devices.detectors:
             detector_set_for_user.add( str(detector.fetch().id) )
 
+        # Check detector_set_for_user
+        print('detector_set_for_user', detector_set_for_user)
+
         # Check logs allowed
         log_allowed = []
         for log in queryset:
             detector_set = set()
             for detector in log.detectors:
                 detector_set.add(str(detector.id))
+            # Check detector_set_for_user
+            print('detector_set', log.id, detector_set)
+
             if len( detector_set & detector_set_for_user ) > 0:
                 log_allowed.append(log['id'])
         return log_allowed
@@ -148,7 +154,10 @@ class LogByPage(APIView):
 
         # Apply filtering            
         log_allowed = self.get_allowed(request.user, queryset)
-        print(log_allowed)
+
+        # Check detector_set_for_user
+        print('log_allowed', log_allowed)
+
         # queryset = queryset.filter(id__in=log_allowed)
         # if queryset.count() == 0:
         #     return Response({"success": False, "error": "NOT_ALLOWED"})
