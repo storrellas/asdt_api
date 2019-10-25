@@ -20,7 +20,7 @@ from bson.objectid import ObjectId
 from .models import *
 from user.models import *
 
-class LogById(APIView):
+class LogByIdView(APIView):
     authentication_classes = [ASDTAuthentication]
     permission_classes = (IsAuthenticated,)
 
@@ -97,7 +97,7 @@ class LogById(APIView):
         return Response(data)
 
 
-class LogByPage(APIView):
+class LogByPageView(APIView):
     authentication_classes = [ASDTAuthentication]
     permission_classes = (IsAuthenticated,)
 

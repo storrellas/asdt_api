@@ -7,7 +7,7 @@ from django.urls import path, include
 from .views import *
 
 urlpatterns = [    
-    path('<str:model_id>/img', ModelDetectorImgView.as_view()),
-    url(r'^$', ModelDetectorView.as_view()) 
+    path('<str:model_id>/img', DroneModelImgView.as_view()),
+    url(r'^$', DroneModelView.as_view()) 
 ]
 

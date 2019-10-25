@@ -16,30 +16,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
-from user.views import Authenticate
-from modeldetectors.views import ModelDetectorView
-from logs.views import LogByPage
-
-# urlpatterns = [
-#     path('admin/', admin.site.urls),
-#     path('authenticate', Authenticate.as_view()),
-#     path('user/', include('user.urls')),
-#     path('logs', LogByPage.as_view()),
-#     path('logs/', include('logs.urls')),
-#     path('model', ModelDetectorView.as_view()),
-#     path('models/', include('modeldetectors.urls')),
-#     path('model/', include('modeldetectors.urls')),
-# ]
 
 PREFIX = 'api/v2/'
 
 urlpatterns = [
     path(PREFIX + 'admin/', admin.site.urls),
     path(PREFIX + 'user/', include('user.urls')),
-    path(PREFIX + 'logs', LogByPage.as_view()),
     path(PREFIX + 'logs/', include('logs.urls')),
-    path(PREFIX + 'model', ModelDetectorView.as_view()),
-    path(PREFIX + 'models/', include('modeldetectors.urls')),
-    path(PREFIX + 'model/', include('modeldetectors.urls')),
+    path(PREFIX + 'model/', include('drones.urls')),
 ]
 

@@ -19,13 +19,13 @@ from asdt_api.authentication import ASDTAuthentication
 from bson.objectid import ObjectId
 from .models import *
 
-class ModelDetectorView(APIView):
+class DroneModelView(APIView):
     authentication_classes = [ASDTAuthentication]
     permission_classes = (IsAuthenticated,)
 
 
     def get(self, request, log_id = None):
-        queryset = ModelDetector.objects.fields(id=0).all()
+        queryset = DroneModel.objects.fields(id=0).all()
 
         # Transform to queryset
         data = []
@@ -38,7 +38,7 @@ class ModelDetectorView(APIView):
         return Response(data)
 
 
-class ModelDetectorImgView(APIView):
+class DroneModelImgView(APIView):
     authentication_classes = [ASDTAuthentication]
     permission_classes = (IsAuthenticated,)
 

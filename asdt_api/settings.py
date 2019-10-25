@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'user',
     'logs',
-    'modeldetectors'
+    'drones'
 ]
 
 ADMIN_ENABLED = False

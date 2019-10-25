@@ -7,7 +7,7 @@ from django.urls import path, include
 from .views import *
 
 urlpatterns = [    
-    path('<str:log_id>/', LogById.as_view()),
-    url(r'^$', LogByPage.as_view()) 
+    path('<str:log_id>/', LogByIdView.as_view()),
+    url(r'^$', LogByPageView.as_view()) 
 ]
 
