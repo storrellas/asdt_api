@@ -84,14 +84,12 @@ class LogById(APIView):
         return Response(data)
 
 
-
-
-
 class LogByPage(APIView):
     authentication_classes = [ASDTAuthentication]
     permission_classes = (IsAuthenticated,)
 
     page_size = 200
+
 
     def post(self, request):
 
@@ -118,11 +116,40 @@ class LogByPage(APIView):
         if sn is not None:
             queryset = queryset.filter(sn=sn)
 
-        # # Allowed detector list
-        # detector_list_for_user = []        
-        # for detector in request.user.group.devices.detectors:
-        #     detector_list_for_user.append( detector.fetch().id )
-        # print(detector_list_for_user)
+        # Allowed detector list for user
+        detector_list_for_user = []        
+        for detector in request.user.group.devices.detectors:
+            detector_list_for_user.append( str(detector.fetch().id) )
+
+
+        log_list = []
+        for log in queryset:
+            detector_list = []
+            for detector in log.detectors:
+                detector_list.append(str(detector.id))
+            log_list.append({'id': str(log.id), 'detectors': detector_list}) 
+        
+        # Two lists
+        print(detector_list_for_user)            
+        print(log_list)
+
+        print("Analysing allowance ...")
+        log_allowed = []
+        for log in log_list:
+            print(log['id'])
+            print( set(log['detectors']) )
+            print( set(detector_list_for_user) )
+            if len( set(log['detectors']) & set(detector_list_for_user) ) > 0:
+                print("allowed")
+                log_allowed.append(log['id'])
+            else:
+                print("not allowed")
+
+        # Apply filtering        
+        queryset = queryset.filter(id__in=log_allowed)
+        if len(queryset) != 1:
+            return Response({"success": False, "error": "NOT_ALLOWED"})
+
         # queryset = queryset.filter(detectors__in=[detector_list_for_user])
 
         # ############################
@@ -167,7 +194,8 @@ class LogByPage(APIView):
                 }
             }
         ]
-        cursor = queryset.aggregate(*pipeline)
+        cursor = queryset.aggregate(*pipeline)        
+
         data = { 
             'success': True,
             'data': cursor
