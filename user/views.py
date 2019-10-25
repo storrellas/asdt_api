@@ -107,7 +107,7 @@ class UserInfo(APIView):
         
         return Response(data)
 
-class AllowedTools(APIView):
+class Tools(APIView):
 
     authentication_classes = [ASDTAuthentication]
     permission_classes = (IsAuthenticated,)

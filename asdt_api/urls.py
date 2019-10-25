@@ -21,8 +21,8 @@ from modeldetectors.views import ModelDetectorView
 from logs.views import LogByPage
 
 urlpatterns = [
-    #path('admin/', admin.site.urls),
-    path('authenticate', Authenticate.as_view()),
+    path('admin/', admin.site.urls),
+    #path('authenticate', Authenticate.as_view()),
     path('user/', include('user.urls')),
     path('logs', LogByPage.as_view()),
     path('logs/', include('logs.urls')),
