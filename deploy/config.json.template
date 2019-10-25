@@ -1,0 +1,9 @@
+{
+   "version": "pro",
+   "remote_workspace":"./workspace",
+   "repository": "http://sos.asdt.eu:800/storrellas/asdt_api.git",
+   "branch": "master",
+   "app_domain": "asdtdev.mooo.com",
+   "git_key_public": "/home/vagrant/.ssh/storrellas.pub",
+   "git_key_private": "/home/vagrant/.ssh/storrellas"
+}
