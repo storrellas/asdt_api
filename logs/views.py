@@ -136,7 +136,6 @@ class LogViewSet(viewsets.ViewSet):
         return Response(data)
 
     def retrieve(self, request, pk=None):
-        print("pk", pk)
         # Get queryset
         queryset = Log.objects.filter(id=pk)
         if len(queryset) != 1:
