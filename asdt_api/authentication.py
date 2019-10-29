@@ -9,6 +9,9 @@ from django.conf import settings
 from rest_framework import authentication
 
 from user.models import *
+from .utils import get_logger
+
+logger = get_logger()
 
 class ASDTUser:
   data = {}
@@ -20,16 +23,17 @@ class ASDTUser:
 
 class ASDTAuthentication(authentication.BaseAuthentication):
     def authenticate(self, request):
-      # Decoded header
-      authorization_header = request.META.get('HTTP_AUTHORIZATION')
-      encoded_jwt = authorization_header.split(' ')[1]
       try:
+        # Decoded header
+        authorization_header = request.META.get('HTTP_AUTHORIZATION')
+        encoded_jwt = authorization_header.split(' ')[1]
+
         decoded_jwt = jwt.decode(encoded_jwt, settings.SECRET_KEY, algorithms=['HS256'])       
         user = User.objects.get(id=decoded_jwt['id'])
         return(user, None)
       except Exception as e:
-        print(e)
+        logger.info("Exception " + str(e))
         return (None, None)
       except jwt.ExpiredSignatureError as e:
-        print("Expired ", str(e))
+        logger.info("Expired " + str(e))
         return (None, None)
