@@ -155,6 +155,8 @@ class LogByPageView(APIView):
         if sn is not None:
             queryset = queryset.filter(sn=sn)
 
+        if queryset.count() == 0:
+            return Response({"success": True, "data": []})
 
         # Apply filtering            
         log_allowed = self.get_allowed(request.user, queryset)

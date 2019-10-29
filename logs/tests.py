@@ -133,4 +133,37 @@ class DroneTestCase(APITestCase):
     self.assertEqual(response_json['success'], True)
     self.assertEqual(len(response_json['data']), 0)
 
+  def test_logs_bysn(self):
+    # Get token
+    response = self.client.post('/api/v2/user/authenticate/', 
+                                { "email": "admin@asdt.eu", "password": "asdt2019" })
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    access_token = response_json['data']['token']
+    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+
+    # Get Logs
+    body = {
+      "dateIni": "2019-08-01T23:00:00.000Z",
+      "dateFin": "2019-11-01T00:00:00.000Z",
+      "sn": "1"
+    }
+    response = self.client.post('/api/v2/logs/', body)
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertEqual(response_json['success'], True)
+    self.assertEqual(len(response_json['data']), 2)
+
+    # Get Logs
+    body = {
+      "dateIni": "2019-10-01T23:00:00.000Z",
+      "dateFin": "2019-11-01T00:00:00.000Z",
+      "sn" : "6"
+    }
+    response = self.client.post('/api/v2/logs/', body)
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertEqual(response_json['success'], True)
+    self.assertEqual(len(response_json['data']), 0)
+
 
