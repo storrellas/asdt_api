@@ -17,11 +17,6 @@ logger = utils.get_logger()
 
 class UserTestCase(APITestCase):
 
-  # fixtures = ['sport.json',
-  #             'sport_priority.json',
-  #             'api.json'
-  #             ]
-
 
   @classmethod
   def setUpClass(cls):
