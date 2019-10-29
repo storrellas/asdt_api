@@ -17,6 +17,7 @@ class DroneModel(Document):
   productId = IntField(default=-1)
   image = BooleanField(default=True)
   imageType = StringField(default='')
+  imageUrl = StringField(default='')
   imageCode = IntField(default=-1)
 
 class Drone(ASDTDocument):
