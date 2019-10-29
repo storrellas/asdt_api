@@ -155,13 +155,13 @@ class MongoDummy:
     ##############
     logger.info("Creating models ...")
     DroneModel.objects.create(name='Mavic', productId=16, imageType='image/png', 
-                              imageUrl='/media/drones/model/16.png', image=True, imageCode=1)
+                              imageUrl='/api/v2/media/drones/model/16.png', image=True, imageCode=1)
     DroneModel.objects.create(name='Phantom', productId=20, imageType='image/png', 
-                              imageUrl='/media/drones/model/20.png', image=True, imageCode=1)
+                              imageUrl='/api/v2/media/drones/model/20.png', image=True, imageCode=1)
     DroneModel.objects.create(name='Mavic Pro', productId=18, imageType='image/png', 
-                              imageUrl='/media/drones/model/18.png', image=True, imageCode=1)
+                              imageUrl='/api/v2/media/drones/model/18.png', image=True, imageCode=1)
     DroneModel.objects.create(name='DJI MAVIC PRO DUAL', productId=51, imageType='image/png', 
-                              imageUrl='/media/drones/model/51.png', image=True, imageCode=1)
+                              imageUrl='/api/v2/media/drones/model/51.png', image=True, imageCode=1)
     logger.info("Created {}. Done!".format(DroneModel.objects.all().count()) )
 
 
