@@ -63,7 +63,7 @@ class DroneTestCase(APITestCase):
     self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
 
     # Get Logs
-    response = self.client.post('/api/v2/logs/')
+    response = self.client.get('/api/v2/logs/')
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['success'], True)
@@ -79,22 +79,22 @@ class DroneTestCase(APITestCase):
     self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
 
     # Get Logs
-    body = {
+    url_params = {
       "dateIni": "2019-08-01T23:00:00.000Z",
       "dateFin": "2019-11-01T00:00:00.000Z"
     }
-    response = self.client.post('/api/v2/logs/', body)
+    response = self.client.get('/api/v2/logs/', url_params)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['success'], True)
     self.assertEqual(len(response_json['data']), 3)
 
     # Get Logs
-    body = {
+    url_params = {
       "dateIni": "2019-10-01T23:00:00.000Z",
       "dateFin": "2019-11-01T00:00:00.000Z"
     }
-    response = self.client.post('/api/v2/logs/', body)
+    response = self.client.get('/api/v2/logs/', url_params)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['success'], True)
@@ -110,24 +110,24 @@ class DroneTestCase(APITestCase):
     self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
 
     # Get Logs
-    body = {
+    url_params = {
       "dateIni": "2019-08-01T23:00:00.000Z",
       "dateFin": "2019-11-01T00:00:00.000Z",
       "page": 0
     }
-    response = self.client.post('/api/v2/logs/', body)
+    response = self.client.get('/api/v2/logs/', url_params)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['success'], True)
     self.assertEqual(len(response_json['data']), 3)
 
     # Get Logs
-    body = {
+    url_params = {
       "dateIni": "2019-10-01T23:00:00.000Z",
       "dateFin": "2019-11-01T00:00:00.000Z",
       "page" : 1
     }
-    response = self.client.post('/api/v2/logs/', body)
+    response = self.client.get('/api/v2/logs/', url_params)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['success'], True)
@@ -143,24 +143,24 @@ class DroneTestCase(APITestCase):
     self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
 
     # Get Logs
-    body = {
+    url_params = {
       "dateIni": "2019-08-01T23:00:00.000Z",
       "dateFin": "2019-11-01T00:00:00.000Z",
       "sn": "1"
     }
-    response = self.client.post('/api/v2/logs/', body)
+    response = self.client.get('/api/v2/logs/', url_params)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['success'], True)
     self.assertEqual(len(response_json['data']), 2)
 
     # Get Logs
-    body = {
+    url_params = {
       "dateIni": "2019-10-01T23:00:00.000Z",
       "dateFin": "2019-11-01T00:00:00.000Z",
       "sn" : "6"
     }
-    response = self.client.post('/api/v2/logs/', body)
+    response = self.client.get('/api/v2/logs/', url_params)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['success'], True)
@@ -177,11 +177,11 @@ class DroneTestCase(APITestCase):
     self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
 
     # Get Logs
-    body = {
+    url_params = {
       "dateIni": "2019-08-01T23:00:00.000Z",
       "dateFin": "2019-11-01T00:00:00.000Z"
     }
-    response = self.client.post('/api/v2/logs/', body)
+    response = self.client.get('/api/v2/logs/', url_params)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['success'], False)

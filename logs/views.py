@@ -130,21 +130,21 @@ class LogByPageView(APIView):
                 log_allowed.append(log['id'])
         return log_allowed
 
-    def post(self, request):
+    def get(self, request):
 
         # Get dateIni / dateFin / sn / page
         dateIni = datetime.datetime.now() - timedelta(days=4)
-        if 'dateIni' in request.data:
-            dateIni = datetime.datetime.strptime(request.data['dateIni'], "%Y-%m-%dT%H:%M:%S.%fZ")
+        if 'dateIni' in request.query_params:
+            dateIni = datetime.datetime.strptime(request.query_params['dateIni'], "%Y-%m-%dT%H:%M:%S.%fZ")
         dateFin = datetime.datetime.now()
-        if 'dateFin' in request.data:
-            dateFin = datetime.datetime.strptime(request.data['dateFin'], "%Y-%m-%dT%H:%M:%S.%fZ")
+        if 'dateFin' in request.query_params:
+            dateFin = datetime.datetime.strptime(request.query_params['dateFin'], "%Y-%m-%dT%H:%M:%S.%fZ")
         sn = None
-        if 'sn' in request.data:
-            sn = request.data['sn']
+        if 'sn' in request.query_params:
+            sn = request.query_params['sn']
         page = 0
-        if 'page' in request.data:
-            page = int(request.data['page'])
+        if 'page' in request.query_params:
+            page = int(request.query_params['page'])
 
         # Select query to apply
         query = { "$and": [ {"dateIni": {"$gt": dateIni }}, {"dateFin": {"$lte": dateFin }}] }
