@@ -155,6 +155,7 @@ class LogByPageView(APIView):
         if sn is not None:
             queryset = queryset.filter(sn=sn)
 
+        # Return when no elements are present
         if queryset.count() == 0:
             return Response({"success": True, "data": []})
 
