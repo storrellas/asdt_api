@@ -40,6 +40,8 @@ services:
     volumes:
       - /home/vagrant/mongodocker/:/data/db/
     environment:
+      ME_CONFIG_BASICAUTH_USERNAME: $ME_USERNAME
+      ME_CONFIG_BASICAUTH_PASSWORD: $ME_PASSWORD
       ME_CONFIG_MONGODB_SERVER: $MONGO_HOST
       ME_CONFIG_MONGODB_PORT: $MONGO_PORT
       ME_CONFIG_SITE_BASEURL: '/me/'
