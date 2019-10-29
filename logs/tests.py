@@ -120,6 +120,7 @@ class DroneTestCase(APITestCase):
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['success'], True)
     self.assertEqual(len(response_json['data']), 3)
+    log_id = response_json['data'][0]['id']
 
     # Get Logs
     url_params = {
@@ -132,6 +133,16 @@ class DroneTestCase(APITestCase):
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['success'], True)
     self.assertEqual(len(response_json['data']), 0)
+
+    # Get by ID
+    response = self.client.get('/api/v2/logs/{}/'.format(log_id))
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+
+
+    # Get KML
+    response = self.client.get('/api/v2/logs/{}/kml/'.format(log_id))
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    self.assertEqual(response.get('Content-Type'), 'application/xml')
 
   def test_logs_bysn(self):
     # Get token

@@ -38,16 +38,16 @@ class DroneModelView(APIView):
         return Response(data)
 
 
-class DroneModelImgView(APIView):
-    authentication_classes = [ASDTAuthentication]
-    permission_classes = (IsAuthenticated,)
+# class DroneModelImgView(APIView):
+#     authentication_classes = [ASDTAuthentication]
+#     permission_classes = (IsAuthenticated,)
 
-    def get(self, request, model_id = None):
-      file_path = '{}/drones/model/{}.png'.format(settings.MEDIA_ROOT, model_id)
-      if os.path.exists(file_path):
-        with open(file_path, 'rb') as fh:
-          response = HttpResponse(fh.read(), content_type="image/png")
-          response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
-          return response
-      return HttpResponse('failed')
+#     def get(self, request, model_id = None):
+#       file_path = '{}/drones/model/{}.png'.format(settings.MEDIA_ROOT, model_id)
+#       if os.path.exists(file_path):
+#         with open(file_path, 'rb') as fh:
+#           response = HttpResponse(fh.read(), content_type="image/png")
+#           response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
+#           return response
+#       return HttpResponse('failed')
       

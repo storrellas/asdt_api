@@ -13,7 +13,7 @@ router = routers.DefaultRouter()
 router.register(r'', LogViewSet, basename='log')
 
 # urlpatterns = [    
-#     path('', include(router.urls)),  
+#   path('', include(router.urls))
 # ]
 
 urlpatterns = router.urls
