@@ -43,7 +43,7 @@ class DroneModelImgView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, model_id = None):
-      file_path = '{}/{}.png'.format(settings.MEDIA_ROOT, model_id)
+      file_path = '{}/drones/model/{}.png'.format(settings.MEDIA_ROOT, model_id)
       if os.path.exists(file_path):
         with open(file_path, 'rb') as fh:
           response = HttpResponse(fh.read(), content_type="image/png")
