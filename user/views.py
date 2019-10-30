@@ -31,7 +31,7 @@ from .models import *
 logger = get_logger()
 
      
-class Authenticate(APIView):
+class UserAuthenticateView(APIView):
 
     def post(self, request):
       if 'email' not in request.data or 'password' not in request.data:
@@ -74,24 +74,12 @@ class Authenticate(APIView):
 
       
 
-class UserInfo(APIView):
+class UserMeView(APIView):
     authentication_classes = [ASDTAuthentication]
     permission_classes = (IsAuthenticated,)
 
 
     def get(self, request):
-        # data = {
-        #   'success': True,
-        #   'data': {
-        #     'id': str(request.user.data['_id']),
-        #     'email': request.user.data['email'],
-        #     'name': request.user.data['name'],
-        #     'detectors' : [],
-        #     'inhibitors' : [],
-        #     'role' : request.user.data['role'],
-        #   }
-        # } 
-
         data = {
           'success': True,
           'data': {
@@ -107,7 +95,7 @@ class UserInfo(APIView):
         
         return Response(data)
 
-class Tools(APIView):
+class UserToolsView(APIView):
 
     authentication_classes = [ASDTAuthentication]
     permission_classes = (IsAuthenticated,)

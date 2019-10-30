@@ -40,7 +40,7 @@ class UserTestCase(APITestCase):
   def test_get_token_admin(self):
     
     # Check not workin without login
-    response = self.client.get('/api/v2/user/info/')
+    response = self.client.get('/api/v2/user/me/')
     self.assertTrue(response.status_code == HTTPStatus.FORBIDDEN)
 
     # Get token
@@ -52,13 +52,13 @@ class UserTestCase(APITestCase):
     self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
 
     # Check user info
-    response = self.client.get('/api/v2/user/info/')
+    response = self.client.get('/api/v2/user/me/')
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['data']['email'], 'admin@asdt.eu')
 
     # Check tools
-    response = self.client.get('/api/v2/user/tools/')
+    response = self.client.get('/api/v2/user/me/tools/')
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['data']['SETTING'], True)
@@ -67,7 +67,7 @@ class UserTestCase(APITestCase):
   def test_get_token_viewer(self):
     
     # Check not workin without login
-    response = self.client.get('/api/v2/user/info/')
+    response = self.client.get('/api/v2/user/me/')
     self.assertTrue(response.status_code == HTTPStatus.FORBIDDEN)
 
     # Get token
@@ -79,13 +79,13 @@ class UserTestCase(APITestCase):
     self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
 
     # Check user info
-    response = self.client.get('/api/v2/user/info/')
+    response = self.client.get('/api/v2/user/me/')
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['data']['email'], 'viewer@asdt.eu')
 
     # Check tools
-    response = self.client.get('/api/v2/user/tools/')
+    response = self.client.get('/api/v2/user/me/tools/')
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['data']['SETTING'], False)

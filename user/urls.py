@@ -13,9 +13,9 @@ from .views import *
 # ]
 
 urlpatterns = [
-    path('authenticate/', Authenticate.as_view()),
-    path('info/', UserInfo.as_view()),
-    path('tools/', Tools.as_view())
+    path('authenticate/', UserAuthenticateView.as_view()),
+    path('me/', UserMeView.as_view()),
+    path('me/tools/', UserToolsView.as_view())
 ]
 
 
