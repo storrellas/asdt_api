@@ -42,11 +42,32 @@ class UserModelTestCase(APITestCase):
     """
     pass
 
-  def test_user_has_power_over(self):
-    admin_user = User.objects.get(email='admin@asdt.eu')
-    admin_child_user = User.objects.get(email='admin_child@asdt.eu')
-    self.assertTrue(admin_user.has_power_over(admin_child_user))
-    self.assertFalse(admin_user.has_power_over(admin_user))
+
+  def test_group_get_full_devices(self):
+    group = Group.objects.get(name='ADMIN_ASDT')
+    devices = group.get_full_devices()
+    self.assertTrue(len(devices.detectors) == 3)
+    
+
+  def test_group_is_parent_of(self):
+    # Check Ok
+    admin_child_child_group = Group.objects.get(name='ADMIN_CHILD_CHILD_ASDT')
+    admin_group = Group.objects.get(name='ADMIN_ASDT')
+    self.assertTrue(admin_group.is_parent_of(admin_child_child_group))
+
+    # Check inverse    
+    self.assertFalse(admin_child_child_group.is_parent_of(admin_group))
+
+    # Check other group
+    viewer_group = Group.objects.get(name='VIEWER_ASDT')
+    self.assertFalse(admin_group.is_parent_of(viewer_group))
+
+  def test_group_get_full_children(self):
+    group = Group.objects.get(name='ADMIN_ASDT')
+    group_children = group.get_full_children()
+    self.assertTrue(len(group_children) == 2)
+
+
 
 
 
