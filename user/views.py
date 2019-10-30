@@ -84,10 +84,8 @@ class UserView(APIView):
       serializer = UserSerializer(data=request.data)
       if serializer.is_valid():
         data = serializer.validated_data
+        group = None
 
-        # Create user
-        user = User.objects.create(email=data['email'], name=data['name'], role=data['role'])
-        user.set_password(data['password'])
 
         # Add group if any
         if data['hasGroup']:
@@ -95,16 +93,49 @@ class UserView(APIView):
           ## Checking whether group is valid
           ## Checking whether group is valid
 
+			# //Si estem afegint un administrador: (ADMINISTRADOR NOMES POT AFEGIR ALS DELS GRUPS INFERIORS)
+			# if (req.body.role == "ADMIN") {
+			# 	if (userGroup.isParentOf(requestedGroup)) {
+			# 		success = true;
+			# 	}
+
+			# } else if (req.body.role == "VIEWER" || req.body.role == "EMPOWERED") {
+			# 	if (userGroup.isParentOf(requestedGroup) || actual._id.equals(requestedGroup._id)) {
+			# 		success = true;
+			# 	}
+			# }
+
+          # Recover group
           try:
             group = Group.objects.get(id=data['group'])
-            user.hasGroup = True
-            user.group = group
-            user.save()
           except Exception as e:
             logger.info("mytest")
             print(str(e))
             return Response({"success": False, "error": "WRONG_PARAMTERS"})
-        
+
+          # Check permissions
+          success = False
+          if data['role'] == 'ADMIN':
+            success = request.user.group.is_parent_of(group)
+          elif data['role'] == 'VIEWER' or data['role'] == 'EMPOWERED':
+            if request.user.group.is_parent_of(group) or request.user.group == group:
+              success = True
+          else:
+            success = True
+          
+          if success == False:
+            return Response({"success": False, "error": "NOT_ALLOWED"})
+
+        # Create user        
+        user = User.objects.create(email=data['email'], name=data['name'], 
+                                    role=data['role'], hasGroup=data['hasGroup'])
+        user.set_password(data['password'])
+
+        # Add group to user        
+        if group is not None:
+          user.group = group
+          user.save()
+
         # ObjectID to str
         user_dict = user.to_mongo().to_dict()
         user_dict['_id'] = str(user_dict['_id'])   

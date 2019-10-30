@@ -135,7 +135,7 @@ class UserTestCase(APITestCase):
       "hasGroup": False
     }
     response = self.client.post('/api/v2/user/', body)
-    self.assertTrue(response_json['success'] == True)
+    self.assertTrue(response_json['success'])
 
     # Get token
     self.client.credentials(HTTP_AUTHORIZATION='')
@@ -143,7 +143,7 @@ class UserTestCase(APITestCase):
                                 { "email": "user@test.eu", "password": "asdt2019" })
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'] == True)
+    self.assertTrue(response_json['success'])
 
   def test_create_user_group(self):
     
@@ -156,7 +156,7 @@ class UserTestCase(APITestCase):
     self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
 
     # Add user to group
-    group = Group.objects.first()
+    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
 
     # Check not workin without login
     body = {
@@ -170,6 +170,7 @@ class UserTestCase(APITestCase):
     response = self.client.post('/api/v2/user/', body)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
     self.assertTrue(response_json['data']['group'] == str(group.id))
 
     # Get token
@@ -201,6 +202,33 @@ class UserTestCase(APITestCase):
     }
     response = self.client.post('/api/v2/user/', body)
     self.assertTrue(response.status_code == HTTPStatus.FORBIDDEN)
+
+  def test_create_user_group_not_allowed(self):
+    
+    # Get token
+    response = self.client.post('/api/v2/user/authenticate/', 
+                                { "email": "admin@asdt.eu", "password": "asdt2019" })
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    access_token = response_json['data']['token']
+    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+
+    # Add user to group
+    group = Group.objects.get(name='VIEWER_ASDT')
+
+    # Check not workin without login
+    body = {
+      "email": "user@test.com",
+      "password": "asdt2019",
+      "name": "Oussama",
+      "role": "EMPOWERED",
+      "hasGroup": True,
+      "group": group.id
+    }
+    response = self.client.post('/api/v2/user/', body)
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertFalse(response_json['success'])
 
 
 
