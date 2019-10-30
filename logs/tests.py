@@ -5,6 +5,7 @@ import datetime
 # Django imports
 from django.test import TestCase, Client
 from django.http import HttpRequest
+from django.conf import settings
 from rest_framework.test import APITestCase
 from unittest.mock import patch
 
@@ -90,7 +91,7 @@ class DroneTestCase(APITestCase):
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['success'], True)
-    self.assertEqual(len(response_json['data']), 3)
+    self.assertEqual(len(response_json['data']), 4)
 
     # Get Logs
     url_params = {
@@ -101,7 +102,7 @@ class DroneTestCase(APITestCase):
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['success'], True)
-    self.assertEqual(len(response_json['data']), 2)
+    self.assertEqual(len(response_json['data']), 3)
 
   def test_logs_bypage(self):
     # Get token
@@ -122,7 +123,7 @@ class DroneTestCase(APITestCase):
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['success'], True)
-    self.assertEqual(len(response_json['data']), 3)
+    self.assertEqual(len(response_json['data']), 4)
     log_id = response_json['data'][0]['id']
 
     # Get Logs
