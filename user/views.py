@@ -28,6 +28,7 @@ from asdt_api.utils import get_logger
 from asdt_api.authentication import *
 
 from .models import *
+from .serializers import *
 
 logger = get_logger()
 
@@ -35,6 +36,7 @@ logger = get_logger()
 class UserAuthenticateView(APIView):
 
     def post(self, request):
+    
       if 'email' not in request.data or 'password' not in request.data:
         return Response({"success": False, "error": "WRONG_PARAMETERS"})
 
@@ -72,33 +74,27 @@ class UserAuthenticateView(APIView):
         return Response({"success": False, "error": "DOES_NOT_EXIST"})
 
 
-# Dependencies
-from rest_framework import serializers
-class UserSerializer(serializers.Serializer):
-    email = serializers.CharField(max_length=200)
-    password = serializers.CharField(max_length=72)
-    name = serializers.CharField(max_length=200)
-    role = serializers.ChoiceField(choices=['MASTER', 'ADMIN', 'EMPOWERED', 'VIEWER'])
-    hasGroup = serializers.BooleanField()
-    group = serializers.CharField(max_length=200, required=False)
+
 
 class UserView(APIView):
     authentication_classes = [ASDTAuthentication]
     permission_classes = (IsAuthenticated,ASDTIsAdminPermission,)
 
     def post(self, request):
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
+      serializer = UserSerializer(data=request.data)
+      if serializer.is_valid():
 
-            if serializer.validated_data['hasGroup']:
-                group = None
-                try:
-                    group = Group.objects.get(serializer.validated_data['group'])
-                except Exception as e:
-                    print(e)
-                    return Response({"success": False, "error": "WRONG_PARAMTERS"})
-            else:
-                pass
+        if serializer.validated_data['hasGroup']:
+          group = None
+          try:
+            group = Group.objects.get(serializer.validated_data['group'])
+          except Exception as e:
+            print(e)
+            return Response({"success": False, "error": "WRONG_PARAMTERS"})
+        else:
+          data = serializer.validated_data
+          user = User.objects.create(email=data['email'], name=data['name'], role=data['role'])
+          user.set_password(data['password'])
 
 			# let newUser = await User.create(
 			# 	{
@@ -115,12 +111,12 @@ class UserView(APIView):
 			# res.end();
 
 
-            ## Adding here logic to create user
-            print("Logic to create user", serializer.validated_data)        
-            return Response({'success': True } )
-        else:
-            print({'message': serializer.errors})
-            return Response({'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+          ## Adding here logic to create user
+          print("Logic to create user", serializer.validated_data)        
+          return Response({'success': True } )
+      else:
+          print({'message': serializer.errors})
+          return Response({'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
       

@@ -30,7 +30,7 @@ class DroneTestCase(APITestCase):
     logger.info("--- Generating scenario  ---")
     logger.info("----------------------------")    
     settings.MONGO_DB = 'asdt_test'
-    logger.info("DB Generated: {}".settings.MONGO_DB)
+    logger.info("DB Generated: {}".format(settings.MONGO_DB))
 
     mongo_dummy = MongoDummy()
     mongo_dummy.setup(settings.MONGO_DB, settings.MONGO_HOST, int(settings.MONGO_PORT))

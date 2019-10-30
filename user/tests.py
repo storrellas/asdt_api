@@ -29,7 +29,7 @@ class UserTestCase(APITestCase):
     logger.info("--- Generating scenario  ---")
     logger.info("----------------------------")    
     settings.MONGO_DB = 'asdt_test'
-    logger.info("DB Generated: {}".settings.MONGO_DB)
+    logger.info("DB Generated: {}".format(settings.MONGO_DB))
 
     mongo_dummy = MongoDummy()
     mongo_dummy.setup(settings.MONGO_DB, settings.MONGO_HOST, int(settings.MONGO_PORT))
@@ -106,13 +106,19 @@ class UserTestCase(APITestCase):
 
     # Check not workin without login
     body = {
-      "email": "a@a.com",
+      "email": "user@test.com",
       "password": "asdt2019",
       "name": "Oussama",
       "role": "EMPOWERED",
       "hasGroup": False
     }
     response = self.client.post('/api/v2/user/', body)
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+
+    # Get token
+    self.client.credentials(HTTP_AUTHORIZATION='')
+    response = self.client.post('/api/v2/user/authenticate/', 
+                                { "email": "user@test.eu", "password": "asdt2019" })
     self.assertTrue(response.status_code == HTTPStatus.OK)
 
 
@@ -128,7 +134,7 @@ class UserTestCase(APITestCase):
 
     # Check not workin without login
     body = {
-      "email": "a@a.com",
+      "email": "user@test.com",
       "password": "asdt2019",
       "name": "Oussama",
       "role": "EMPOWERED",
