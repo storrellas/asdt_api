@@ -139,11 +139,23 @@ class UserViewset(viewsets.ViewSet):
       if request.user.group.parent is None:
         queryset = User.objects.all()
       else:
+
         # Get groups assigned
         groups = []
         if request.user.group is not None:
-          groups.extend ( self.request.user.group.get_full_children() ) 
-          groups.extend( request.user.group )
+          # Get referenced groups
+          groups.extend( request.user.group.get_full_children() ) 
+          # Add user group
+          groups.append( request.user.group )
+
+        # Get group List
+        group_list = []
+        for item in groups:
+          group_list.append(item.id)
+
+        # Queryset
+        queryset = User.objects.filter(group__in=group_list)
+
 
       # Generate response
       user_dict = []

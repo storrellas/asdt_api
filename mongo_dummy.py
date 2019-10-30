@@ -67,8 +67,8 @@ class MongoDummy:
     # Users
     ##############
     logger.info("Creating users ...")
-    master = User.objects.create(email='a@a.com', name='admin', role='ADMIN')
-    master.set_password('asdt2019')
+    admin_a = User.objects.create(email='a@a.com', name='admin', role='ADMIN')
+    admin_a.set_password('asdt2019')
 
     master = User.objects.create(email='master@asdt.eu', name='master', role='MASTER')
     master.set_password('asdt2019')
@@ -199,24 +199,26 @@ if __name__ == "__main__":
   mongo_dummy.setup(settings.MONGO_DB, settings.MONGO_HOST, int(settings.MONGO_PORT))
   mongo_dummy.generate_scenario()
 
-# user = User.objects.get(email='admin@asdt.eu')
-# user.group
 
 
-# queryset = Log.objects.all()
-# # Allowed detector list
-# detector_list_for_user = []
-# for detector in user.group.devices.detectors:
-#     detector_list_for_user.append( detector.fetch() )
+  # user = User.objects.get(email='admin@asdt.eu')
+  # user.group
 
-# print(len(detector_list_for_user) )
-# for detector in detector_list_for_user:
-#   print(detector)
-#   print(detector.to_mongo().to_dict())
 
-# #queryset = queryset.filter(detectors__in=[detector_list_for_user])
-# for item in queryset:
-#   print(item.detectors[0])
-#   print(item.detectors[0].to_json())
-#   print(item.detectors[0].as_pymongo())
-#   print(item.detectors[0].to_mongo())
+  # queryset = Log.objects.all()
+  # # Allowed detector list
+  # detector_list_for_user = []
+  # for detector in user.group.devices.detectors:
+  #     detector_list_for_user.append( detector.fetch() )
+
+  # print(len(detector_list_for_user) )
+  # for detector in detector_list_for_user:
+  #   print(detector)
+  #   print(detector.to_mongo().to_dict())
+
+  # #queryset = queryset.filter(detectors__in=[detector_list_for_user])
+  # for item in queryset:
+  #   print(item.detectors[0])
+  #   print(item.detectors[0].to_json())
+  #   print(item.detectors[0].as_pymongo())
+  #   print(item.detectors[0].to_mongo())

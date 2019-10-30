@@ -235,7 +235,7 @@ class UserTestCase(APITestCase):
     response_json = json.loads(response.content.decode())
     self.assertFalse(response_json['success'])
 
-  def test_list(self):
+  def test_list_admin(self):
     
     # Get token
     response = self.client.post('/api/v2/user/authenticate/', 
@@ -249,8 +249,26 @@ class UserTestCase(APITestCase):
     response = self.client.get('/api/v2/user/')
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
-    print(response_json)
     self.assertTrue(response_json['success'])
+    self.assertTrue(len(response_json['data']) == 7)
+
+  def test_list_admin_child(self):
+    
+    # Get token
+    response = self.client.post('/api/v2/user/authenticate/', 
+                                { "email": "admin_child@asdt.eu", "password": "asdt2019" })
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    access_token = response_json['data']['token']
+    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+
+    # Get list of users
+    response = self.client.get('/api/v2/user/')
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
+    self.assertTrue(len(response_json['data']) == 2)
+
 
 
 
