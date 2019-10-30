@@ -51,8 +51,10 @@ class MongoDummy:
     # Groups
     ##############
     logger.info("Creating groups ...")
-    admin_group = Group.objects.create(name='ADMIN_ASDT')
-    viewer_group = Group.objects.create(name='VIEWER_ASDT')
+    admin_child_child_group = Group.objects.create(name='ADMIN_CHILD_CHILD_ASDT')
+    admin_child_group = Group.objects.create(name='ADMIN_CHILD_ASDT', childs=[admin_child_child_group])
+    admin_group = Group.objects.create(name='ADMIN_ASDT', childs=[admin_child_group])
+    viewer_group = Group.objects.create(name='VIEWER_ASDT')    
     logger.info("Created {}. Done!".format(Group.objects.all().count()) )
 
     # Users
@@ -107,9 +109,15 @@ class MongoDummy:
     # Add to groups
     admin_group.devices.detectors = [detector2]
     admin_group.save()
+  
     viewer_group.devices.detectors = [detector3]
     viewer_group.save()
 
+    admin_child_group.devices.detectors = [detector4]
+    admin_child_group.save()
+
+    admin_child_child_group.devices.detectors = [detector5]
+    admin_child_child_group.save()
 
 
     # Logs

@@ -42,6 +42,13 @@ class UserTestCase(APITestCase):
     """
     pass
 
+
+  def test_group_get_devices(self):
+    group = Group.objects.get(name='ADMIN_ASDT')
+    devices = group.get_devices()
+    print(devices.to_mongo())
+    
+
   def test_get_token_admin(self):
     
     # Check not workin without login

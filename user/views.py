@@ -98,8 +98,6 @@ class UserView(APIView):
             print(str(e))
             return Response({"success": False, "error": "WRONG_PARAMTERS"})
         
-
-
         # ObjectID to str
         user_dict = user.to_mongo().to_dict()
         user_dict['_id'] = str(user_dict['_id'])   
