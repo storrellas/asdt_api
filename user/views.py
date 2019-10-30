@@ -96,24 +96,15 @@ class UserView(APIView):
           user = User.objects.create(email=data['email'], name=data['name'], role=data['role'])
           user.set_password(data['password'])
 
-			# let newUser = await User.create(
-			# 	{
-			# 		email: req.body.email,
-			# 		name: req.body.name,
-			# 		password: req.body.password,
-			# 		detectionMode: req.body.detectionMode,
-			# 		role: req.body.role,
-			# 		location: req.body.location,
-			# 		hasGroup: false,
-			# 		group: null
-			# 	});
-			# res.send({ success: true, data: { id: newUser.id } });
-			# res.end();
-
+          # ObjectID to str
+          user_dict = user.to_mongo().to_dict()
+          user_dict['_id'] = str(user_dict['_id'])   
+          if 'group' in user_dict:       
+            user_dict['group'] = str(user_dict['group'])
 
           ## Adding here logic to create user
           print("Logic to create user", serializer.validated_data)        
-          return Response({'success': True } )
+          return Response({'success': True, 'data': user_dict } )
       else:
           print({'message': serializer.errors})
           return Response({'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
