@@ -45,7 +45,7 @@ class UserTestCase(APITestCase):
 
   def test_group_get_devices(self):
     group = Group.objects.get(name='ADMIN_ASDT')
-    devices = group.get_devices()
+    devices = group.get_full_devices()
     print(devices.to_mongo())
     
 

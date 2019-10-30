@@ -47,7 +47,7 @@ class LogViewSet(viewsets.ViewSet):
         # Allowed detector list for user
         detector_set_for_user = set()
         #for detector in user.group.devices.detectors:
-        devices = user.group.get_devices()
+        devices = user.group.get_full_devices()
         for detector in devices.detectors:
             detector_set_for_user.add( str(detector.fetch().id) )
 

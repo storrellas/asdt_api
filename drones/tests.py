@@ -4,6 +4,7 @@ from http import HTTPStatus
 # Django imports
 from django.test import TestCase, Client
 from django.http import HttpRequest
+from django.conf import settings
 from rest_framework.test import APITestCase
 from unittest.mock import patch
 

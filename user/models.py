@@ -40,11 +40,11 @@ class Group(ASDTDocument):
   users = ListField(LazyReferenceField('User'), reverse_delete_rule = NULLIFY)  
   devices = EmbeddedDocumentField(GroupDevices, default=GroupDevices())
 
-  def get_devices(self):
+  def get_full_devices(self):
     devices = self.devices
     for child_group in self.childs:
-      
-      child_group.devices = child_group.get_devices()
+
+      child_group.devices = child_group.get_full_devices()
       if child_group.devices.detectors is not None:
         devices.detectors.extend(child_group.devices.detectors)
       
