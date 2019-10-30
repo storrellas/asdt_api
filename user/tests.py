@@ -13,6 +13,7 @@ from unittest.mock import patch
 # Projet imports
 from asdt_api import utils
 from mongo_dummy import MongoDummy
+from .models import *
 
 logger = utils.get_logger()
 
@@ -106,20 +107,57 @@ class UserTestCase(APITestCase):
 
     # Check not workin without login
     body = {
-      "email": "user@test.com",
+      "email": "user@test.eu",
       "password": "asdt2019",
       "name": "Oussama",
       "role": "EMPOWERED",
       "hasGroup": False
     }
     response = self.client.post('/api/v2/user/', body)
-    self.assertTrue(response.status_code == HTTPStatus.OK)
+    self.assertTrue(response_json['success'] == True)
 
     # Get token
     self.client.credentials(HTTP_AUTHORIZATION='')
     response = self.client.post('/api/v2/user/authenticate/', 
                                 { "email": "user@test.eu", "password": "asdt2019" })
     self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'] == True)
+
+  def test_create_user_group(self):
+    
+    # Get token
+    response = self.client.post('/api/v2/user/authenticate/', 
+                                { "email": "admin@asdt.eu", "password": "asdt2019" })
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    access_token = response_json['data']['token']
+    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+
+    # Add user to group
+    group = Group.objects.first()
+
+    # Check not workin without login
+    body = {
+      "email": "user2@test.eu",
+      "password": "asdt2019",
+      "name": "Oussama",
+      "role": "EMPOWERED",
+      "hasGroup": True,
+      "group": group.id
+    }
+    response = self.client.post('/api/v2/user/', body)
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['data']['group'] == str(group.id))
+
+    # Get token
+    self.client.credentials(HTTP_AUTHORIZATION='')
+    response = self.client.post('/api/v2/user/authenticate/', 
+                                { "email": "user2@test.eu", "password": "asdt2019" })
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+
 
 
   def test_create_user_forbidden(self):

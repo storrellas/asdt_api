@@ -83,28 +83,34 @@ class UserView(APIView):
     def post(self, request):
       serializer = UserSerializer(data=request.data)
       if serializer.is_valid():
-
-        if serializer.validated_data['hasGroup']:
-          group = None
+        data = serializer.validated_data
+        user = None
+        if data['hasGroup']:
+          print("Creating with group ...", data['group'])
           try:
-            group = Group.objects.get(serializer.validated_data['group'])
+            group = Group.objects.get(id=data['group'])
+            user = User.objects.create(email=data['email'], name=data['name'], role=data['role'],
+                                        hasGroup=True, group=group)
+            user.set_password(data['password'])
+
           except Exception as e:
-            print(e)
+            logger.info("mytest")
+            print(str(e))
             return Response({"success": False, "error": "WRONG_PARAMTERS"})
-        else:
-          data = serializer.validated_data
+        else:         
           user = User.objects.create(email=data['email'], name=data['name'], role=data['role'])
           user.set_password(data['password'])
 
-          # ObjectID to str
-          user_dict = user.to_mongo().to_dict()
-          user_dict['_id'] = str(user_dict['_id'])   
-          if 'group' in user_dict:       
-            user_dict['group'] = str(user_dict['group'])
+        # ObjectID to str
+        user_dict = user.to_mongo().to_dict()
+        user_dict['_id'] = str(user_dict['_id'])   
+        if 'group' in user_dict:       
+          user_dict['group'] = str(user_dict['group'])
 
-          ## Adding here logic to create user
-          print("Logic to create user", serializer.validated_data)        
-          return Response({'success': True, 'data': user_dict } )
+        ## Adding here logic to create user
+        print("Logic to create user", serializer.validated_data) 
+        print(user_dict)       
+        return Response({'success': True, 'data': user_dict } )
       else:
           print({'message': serializer.errors})
           return Response({'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
