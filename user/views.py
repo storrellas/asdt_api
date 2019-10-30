@@ -84,10 +84,17 @@ class UserView(APIView):
       serializer = UserSerializer(data=request.data)
       if serializer.is_valid():
         data = serializer.validated_data
+
+        # Create user
         user = User.objects.create(email=data['email'], name=data['name'], role=data['role'])
         user.set_password(data['password'])
+
+        # Add group if any
         if data['hasGroup']:
-          print("Creating with group ...", data['group'])
+          ## Checking whether group is valid
+          ## Checking whether group is valid
+          ## Checking whether group is valid
+
           try:
             group = Group.objects.get(id=data['group'])
             user.hasGroup = True
