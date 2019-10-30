@@ -42,32 +42,6 @@ class UserTestCase(APITestCase):
     """
     pass
 
-
-  def test_group_get_full_devices(self):
-    group = Group.objects.get(name='ADMIN_ASDT')
-    devices = group.get_full_devices()
-    self.assertTrue(len(devices.detectors) == 3)
-    
-
-  def test_group_is_parent_of(self):
-    # Check Ok
-    admin_child_child_group = Group.objects.get(name='ADMIN_CHILD_CHILD_ASDT')
-    admin_group = Group.objects.get(name='ADMIN_ASDT')
-    self.assertTrue(admin_group.is_parent_of(admin_child_child_group))
-
-    # Check inverse    
-    self.assertFalse(admin_child_child_group.is_parent_of(admin_group))
-
-    # Check other group
-    viewer_group = Group.objects.get(name='VIEWER_ASDT')
-    self.assertFalse(admin_group.is_parent_of(viewer_group))
-
-
-  def test_get_full_children(self):
-    group = Group.objects.get(name='ADMIN_ASDT')
-    group_children = group.get_full_children()
-    self.assertTrue(len(group_children) == 2)
-
   def test_get_token_admin(self):
     
     # Check not workin without login
@@ -268,6 +242,25 @@ class UserTestCase(APITestCase):
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
     self.assertTrue(len(response_json['data']) == 2)
+
+  def test_retreive(self):
+    
+    # Get token
+    response = self.client.post('/api/v2/user/authenticate/', 
+                                { "email": "admin_child@asdt.eu", "password": "asdt2019" })
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    access_token = response_json['data']['token']
+    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+
+    user = User.objects.first()
+
+    # Get list of users
+    response = self.client.get('/api/v2/user/{}/'.format(user.id))
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
+    print(response_json)
 
 
 

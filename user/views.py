@@ -176,7 +176,16 @@ class UserViewset(viewsets.ViewSet):
 
       return Response({ 'success': True, 'data': user_dict } )
 
+    def retrieve(self, request, pk=None):
+      # Get user
+      queryset = Log.objects.filter(id=pk)
+      if len(queryset) != 1:
+        logger.info("Retreived: " + str(len(queryset)))
+        return Response({"success": False, "error": "NOT_FOUND"})
       
+
+
+      return Response({ 'success': True, 'data': '' } )
 
 class UserMeView(APIView):
     authentication_classes = [ASDTAuthentication]
