@@ -26,9 +26,6 @@ from asdt_api.utils import get_logger
 logger = get_logger()
 
 class LogViewSet(viewsets.ViewSet):
-    """
-    A simple ViewSet for listing or retrieving users.
-    """
 
     authentication_classes = [ASDTAuthentication]
     permission_classes = (IsAuthenticated,)

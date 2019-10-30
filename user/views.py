@@ -16,6 +16,7 @@ from django.http import HttpResponse
 from django.conf import settings
 
 # rest framework import
+from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
@@ -76,11 +77,11 @@ class UserAuthenticateView(APIView):
 
 
 
-class UserView(APIView):
+class UserViewset(viewsets.ViewSet):
     authentication_classes = [ASDTAuthentication]
     permission_classes = (IsAuthenticated,ASDTIsAdminPermission,)
 
-    def post(self, request):
+    def create(self, request):
       serializer = UserSerializer(data=request.data)
       if serializer.is_valid():
         data = serializer.validated_data
