@@ -51,10 +51,17 @@ class MongoDummy:
     # Groups
     ##############
     logger.info("Creating groups ...")
+    viewer_group = Group.objects.create(name='VIEWER_ASDT') 
     admin_child_child_group = Group.objects.create(name='ADMIN_CHILD_CHILD_ASDT')
     admin_child_group = Group.objects.create(name='ADMIN_CHILD_ASDT', childs=[admin_child_child_group])
     admin_group = Group.objects.create(name='ADMIN_ASDT', childs=[admin_child_group])
-    viewer_group = Group.objects.create(name='VIEWER_ASDT')    
+    
+    # Configura parents
+    admin_child_child_group.parent = admin_child_group
+    admin_child_child_group.save()
+    admin_child_group.parent = admin_group
+    admin_child_group.save()
+
     logger.info("Created {}. Done!".format(Group.objects.all().count()) )
 
     # Users

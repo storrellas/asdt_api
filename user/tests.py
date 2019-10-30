@@ -43,11 +43,25 @@ class UserTestCase(APITestCase):
     pass
 
 
-  def test_group_get_devices(self):
+  def test_group_get_full_devices(self):
     group = Group.objects.get(name='ADMIN_ASDT')
     devices = group.get_full_devices()
-    print(devices.to_mongo())
+    self.assertTrue(len(devices.detectors) == 3)
     
+
+  def test_group_is_parent_of(self):
+    # Check Ok
+    admin_child_child_group = Group.objects.get(name='ADMIN_CHILD_CHILD_ASDT')
+    admin_group = Group.objects.get(name='ADMIN_ASDT')
+    self.assertTrue(admin_group.is_parent_of(admin_child_child_group))
+
+    # Check inverse    
+    self.assertFalse(admin_child_child_group.is_parent_of(admin_group))
+
+    # Check other group
+    viewer_group = Group.objects.get(name='VIEWER_ASDT')
+    self.assertFalse(admin_group.is_parent_of(viewer_group))
+
 
   def test_get_token_admin(self):
     

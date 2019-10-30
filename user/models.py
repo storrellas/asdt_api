@@ -10,6 +10,10 @@ from asdt_api.models import ASDTDocument, Location
 from mongoengine import *
 import datetime
 
+from asdt_api.utils import get_logger
+
+logger = get_logger()
+
 ###############################
 # GROUP
 ###############################
@@ -58,6 +62,22 @@ class Group(ASDTDocument):
         devices.detectors.extend(child_group.devices.friendDrones)
     
     return devices
+
+  def is_parent_of(self, group):
+    """
+    Checks whether 'group' indicated is parent of self
+    """    
+    tmp = group
+    while tmp.parent is not None: 
+      try:       
+        tmp = self._qs.get(id=tmp.parent.id)
+        if tmp.id == self.id:
+          return True
+      except Exception as e:
+        print(e)
+        logger.info("parent not found {}".format(tmp.parent.id))
+        return False  
+    return False
 
 
 
