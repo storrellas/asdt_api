@@ -124,6 +124,9 @@ class UserTestCase(APITestCase):
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
 
+    # Delete created user
+    User.objects.filter(email='user@test.eu').delete()
+
   def test_create_user_group(self):
     
     # Get token
@@ -158,6 +161,9 @@ class UserTestCase(APITestCase):
                                 { "email": "user2@test.eu", "password": "asdt2019" })
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
+
+    # Delete created user
+    User.objects.filter(email='user2@test.eu').delete()
 
 
 
@@ -294,21 +300,23 @@ class UserTestCase(APITestCase):
     access_token = response_json['data']['token']
     self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
 
-    user = User.objects.get(email='admin_child@asdt.eu')
-
+    # Create custom user    
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')
-    print( group.to_mongo() )
-
+    user = User.objects.create(email='test_delete@asdt.eu', hasGroup=True, group=group)
+    
+    # Add user to group
+    group.users.append(user)
+    group.save()
 
     # Update user
     response = self.client.delete('/api/v2/user/{}/'.format(user.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
-    self.assertTrue( User.objects.filter(email='admin_child@asdt.eu').count() == 0 )
+    self.assertTrue( User.objects.filter(email='test_delete@asdt.eu').count() == 0 )
 
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')
-    print( group.to_mongo() )
+    self.assertTrue(len(group.users) == 1)
 
 
 

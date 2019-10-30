@@ -8,6 +8,7 @@ from django.conf import settings
 
 # Project imports
 from user.models import *
+from groups.models import *
 from logs.models import *
 from drones.models import *
 from bson.objectid import ObjectId
