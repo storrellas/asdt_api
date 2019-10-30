@@ -17,6 +17,7 @@ from django.conf import settings
 
 # rest framework import
 from rest_framework.response import Response
+from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework import authentication
 from rest_framework import exceptions
@@ -70,6 +71,42 @@ class UserAuthenticateView(APIView):
         print(e)
         return Response({"success": False, "error": "DOES_NOT_EXIST"})
 
+
+# Dependencies
+from rest_framework import serializers
+class UserSerializer(serializers.Serializer):
+    email = serializers.CharField(max_length=200)
+    password = serializers.CharField(max_length=72)
+    name = serializers.CharField(max_length=200)
+    role = serializers.ChoiceField(choices=['MASTER', 'ADMIN', 'EMPOWERED', 'VIEWER'])
+    hasGroup = serializers.BooleanField()
+    group = serializers.CharField(max_length=200, required=False)
+
+class UserView(APIView):
+    authentication_classes = [ASDTAuthentication]
+    permission_classes = (IsAuthenticated,ASDTIsAdminPermission,)
+
+    def post(self, request):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+
+            if serializer.validated_data['hasGroup']:
+                group = None
+                try:
+                    group = Group.objects.get(serializer.validated_data['group'])
+                except Exception as e:
+                    print(e)
+                    return Response({"success": False, "error": "WRONG_PARAMTERS"})
+            else:
+                # Creating without
+                pass
+
+            ## Adding here logic to create user
+            print("Logic to create user", serializer.validated_data)        
+            return Response({'success': True } )
+        else:
+            print({'message': serializer.errors})
+            return Response({'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
       

@@ -6,8 +6,9 @@ from bson.objectid import ObjectId
 from django.conf import settings
 
 # rest framework import
-from rest_framework import authentication
+from rest_framework import authentication, permissions
 
+# Project includes
 from user.models import *
 from .utils import get_logger
 
@@ -37,3 +38,11 @@ class ASDTAuthentication(authentication.BaseAuthentication):
       except jwt.ExpiredSignatureError as e:
         logger.info("Expired " + str(e))
         return (None, None)
+
+class ASDTIsAdminPermission(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+      if request.user.role == 'ADMIN':
+        return True
+      else:
+        return False

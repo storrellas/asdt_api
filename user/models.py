@@ -66,7 +66,7 @@ class DisplayOptions(EmbeddedDocument):
 
 class User(ASDTDocument):
   meta = {'collection': 'users'}
-
+  
   __original_password = None
 
   email = StringField(required=True, unique=True, default='')
@@ -77,6 +77,7 @@ class User(ASDTDocument):
   role = StringField(choices=['MASTER', 'ADMIN', 'EMPOWERED', 'VIEWER'], default='ADMIN')
   hasGroup = BooleanField(default=False)
   group = ReferenceField(Group, reverse_delete_rule = NULLIFY)
+  concrete_model = None
 
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)

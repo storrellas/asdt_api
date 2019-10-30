@@ -90,4 +90,50 @@ class UserTestCase(APITestCase):
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['data']['SETTING'], False)
 
+  def test_create_user(self):
+    
+    # Get token
+    response = self.client.post('/api/v2/user/authenticate/', 
+                                { "email": "admin@asdt.eu", "password": "asdt2019" })
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    access_token = response_json['data']['token']
+    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+
+    # Check not workin without login
+    body = {
+      "email": "a@a.com",
+      "password": "asdt2019",
+      "name": "Oussama",
+      "role": "EMPOWERED",
+      "hasGroup": False
+    }
+    response = self.client.post('/api/v2/user/', body)
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+
+
+  def test_create_user_forbidden(self):
+    
+    # Get token
+    response = self.client.post('/api/v2/user/authenticate/', 
+                                { "email": "viewer@asdt.eu", "password": "asdt2019" })
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    access_token = response_json['data']['token']
+    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+
+    # Check not workin without login
+    body = {
+      "email": "a@a.com",
+      "password": "asdt2019",
+      "name": "Oussama",
+      "role": "EMPOWERED",
+      "hasGroup": False
+    }
+    response = self.client.post('/api/v2/user/', body)
+    self.assertTrue(response.status_code == HTTPStatus.FORBIDDEN)
+
+
+
+
 
