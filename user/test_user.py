@@ -247,13 +247,13 @@ class UserTestCase(APITestCase):
     
     # Get token
     response = self.client.post('/api/v2/user/authenticate/', 
-                                { "email": "admin_child@asdt.eu", "password": "asdt2019" })
+                                { "email": "admin@asdt.eu", "password": "asdt2019" })
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     access_token = response_json['data']['token']
     self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
 
-    user = User.objects.first()
+    user = User.objects.get(email='admin_child@asdt.eu')
 
     # Get list of users
     response = self.client.get('/api/v2/user/{}/'.format(user.id))

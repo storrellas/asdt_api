@@ -177,15 +177,34 @@ class UserViewset(viewsets.ViewSet):
       return Response({ 'success': True, 'data': user_dict } )
 
     def retrieve(self, request, pk=None):
+
       # Get user
-      queryset = Log.objects.filter(id=pk)
+      queryset = User.objects.filter(id=pk)
       if len(queryset) != 1:
         logger.info("Retreived: " + str(len(queryset)))
         return Response({"success": False, "error": "NOT_FOUND"})
       
+      # Get user instance
+      user = queryset.first()
+      if request.user.has_power_over(user) == False:
+        return Response({"success": False, "error": "NOT_ALLOWED"})
 
+      # Generate response
+      user_dict = []
+      for item in queryset:
+        item = item.to_mongo().to_dict()
+        item['_id'] = str(item['_id'])
+        if 'group' in item:       
+          item['group'] = str(item['group'])
 
-      return Response({ 'success': True, 'data': '' } )
+        # Filtering items
+        del item['__v']
+        del item['password']
+
+        user_dict.append( item )
+
+      user_dict = user_dict[0]
+      return Response({ 'success': True, 'data': user_dict } )
 
 class UserMeView(APIView):
     authentication_classes = [ASDTAuthentication]
