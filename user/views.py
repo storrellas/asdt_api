@@ -86,25 +86,8 @@ class UserView(APIView):
         data = serializer.validated_data
         group = None
 
-
         # Add group if any
-        if data['hasGroup']:
-          ## Checking whether group is valid
-          ## Checking whether group is valid
-          ## Checking whether group is valid
-
-			# //Si estem afegint un administrador: (ADMINISTRADOR NOMES POT AFEGIR ALS DELS GRUPS INFERIORS)
-			# if (req.body.role == "ADMIN") {
-			# 	if (userGroup.isParentOf(requestedGroup)) {
-			# 		success = true;
-			# 	}
-
-			# } else if (req.body.role == "VIEWER" || req.body.role == "EMPOWERED") {
-			# 	if (userGroup.isParentOf(requestedGroup) || actual._id.equals(requestedGroup._id)) {
-			# 		success = true;
-			# 	}
-			# }
-
+        if 'group' in data:
           # Recover group
           try:
             group = Group.objects.get(id=data['group'])
@@ -142,9 +125,7 @@ class UserView(APIView):
         if 'group' in user_dict:       
           user_dict['group'] = str(user_dict['group'])
 
-        ## Adding here logic to create user
-        print("Logic to create user", serializer.validated_data) 
-        print(user_dict)       
+
         return Response({'success': True, 'data': user_dict } )
       else:
           print({'message': serializer.errors})
