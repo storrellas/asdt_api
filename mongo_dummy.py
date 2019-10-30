@@ -73,7 +73,7 @@ class MongoDummy:
     master = User.objects.create(email='master@asdt.eu', name='master', role='MASTER')
     master.set_password('asdt2019')
 
-    # Create admin
+    # Create admin - group : admin_group
     circle_zone = CircleZone(center=CircleZoneCenter(longitude=1.2, latitude=2.3),
                             radius=1.0, color="blue", opacity="1.0", 
                             id="123", droneID=["456"], visible=True, active=False)
@@ -83,6 +83,20 @@ class MongoDummy:
                                 displayOptions=display_options,
                                 group=admin_group, hasGroup=True)
     admin.set_password('asdt2019')
+
+    # Create admin_child - group : admin_child_group
+    admin_child = User.objects.create(email='admin_child@asdt.eu', name='admin', 
+                                password='asdt2019', role='ADMIN',
+                                displayOptions=display_options,
+                                group=admin_child_group, hasGroup=True)
+    admin_child.set_password('asdt2019')
+
+    # Create admin_child_child - group : admin_child_child_group
+    admin_child_child = User.objects.create(email='admin_child_child@asdt.eu', name='admin', 
+                                password='asdt2019', role='ADMIN',
+                                displayOptions=display_options,
+                                group=admin_child_child_group, hasGroup=True)
+    admin_child_child.set_password('asdt2019')
 
     empowered = User.objects.create(email='empowered@asdt.eu', name='empowered', password='asdt2019', role='EMPOWERED')
     empowered.set_password('asdt2019')

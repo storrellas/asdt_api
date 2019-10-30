@@ -132,6 +132,37 @@ class UserViewset(viewsets.ViewSet):
           print({'message': serializer.errors})
           return Response({'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
+    def list(self, request):
+
+      # List all users
+      queryset = None
+      if request.user.group.parent is None:
+        queryset = User.objects.all()
+      else:
+        # Get groups assigned
+        groups = []
+        if request.user.group is not None:
+          groups.extend ( self.request.user.group.get_full_children() ) 
+          groups.extend( request.user.group )
+
+      # Generate response
+      user_dict = []
+      for item in queryset:
+        item = item.to_mongo().to_dict()
+        item['_id'] = str(item['_id'])
+        if 'group' in item:       
+          item['group'] = str(item['group'])
+
+        # Filtering items
+        del item['displayOptions']
+        del item['__v']
+        del item['createdAt']
+        del item['updatedAt']
+        del item['password']
+
+        user_dict.append( item )
+
+      return Response({ 'success': True, 'data': user_dict } )
 
       
 

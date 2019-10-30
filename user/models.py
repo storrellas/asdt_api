@@ -45,6 +45,9 @@ class Group(ASDTDocument):
   devices = EmbeddedDocumentField(GroupDevices, default=GroupDevices())
 
   def get_full_devices(self):
+    """
+    Returns a list of all devices within child groups
+    """
     devices = self.devices
     for child_group in self.childs:
 
@@ -62,6 +65,16 @@ class Group(ASDTDocument):
         devices.detectors.extend(child_group.devices.friendDrones)
     
     return devices
+
+  def get_full_children(self):
+    """
+    Returns a list of all devices within child groups
+    """
+    children = self.childs
+    for child_group in self.childs:
+      children.extend( child_group.get_full_children() )
+
+    return children
 
   def is_parent_of(self, group):
     """
