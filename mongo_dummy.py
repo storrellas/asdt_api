@@ -108,6 +108,10 @@ class MongoDummy:
     # Add to groups
     admin_group.users.append(admin)
     admin_group.save()
+    admin_child_group.users.append(admin_child)
+    admin_child_group.save()
+    admin_child_child_group.users.append(admin_child_child)
+    admin_child_child_group.save()
     viewer_group.users.append(viewer)
     viewer_group.save()
 

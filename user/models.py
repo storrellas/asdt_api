@@ -92,6 +92,16 @@ class Group(ASDTDocument):
         return False  
     return False
 
+  def remove_user(self, user_target):
+    self.users.remove(user_target)
+    self.save()
+    # for user in self.users:
+    #   if user_target == user:
+    #     self.users.remove(user_target)
+    #     self.save()
+    #     print("Found!")
+
+    #   print(user)
 
 
 ###############################
@@ -170,5 +180,6 @@ class User(ASDTDocument):
     else:
       # Return True when current group is parent of user group
       return self.group.is_parent_of(user.group)
+
 
     

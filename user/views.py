@@ -27,6 +27,7 @@ from rest_framework.permissions import IsAuthenticated
 # Project imports
 from asdt_api.utils import get_logger
 from asdt_api.authentication import *
+from asdt_api.models import Location
 
 from .models import *
 from .serializers import *
@@ -85,9 +86,9 @@ class UserViewset(viewsets.ViewSet):
       serializer = UserSerializer(data=request.data)
       if serializer.is_valid():
         data = serializer.validated_data
-        group = None
 
         # Add group if any
+        group = None
         if 'group' in data:
           # Recover group
           try:
@@ -129,8 +130,8 @@ class UserViewset(viewsets.ViewSet):
 
         return Response({'success': True, 'data': user_dict } )
       else:
-          print({'message': serializer.errors})
-          return Response({'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        print({'message': serializer.errors})
+        return Response({'sucess': False, 'data': 'DATABASE_ERRORS'})
 
     def list(self, request):
 
@@ -205,6 +206,89 @@ class UserViewset(viewsets.ViewSet):
 
       user_dict = user_dict[0]
       return Response({ 'success': True, 'data': user_dict } )
+
+    def update(self, request, pk=None):
+
+      try:
+
+        # Get user
+        queryset = User.objects.filter(id=pk)
+        if len(queryset) != 1:
+          logger.info("Retreived: " + str(len(queryset)))
+          return Response({"success": False, "error": "NOT_FOUND"})
+        
+        # Get user instance
+        user = queryset.first()
+        if request.user.has_power_over(user) == False:
+          return Response({"success": False, "error": "NOT_ALLOWED"})
+
+        # Update User
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+          data = serializer.validated_data
+          user.email = data['email'] if 'email' in data else user.email
+          user.name = data['name'] if 'name' in data else user.name
+          user.role = data['role'] if 'role' in data else user.role
+          if 'password' in data:
+            user.set_password(data['password'])
+          if 'group' in data:
+            if data['group'] == "0":
+              pass
+            else:            
+              target_group = Group.objects.get(id=data['group'])
+              if target_group == request.user.group or request.user.group.is_parent_of(target_group):
+                user.hasGroup = True
+                user.group = target_group
+          user.save()
+
+        # Generate response
+        user_dict = []
+        for item in [user]:
+          item = item.to_mongo().to_dict()
+          item['_id'] = str(item['_id'])
+          if 'group' in item:       
+            item['group'] = str(item['group'])
+
+          # Filtering items
+          del item['__v']
+          del item['password']
+
+          user_dict.append( item )
+
+        user_dict = user_dict[0]
+        return Response({ 'success': True, 'data': user_dict } )
+
+      except Exception as e:
+        print(str(e))
+        return Response({'sucess': False, 'data': 'DATABASE_ERRORS'})
+
+    def delete(self, request, pk=None):
+
+      try:
+
+        # Get user
+        queryset = User.objects.filter(id=pk)
+        if len(queryset) != 1:
+          logger.info("Retreived: " + str(len(queryset)))
+          return Response({"success": False, "error": "NOT_FOUND"})
+        
+        # Get user instance
+        user = queryset.first()
+        if request.user.has_power_over(user) == False:
+          return Response({"success": False, "error": "NOT_ALLOWED"})
+
+        # Remove user from group        
+        user.group.users.remove(user)
+        user.group.save()
+
+        # Delete user
+        user.delete()
+
+        return Response({ 'success': True } )
+
+      except Exception as e:
+        print(str(e))
+        return Response({'sucess': False, 'data': 'DATABASE_ERRORS'})
 
 class UserMeView(APIView):
     authentication_classes = [ASDTAuthentication]
