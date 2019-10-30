@@ -84,22 +84,21 @@ class UserView(APIView):
       serializer = UserSerializer(data=request.data)
       if serializer.is_valid():
         data = serializer.validated_data
-        user = None
+        user = User.objects.create(email=data['email'], name=data['name'], role=data['role'])
+        user.set_password(data['password'])
         if data['hasGroup']:
           print("Creating with group ...", data['group'])
           try:
             group = Group.objects.get(id=data['group'])
-            user = User.objects.create(email=data['email'], name=data['name'], role=data['role'],
-                                        hasGroup=True, group=group)
-            user.set_password(data['password'])
-
+            user.hasGroup = True
+            user.group = group
+            user.save()
           except Exception as e:
             logger.info("mytest")
             print(str(e))
             return Response({"success": False, "error": "WRONG_PARAMTERS"})
-        else:         
-          user = User.objects.create(email=data['email'], name=data['name'], role=data['role'])
-          user.set_password(data['password'])
+        
+
 
         # ObjectID to str
         user_dict = user.to_mongo().to_dict()
