@@ -20,9 +20,9 @@ logger = utils.get_logger()
 
 class MongoDummy:
 
-  def setup(self):
-    # Connect mongo
-    mongoengine.connect(settings.MONGO_DB, host=settings.MONGO_HOST, port=int(settings.MONGO_PORT))
+  def setup(self, db, host, port):
+    # Connect mongo    
+    mongoengine.connect(db, host=host, port=port)
     logger.info("Connected MONGODB against mongodb://{}:{}/{}".format(settings.MONGO_HOST, settings.MONGO_PORT, settings.MONGO_DB))
 
   def default_route(self):
@@ -167,7 +167,7 @@ class MongoDummy:
 
 if __name__ == "__main__":
   mongo_dummy = MongoDummy()
-  mongo_dummy.setup()
+  mongo_dummy.setup(settings.MONGO_DB, settings.MONGO_HOST, int(settings.MONGO_PORT))
   mongo_dummy.generate_scenario()
 
 # user = User.objects.get(email='admin@asdt.eu')

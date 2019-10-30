@@ -98,8 +98,22 @@ class UserView(APIView):
                     print(e)
                     return Response({"success": False, "error": "WRONG_PARAMTERS"})
             else:
-                # Creating without
                 pass
+
+			# let newUser = await User.create(
+			# 	{
+			# 		email: req.body.email,
+			# 		name: req.body.name,
+			# 		password: req.body.password,
+			# 		detectionMode: req.body.detectionMode,
+			# 		role: req.body.role,
+			# 		location: req.body.location,
+			# 		hasGroup: false,
+			# 		group: null
+			# 	});
+			# res.send({ success: true, data: { id: newUser.id } });
+			# res.end();
+
 
             ## Adding here logic to create user
             print("Logic to create user", serializer.validated_data)        
