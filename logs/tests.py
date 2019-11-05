@@ -13,6 +13,7 @@ from unittest.mock import patch
 from asdt_api import utils
 from mongo_dummy import MongoDummy
 from user.models import User
+from groups.models import Group
 from logs.models import Log, LogCenterPoint, LogBoundingBox
 from asdt_api.models import Location
 
@@ -58,6 +59,7 @@ class LogsTestCase(APITestCase):
     pass
 
   def test_logs(self):
+
     # Get token
     response = self.client.post('/api/v2/user/authenticate/', 
                                 { "email": "admin@asdt.eu", "password": "asdt2019" })

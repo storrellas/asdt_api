@@ -33,6 +33,7 @@ class LogViewSet(viewsets.ViewSet):
     page_size = 200
 
     def get_allowed(self, user, queryset):
+
         # Check existance of group
         if user.group is None:
             return []
@@ -43,7 +44,6 @@ class LogViewSet(viewsets.ViewSet):
 
         # Allowed detector list for user
         detector_set_for_user = set()
-        #for detector in user.group.devices.detectors:
         devices = user.group.get_full_devices()
         for detector in devices.detectors:
             detector_set_for_user.add( str(detector.fetch().id) )

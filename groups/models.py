@@ -46,7 +46,6 @@ class Group(ASDTDocument):
     """
     devices = self.devices
     for child_group in self.childs:
-
       child_group.devices = child_group.get_full_devices()
       if child_group.devices.detectors is not None:
         devices.detectors.extend(child_group.devices.detectors)
