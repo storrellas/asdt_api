@@ -43,7 +43,7 @@ class GroupTestCase(APITestCase):
     pass
 
 
-  def test_get_token_admin(self):
+  def test_get_all_admin(self):
     
     # Get token
     response = self.client.post('/api/v2/user/authenticate/', 
@@ -53,14 +53,29 @@ class GroupTestCase(APITestCase):
     access_token = response_json['data']['token']
     self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
 
+    # Get All
+    response = self.client.get('/api/v2/groups/all/')
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
+    self.assertEqual(len(response_json['data']), 5)
+
+  def test_get_all_viewer(self):
+    
+    # Get token
+    response = self.client.post('/api/v2/user/authenticate/', 
+                                { "email": "viewer@asdt.eu", "password": "asdt2019" })
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    access_token = response_json['data']['token']
+    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
 
     # Get All
     response = self.client.get('/api/v2/groups/all/')
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
-    print(response_json)
-
+    self.assertEqual(len(response_json['data']), 1)
 
 
 
