@@ -162,9 +162,13 @@ class UserTestCase(APITestCase):
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
 
-    # Delete created user
-    User.objects.filter(email='user2@test.eu').delete()
-
+    # # Delete created user
+    # User.objects.filter(email='user2@test.eu').delete()
+    # Delete user
+    user = User.objects.get(email='user2@test.eu')
+    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
+    group.remove_user(user)
+    user.delete()
 
 
   def test_create_user_forbidden(self):
@@ -214,6 +218,7 @@ class UserTestCase(APITestCase):
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertFalse(response_json['success'])
+
 
   def test_list_admin(self):
     
@@ -308,7 +313,7 @@ class UserTestCase(APITestCase):
     group.users.append(user)
     group.save()
 
-    # Update user
+    # Delete user
     response = self.client.delete('/api/v2/user/{}/'.format(user.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())

@@ -66,7 +66,7 @@ class Group(ASDTDocument):
     """
     Returns a list of all devices within child groups
     """
-    children = self.childs
+    children = self.childs      
     for child_group in self.childs:
       children.extend( child_group.get_full_children() )
 

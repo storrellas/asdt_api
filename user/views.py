@@ -4,9 +4,9 @@ import time
 import json
 
 # pymongo
-from pymongo import MongoClient
 from bson.objectid import ObjectId
 from bson import json_util
+import mongoengine
 
 
 # Django import
@@ -122,8 +122,9 @@ class UserViewset(viewsets.ViewSet):
           user.save()
 
           # Append to group
-          group.childs.append(user)
+          group.users.append(user)
           group.save()
+
 
         # ObjectID to str
         user_dict = user.to_mongo().to_dict()
@@ -246,7 +247,7 @@ class UserViewset(viewsets.ViewSet):
                 user.save()
 
                 # Append to group
-                target_group.childs.append(user)
+                target_group.users.append(user.id)
                 target_group.save()
                 
 
