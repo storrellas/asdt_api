@@ -121,6 +121,10 @@ class UserViewset(viewsets.ViewSet):
           user.group = group
           user.save()
 
+          # Append to group
+          group.childs.append(user)
+          group.save()
+
         # ObjectID to str
         user_dict = user.to_mongo().to_dict()
         user_dict['_id'] = str(user_dict['_id'])   
@@ -239,7 +243,12 @@ class UserViewset(viewsets.ViewSet):
               if target_group == request.user.group or request.user.group.is_parent_of(target_group):
                 user.hasGroup = True
                 user.group = target_group
-          user.save()
+                user.save()
+
+                # Append to group
+                target_group.childs.append(user)
+                target_group.save()
+                
 
         # Generate response
         user_dict = []
