@@ -65,7 +65,8 @@ class UserModelTestCase(APITestCase):
   def test_group_get_full_children(self):
     group = Group.objects.get(name='ADMIN_ASDT')
     group_children = group.get_full_children()
-    self.assertTrue(len(group_children) == 2)
+    print(len(group_children))
+    self.assertTrue(len(group_children) == 4)
 
 
 
