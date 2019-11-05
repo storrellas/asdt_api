@@ -57,7 +57,7 @@ class MongoDummy:
     admin_child_child2_group = Group.objects.create(name='ADMIN_CHILD_CHILD2_ASDT')
     admin_child_group = Group.objects.create(name='ADMIN_CHILD_ASDT', childs=[admin_child_child_group, admin_child_child2_group])
     admin_child2_group = Group.objects.create(name='ADMIN_CHILD2_ASDT')
-    admin_group = Group.objects.create(name='ADMIN_ASDT', childs=[admin_child_group])
+    admin_group = Group.objects.create(name='ADMIN_ASDT', childs=[admin_child_group, admin_child2_group])
     
     # Configura parents
     admin_child_child_group.parent = admin_child_group

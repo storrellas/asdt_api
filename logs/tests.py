@@ -18,7 +18,7 @@ from asdt_api.models import Location
 
 logger = utils.get_logger()
 
-class DroneTestCase(APITestCase):
+class LogsTestCase(APITestCase):
 
 
   @classmethod
@@ -70,7 +70,7 @@ class DroneTestCase(APITestCase):
     response = self.client.get('/api/v2/logs/')
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
-    self.assertEqual(response_json['success'], True)
+    self.assertEqual(response_json['success'], True)    
     self.assertEqual(len(response_json['data']), 1)
 
   def test_logs_bydate(self):
@@ -91,7 +91,7 @@ class DroneTestCase(APITestCase):
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['success'], True)
-    self.assertEqual(len(response_json['data']), 4)
+    self.assertEqual(len(response_json['data']), 3)
 
     # Get Logs
     url_params = {
@@ -102,7 +102,7 @@ class DroneTestCase(APITestCase):
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['success'], True)
-    self.assertEqual(len(response_json['data']), 3)
+    self.assertEqual(len(response_json['data']), 2)
 
   def test_logs_bypage(self):
     # Get token
@@ -123,7 +123,7 @@ class DroneTestCase(APITestCase):
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['success'], True)
-    self.assertEqual(len(response_json['data']), 4)
+    self.assertEqual(len(response_json['data']), 3)
     log_id = response_json['data'][0]['id']
 
     # Get Logs
@@ -167,7 +167,7 @@ class DroneTestCase(APITestCase):
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['success'], True)
-    self.assertEqual(len(response_json['data']), 2)
+    self.assertEqual(len(response_json['data']), 1)
 
     # Get Logs
     url_params = {
