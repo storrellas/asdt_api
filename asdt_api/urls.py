@@ -24,6 +24,7 @@ PREFIX = 'api/v2/'
 urlpatterns = [
     path(PREFIX + 'admin/', admin.site.urls),
     path(PREFIX + 'user/', include('user.urls')),
+    path(PREFIX + 'groups/', include('groups.urls')),
     path(PREFIX + 'logs/', include('logs.urls')),
     path(PREFIX + 'drones/', include('drones.urls')),
 ]
