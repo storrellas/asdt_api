@@ -61,6 +61,16 @@ class Group(ASDTDocument):
     
     return devices
 
+  def get_tree_children(self):
+    """
+    Returns a tree with all children
+    """
+    children = []
+    for child_group in self.childs:
+      children.append( child_group.get_tree_children() )
+    return {'id': str(self.id), 'children': children }
+    #return {'id': str(self.name), 'children': children }
+
   def get_full_children(self):
     """
     Returns a list of all devices within child groups
@@ -68,7 +78,6 @@ class Group(ASDTDocument):
     children = self.childs      
     for child_group in self.childs:
       children.extend( child_group.get_full_children() )
-
     return children
 
   def is_parent_of(self, group):
@@ -93,3 +102,5 @@ class Group(ASDTDocument):
     """
     self.users.remove(user_target)
     self.save()
+
+
