@@ -47,6 +47,7 @@ class GroupView(viewsets.ViewSet):
         group = Group.objects.create(name=data['name'])
         
         # Determine relations
+        # NOTE: I would rename this parameter by parent
         if 'groupToAdd' in data:
           logger.info('Parent is specificed ' + data['groupToAdd'])
           parent_group = Group.objects.get(id=data['groupToAdd'])
@@ -90,7 +91,30 @@ class GroupView(viewsets.ViewSet):
         return Response({"success": False, "error": "DOES_NOT_EXIST"})
 
     def update(self, request, pk=None):
-      return Response({'success': True, 'data': ''})
+      # Check role
+      if request.user.role != 'ADMIN':
+        return Response({"success": False, "data": "NOT_ALLOWED"})
+
+
+      try:
+        group = Group.objects.get(id=pk)
+        # Check permissions
+        if request.user.group == group or request.user.group.is_parent_of(group):
+          pass
+        else:
+          return Response({"success": False, "error": "NOT_ALLOWED"})
+
+        # NOTE: In NODE.JS implementation there is a newParent paramter not used here
+        # It was not referenced in front. It was skipped
+
+        # Update operation
+        group.name = request.data['name']
+        group.save()
+
+        return Response({"success": True, "data": group.as_dict()})
+      except Exception as e:
+        print(e)
+        return Response({"success": False, "error": "DOES_NOT_EXIST"})
 
     def delete(self, request, pk=None):
       return Response({'success': True, 'data': ''})

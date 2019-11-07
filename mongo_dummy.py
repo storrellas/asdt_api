@@ -68,7 +68,7 @@ class MongoDummy:
     admin_group = Group.objects.create(name='ADMIN_ASDT', childs=[admin_child_group, admin_child2_group], 
                                             devices=GroupDevices())
     
-    # Configura parents
+    # Configure parents
     admin_child_child_group.parent = admin_child_group
     admin_child_child_group.save()
     admin_child_child2_group.parent = admin_child_group

@@ -160,6 +160,45 @@ class GroupTestCase(APITestCase):
     group = Group.objects.get(name='TEST_GROUP')
     self.assertEqual(group_to_add, group.parent)
 
+  def test_update(self):
+    # Target group to which add users
+    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
+
+    # Get token
+    response = self.client.post('/api/v2/user/authenticate/', 
+                            { "email": "admin@asdt.eu", "password": "asdt2019" })
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    access_token = response_json['data']['token']
+    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+
+    # Add user to group
+    body = { 'name': 'ADMIN_CHILD_ASDT_UPDATED' }
+    response = self.client.put('/api/v2/groups/{}/'.format(group.id), body)
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
+    self.assertTrue(Group.objects.filter(name='ADMIN_CHILD_ASDT_UPDATED').count() > 0)
+
+    # Leave it as it was
+    group.name = 'ADMIN_CHILD_ASDT'
+    group.save()
+
+
+  # def test_delete(self):
+  #   # Creating scenario
+  #   test_child_group = Group.objects.create(name='TEST_CHILD_ASDT', 
+  #                                           devices=GroupDevices())
+  #   test_group = Group.objects.create(name='TEST_ASDT', childs=[test_child_group, admin_child2_group], 
+  #                                           devices=GroupDevices())    
+  #   test_child_group.parent = test_group
+  #   test_child_group.save()
+
+  #   # Create viewer
+  #   viewer = User.objects.create(email='viewer@asdt.eu', name='viewer', password='asdt2019', role='VIEWER',
+  #                                 group=test_child_group, hasGroup=True)
+  #   test_child_group.users.append(viewer)                                  
+  #   test_child_group.save()
 
   def test_add_viewer(self):
     
