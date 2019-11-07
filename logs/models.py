@@ -12,6 +12,29 @@ from mongoengine import *
 from asdt_api.models import ASDTDocument, Location
 from user.models import Group
 
+###############################
+# DEVICES
+###############################
+
+class Inhibitor(ASDTDocument):
+  meta = {'collection': 'inhibitors'}
+  name = StringField(required=True, unique=True, default='')
+  password = StringField(required=True, unique=True, default='')
+  location = EmbeddedDocumentField(Location)
+  frequencies = ListField(StringField(required=True, unique=True, default=''))
+  groups = ListField(ReferenceField(Group, reverse_delete_rule = NULLIFY))
+
+class Zone(ASDTDocument):
+  meta = {'collection': 'zones'}
+  name = StringField(required=True, unique=True, default='')
+  center = EmbeddedDocumentField(Location)
+  radius = IntField()
+  perimiter = ListField(Location)
+  maxLat = IntField()
+  maxLon = IntField()
+  minLat = IntField()
+  minLon = IntField()
+  groups = ListField(ReferenceField(Group, reverse_delete_rule = NULLIFY))
 
 
 ###############################

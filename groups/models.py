@@ -9,16 +9,10 @@ from bson.objectid import ObjectId
 import datetime
 
 from asdt_api.utils import get_logger
+from asdt_api.models import Location
 
 logger = get_logger()
 
-class Inhibitor(ASDTDocument):
-  meta = {'collection': 'inhibitors'}
-  name = StringField(required=True, unique=True, default='')
-
-class Zone(ASDTDocument):
-  meta = {'collection': 'zones'}
-  name = StringField(required=True, unique=True, default='')
 
 ###############################
 # GROUP
@@ -27,8 +21,8 @@ class Zone(ASDTDocument):
 
 class GroupDevices(EmbeddedDocument):
   detectors = ListField(LazyReferenceField('Detector'), reverse_delete_rule = NULLIFY)
-  inhibitors = ListField(ReferenceField(Inhibitor), reverse_delete_rule = NULLIFY)
-  zones = ListField(ReferenceField(Zone), reverse_delete_rule = NULLIFY)
+  inhibitors = ListField(LazyReferenceField('Inhibitor'), reverse_delete_rule = NULLIFY)
+  zones = ListField(LazyReferenceField('Zone'), reverse_delete_rule = NULLIFY)
   friendDrones = ListField(LazyReferenceField('Drone'), reverse_delete_rule = NULLIFY)
 
 

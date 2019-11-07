@@ -136,6 +136,8 @@ class GroupTestCase(APITestCase):
     group = Group.objects.get(name='TEST_GROUP')
     self.assertEqual(user.group, group.parent)
 
+    group.delete()
+
   def test_create_group_to_add(self):
     
     # Get token
@@ -159,6 +161,8 @@ class GroupTestCase(APITestCase):
     self.assertTrue(Group.objects.filter(name='TEST_GROUP').count() > 0)
     group = Group.objects.get(name='TEST_GROUP')
     self.assertEqual(group_to_add, group.parent)
+
+    group.delete()
 
   def test_update(self):
     # Target group to which add users
