@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 from rest_framework import authentication
 from rest_framework import exceptions
 from rest_framework.permissions import IsAuthenticated
+from rest_framework import serializers
 
 # Project imports
 from asdt_api.utils import get_logger
@@ -21,11 +22,27 @@ from .models import *
 
 logger = get_logger()
 
+class GroupSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=200, required=False)
+    groupToAdd = serializers.CharField(max_length=200, required=False)
+
+
 class GroupView(viewsets.ViewSet):
     authentication_classes = [ASDTAuthentication]
     permission_classes = (IsAuthenticated,)
 
     def create(self, request):
+      if request.user.role != 'ADMIN':
+        return Response({"success": False, "data": "NOT_ALLOWED"})
+
+      # Group serializer
+      serializer = GroupSerializer(data=request.data)
+      if serializer.is_valid() == False:
+        print({'message': serializer.errors})
+        return Response({'sucess': False, 'data': 'DATABASE_ERRORS'})
+
+
+
       return Response({'sucess': True, 'data': ''})
 
     # def list(self, request):
