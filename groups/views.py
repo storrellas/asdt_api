@@ -48,9 +48,9 @@ class GroupView(viewsets.ViewSet):
         
         # Determine relations
         if 'groupToAdd' in data:
-          logger.info('Parent is specificed ', data['groupToAdd'])
+          logger.info('Parent is specificed ' + data['groupToAdd'])
           parent_group = Group.objects.get(id=data['groupToAdd'])
-          if request.user.group == group or request.user.group.is_parent_of(group):
+          if request.user.group == parent_group or request.user.group.is_parent_of(parent_group):
             pass
           else:
             return Response({"success": False, "error": "NOT_ALLOWED"})

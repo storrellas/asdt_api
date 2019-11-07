@@ -129,7 +129,37 @@ class GroupTestCase(APITestCase):
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
+
+    # Check created
+    user = User.objects.get(email='admin@asdt.eu')
     self.assertTrue(Group.objects.filter(name='TEST_GROUP').count() > 0)
+    group = Group.objects.get(name='TEST_GROUP')
+    self.assertEqual(user.group, group.parent)
+
+  def test_create_group_to_add(self):
+    
+    # Get token
+    response = self.client.post('/api/v2/user/authenticate/', 
+                            { "email": "admin@asdt.eu", "password": "asdt2019" })
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    access_token = response_json['data']['token']
+    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+
+    # Add user to group
+    group_to_add = Group.objects.get(name='ADMIN_CHILD_ASDT')
+    body = { 'name': 'TEST_GROUP', 'groupToAdd':  group_to_add.id }
+    response = self.client.post('/api/v2/groups/', body)
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
+
+    # Check created
+    user = User.objects.get(email='admin@asdt.eu')
+    self.assertTrue(Group.objects.filter(name='TEST_GROUP').count() > 0)
+    group = Group.objects.get(name='TEST_GROUP')
+    self.assertEqual(group_to_add, group.parent)
+
 
   def test_add_viewer(self):
     
