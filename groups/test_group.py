@@ -96,7 +96,18 @@ class GroupTestCase(APITestCase):
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
-    print(response_json)
+
+    # Check groups properly configured
+    group_id = user.group.id
+    former_group = Group.objects.get(id=group_id)
+    self.assertFalse( user in group.users )
+    
+    user = User.objects.get(email='viewer@asdt.eu')
+    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
+    self.assertEqual( user.group, group )
+    self.assertTrue( user in group.users )
+
+    
 
 
 

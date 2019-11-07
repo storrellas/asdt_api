@@ -97,11 +97,28 @@ class GroupAddUserView(APIView):
 
         # Check permissions
         if request.user.group.is_parent_of( group ):
-          print("Has permission")
+          pass
+        elif request.user.group == group and user.role == 'ADMIN':
+          # If targeted user is ADMIN do not allow to modify group
+          return Response({"success": False, "data": "NOT_ALLOWED"})
         else:
-          print("Does not have permission")
-        
-        return Response({"success": True, "data": ""})
+          return Response({"success": False, "data": "NOT_ALLOWED"})
+
+        # Remove user from current group
+        if user.group is not None:
+          user.group.remove_user(user)
+          user.group.save()
+
+        # Set group to user
+        user.group = group
+        user.save()
+
+        # Add user to group
+        group.users.append(user)
+        group.save()
+
+
+        return Response({"success": True, "data": str(user.id)})
       except Exception as e:
         print(e)
         return Response({"success": False, "error": "DOES_NOT_EXIST"})
