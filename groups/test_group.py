@@ -94,6 +94,7 @@ class GroupTestCase(APITestCase):
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
+    print(response_json)
     self.assertEqual(len(response_json['data']), 5)
 
   def test_get_all_viewer(self):
