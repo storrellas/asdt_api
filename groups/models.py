@@ -105,27 +105,27 @@ class Group(ASDTDocument):
 
   def as_dict(self):
     item = {}
-    item['id'] = str(group.id)
-    item['name'] = str(group.name)
-    item['parent'] = str(group.parent.id) if group.parent is not None else 'undef'
+    item['id'] = str(self.id)
+    item['name'] = str(self.name)
+    item['parent'] = str(self.parent.id) if self.parent is not None else 'undef'
     item['users'] = []
-    for user in group.users:
+    for user in self.users:
       item['users'].append(str(user.id))
     item['childs'] = []
-    for group_child in group.childs:
+    for group_child in self.childs:
       item['childs'].append(str(group_child.id))
     
     detectors_list = []
-    for detector in group.devices.detectors:
+    for detector in self.devices.detectors:
       detectors_list.append( str(detector.id) )
     inhibitor_list = []
-    for inhibitor in group.devices.inhibitors:
+    for inhibitor in self.devices.inhibitors:
       inhibitor_list.append( str(inhibitor.id) )
     zones_list = []
-    for zone in group.devices.zones:
+    for zone in self.devices.zones:
       zones_list.append( str(zone.id) )
     friend_drone_list = []
-    for friend_drone in group.devices.friendDrones:
+    for friend_drone in self.devices.friendDrones:
       friend_drone_list.append( str(friend_drone.id) )
     item['devices'] = {
       'detectors' : detectors_list,
