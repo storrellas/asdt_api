@@ -75,39 +75,34 @@ class GroupAllView(APIView):
 
       return Response({"success": True, "data": data_dict})
 
+class GroupAddUserView(APIView):
+    authentication_classes = [ASDTAuthentication]
+    permission_classes = (IsAuthenticated,)
 
-      # if 'email' not in request.data or 'password' not in request.data:
-      #   return Response({"success": False, "error": "WRONG_PARAMETERS"})
+    def post(self, request, *args, **kwargs):
 
-      # # Checking password
-      # email = request.data['email']
-      # password = request.data['password']
+      if request.user.role != 'ADMIN':
+        return Response({"success": False, "data": "NOT_ALLOWED"})
+      # Get paramters
+      group_id = kwargs['group_id']
+      user_id = kwargs['user_id']
 
-      # # Check whether user exists
-      # try:
-      #   user = User.objects.get(email=email)
-      #   if bcrypt.checkpw(password.encode(), user.password.encode()):
 
-      #     # Generate payload
-      #     iat = int(time.time()) 
-      #     exp = int(time.time()) + 6 * 3600        
-      #     payload = {
-      #       'type': 'user',
-      #       'id': str(user.id),
-      #       'iss': 'ASDT', 
-      #       'iat': iat,
-      #       'exp': exp
-      #     }
-      #     encoded = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
-      #     data = {
-      #       'success': True,
-      #       'data':{
-      #         'token': encoded
-      #       }
-      #     }
-      #     return Response(data)
-      #   else:
-      #     return Response({"success": False, "error": "WRONG_PASSWORD"})
-      # except Exception as e:
-      #   print(e)
-      #   return Response({"success": False, "error": "DOES_NOT_EXIST"})
+      try:
+        group = Group.objects.get(id=group_id)
+        user = User.objects.get(id=user_id)
+        # Check whether request user has id
+        if request.user.group is None:
+          return Response({"success": False, "error": "GROUP_ID_NOT_FOUND"})
+
+        # Check permissions
+        if request.user.group.is_parent_of( group ):
+          print("Has permission")
+        else:
+          print("Does not have permission")
+        
+        return Response({"success": True, "data": ""})
+      except Exception as e:
+        print(e)
+        return Response({"success": False, "error": "DOES_NOT_EXIST"})
+

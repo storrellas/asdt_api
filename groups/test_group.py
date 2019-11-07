@@ -14,6 +14,7 @@ from unittest.mock import patch
 from asdt_api import utils
 from mongo_dummy import MongoDummy
 from .models import *
+from user.models import User
 
 logger = utils.get_logger()
 
@@ -76,6 +77,26 @@ class GroupTestCase(APITestCase):
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
     self.assertEqual(len(response_json['data']), 1)
+
+  def test_get_add_user(self):
+    
+    user = User.objects.get(email='viewer@asdt.eu')
+    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
+
+    # Get token
+    response = self.client.post('/api/v2/user/authenticate/', 
+                            { "email": "admin@asdt.eu", "password": "asdt2019" })
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    access_token = response_json['data']['token']
+    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+
+    # Add groups
+    response = self.client.post('/api/v2/groups/{}/users/{}/'.format(group.id, user.id), {})
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
+    print(response_json)
 
 
 
