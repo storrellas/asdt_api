@@ -30,7 +30,7 @@ class DroneModelView(APIView):
         # Transform to queryset
         data = []
         for item in queryset:
-          data.append(item.to_mongo().to_dict())
+          data.append(item.as_dict())
         data = { 
             'success': True,
             'data': data

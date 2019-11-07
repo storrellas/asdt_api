@@ -20,9 +20,13 @@ class DroneModel(Document):
   imageUrl = StringField(default='')
   imageCode = IntField(default=-1)
 
+  def as_dict(self):
+    return self.to_mongo().to_dict()
+
 class Drone(ASDTDocument):
   meta = {'collection': 'drones'}
   sn = StringField(required=True, unique=True, default='')
   owner = StringField(required=True, unique=True, default='')
   hide = BooleanField(default=False)
   groups = ListField(ReferenceField(Group, reverse_delete_rule = NULLIFY))
+

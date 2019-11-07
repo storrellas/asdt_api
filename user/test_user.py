@@ -88,14 +88,14 @@ class UserTestCase(APITestCase):
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['data']['email'], 'viewer@asdt.eu')
-    self.assertFalse(response_json['success'])
+    self.assertTrue(response_json['success'])
 
     # Check tools
     response = self.client.get('/api/v2/user/me/tools/')
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['data']['SETTING'], False)
-    self.assertFalse(response_json['success'])
+    self.assertTrue(response_json['success'])
 
   def test_create_user(self):
     

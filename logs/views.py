@@ -133,12 +133,8 @@ class LogViewSet(viewsets.ViewSet):
                 'fHeight': route.fHeight,
                 'time': route.time.isoformat()
             })
-        data_single['route'] = route_list
-        data = { 
-            'success': True,
-            'data': data_single
-        } 
-        return Response(data)
+        data['route'] = route_list
+        return Response({ 'success': True, 'data': data })
 
     @action(detail=True, methods=['get'],  url_path='kml')
     def kml(self, request, pk = None):
