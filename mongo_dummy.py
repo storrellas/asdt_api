@@ -137,15 +137,20 @@ class MongoDummy:
     ##############
     logger.info("Creating detectors ...")
     detector1 = Detector.objects.create(name='moncloa', password='asdt2019', 
-                            location=DetectorLocation(lat=0, lon=0, height=0))
+                            location=DetectorLocation(lat=0, lon=0, height=0),
+                            groups=[])
     detector2 = Detector.objects.create(name='zarzuela', password='asdt2019', 
-                            location=DetectorLocation(lat=0, lon=0, height=0))
+                            location=DetectorLocation(lat=0, lon=0, height=0),
+                            groups=[admin_group])
     detector3 = Detector.objects.create(name='congreso', password='asdt2019', 
-                            location=DetectorLocation(lat=0, lon=0, height=0))
+                            location=DetectorLocation(lat=0, lon=0, height=0),
+                            groups=[viewer_group])
     detector4 = Detector.objects.create(name='cuatrovientos', password='asdt2019', 
-                            location=DetectorLocation(lat=0, lon=0, height=0))
+                            location=DetectorLocation(lat=0, lon=0, height=0),
+                            groups=[admin_child_group])
     detector5 = Detector.objects.create(name='canillas', password='asdt2019', 
-                            location=DetectorLocation(lat=0, lon=0, height=0))
+                            location=DetectorLocation(lat=0, lon=0, height=0),
+                            groups=[admin_child_child_group])
     logger.info("Created {}. Done!".format(Detector.objects.all().count()) )
 
     # Add to groups

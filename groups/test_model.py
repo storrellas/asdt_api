@@ -14,6 +14,7 @@ from unittest.mock import patch
 from asdt_api import utils
 from mongo_dummy import MongoDummy
 from .models import *
+from user.models import User
 
 logger = utils.get_logger()
 
@@ -82,6 +83,20 @@ class GroupModelTestCase(APITestCase):
     self.assertEqual(len(group_tree['children'][0]['children']), 2)
     self.assertEqual(len(group_tree['children'][1]['children']), 0)
 
+  def test_unlink(self):
+    # Creating scenario
+    group = Group.objects.create(name='UNLINK_CHILD_ASDT', 
+                                            devices=GroupDevices())
+
+    # Create viewer
+    user = User.objects.create(email='unlink@asdt.eu', name='unlink', role='ADMIN',
+                                  group=group, hasGroup=True)
+    group.users.append(user)                                  
+    group.save()
+
+    group.unlink_resources()
+
+    print("Testing unlink ....")
 
 
 

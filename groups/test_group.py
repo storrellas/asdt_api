@@ -185,20 +185,21 @@ class GroupTestCase(APITestCase):
     group.save()
 
 
-  # def test_delete(self):
-  #   # Creating scenario
-  #   test_child_group = Group.objects.create(name='TEST_CHILD_ASDT', 
-  #                                           devices=GroupDevices())
-  #   test_group = Group.objects.create(name='TEST_ASDT', childs=[test_child_group, admin_child2_group], 
-  #                                           devices=GroupDevices())    
-  #   test_child_group.parent = test_group
-  #   test_child_group.save()
+  def test_delete(self):
+    # Creating scenario
+    delete_child_group = Group.objects.create(name='DELETE_CHILD_ASDT', 
+                                            devices=GroupDevices())
+    delete_group = Group.objects.create(name='DELETE_ASDT', childs=[delete_child_group], 
+                                            devices=GroupDevices())    
+    delete_child_group.parent = delete_group
+    delete_child_group.save()
 
-  #   # Create viewer
-  #   viewer = User.objects.create(email='viewer@asdt.eu', name='viewer', password='asdt2019', role='VIEWER',
-  #                                 group=test_child_group, hasGroup=True)
-  #   test_child_group.users.append(viewer)                                  
-  #   test_child_group.save()
+    # Create viewer
+    delete_user = User.objects.create(email='delete@asdt.eu', name='delete', role='ADMIN',
+                                  group=delete_child_group, hasGroup=True)
+    delete_child_group.users.append(delete_user)                                  
+    delete_child_group.save()
+
 
   def test_add_viewer(self):
     
@@ -248,6 +249,7 @@ class GroupTestCase(APITestCase):
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')
     self.assertNotEqual( user.group, group )
     self.assertFalse( user in group.users )
+    user.delete()
 
   def test_add_viewer_not_allowed(self):
     

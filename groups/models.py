@@ -5,6 +5,7 @@ from asdt_api.models import ASDTDocument, Location
 
 # Mongoengine imports
 from mongoengine import *
+from bson.objectid import ObjectId
 import datetime
 
 from asdt_api.utils import get_logger
@@ -102,6 +103,16 @@ class Group(ASDTDocument):
     """
     self.users.remove(user_target)
     self.save()
+
+  def unlink_resources(self):
+    """
+    Removes references for users / devices
+    """
+    for user in self.users:
+      user = user.fetch()
+      user.hasGroup = True
+      user.group = None
+      user.save()
 
   def as_dict(self):
     item = {}
