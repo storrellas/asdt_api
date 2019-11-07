@@ -14,7 +14,7 @@ from .views import *
 
 urlpatterns = [
     path('all/', GroupAllView.as_view()),
-    path('<str:group_id>/users/<str:user_id>/', GroupAddUserView.as_view()),
+    path('<str:group_id>/users/<str:user_id>/', GroupUserView.as_view()),
     #path('me/', UserMeView.as_view()),
     #path('me/tools/', UserToolsView.as_view()),
     #path('', include(router.urls))

@@ -75,11 +75,14 @@ class GroupAllView(APIView):
 
       return Response({"success": True, "data": data_dict})
 
-class GroupAddUserView(APIView):
+class GroupUserView(APIView):
     authentication_classes = [ASDTAuthentication]
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, *args, **kwargs):
+      """
+      Adds user to group
+      """
 
       if request.user.role != 'ADMIN':
         return Response({"success": False, "data": "NOT_ALLOWED"})
@@ -123,3 +126,44 @@ class GroupAddUserView(APIView):
         print(e)
         return Response({"success": False, "error": "DOES_NOT_EXIST"})
 
+
+    def delete(self, request, *args, **kwargs):
+      """
+      Removes user from group
+      """
+      if request.user.role != 'ADMIN':
+        return Response({"success": False, "data": "NOT_ALLOWED"})
+      # Get paramters
+      group_id = kwargs['group_id']
+      user_id = kwargs['user_id']
+
+
+      try:
+        group = Group.objects.get(id=group_id)
+        user = User.objects.get(id=user_id)
+        # Check whether request user has id
+        if request.user.group is None:
+          return Response({"success": False, "error": "GROUP_ID_NOT_FOUND"})
+
+        # Check permissions
+        if request.user.group.is_parent_of( group ):
+          pass
+        elif request.user.group == group and user.role == 'ADMIN':
+          # If targeted user is ADMIN do not allow to modify group
+          return Response({"success": False, "data": "NOT_ALLOWED"})
+        else:
+          return Response({"success": False, "data": "NOT_ALLOWED"})
+
+        # Remove user from group
+        user.group.remove_user(user)
+        user.group.save()
+
+        user.group = None
+        user.save()
+
+        return Response({"success": True, "data": str(user.id)})
+      except Exception as e:
+        print(e)
+        return Response({"success": False, "error": "DOES_NOT_EXIST"})
+      return Response({"success": False, "data": "NOT_ALLOWED"})
+ 
