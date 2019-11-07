@@ -104,15 +104,13 @@ class Group(ASDTDocument):
     self.users.remove(user_target)
     self.save()
 
-  def unlink_resources(self):
+  def delete_recursive(self):
     """
     Removes references for users / devices
     """
-    for user in self.users:
-      user = user.fetch()
-      user.hasGroup = True
-      user.group = None
-      user.save()
+    for child in self.childs:
+      child.delete_recursive()
+    self.delete()
 
   def as_dict(self):
     item = {}

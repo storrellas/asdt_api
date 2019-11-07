@@ -83,20 +83,30 @@ class GroupModelTestCase(APITestCase):
     self.assertEqual(len(group_tree['children'][0]['children']), 2)
     self.assertEqual(len(group_tree['children'][1]['children']), 0)
 
-  def test_unlink(self):
+  def test_delete_recursive(self):
     # Creating scenario
-    group = Group.objects.create(name='UNLINK_CHILD_ASDT', 
+    delete_child_group = Group.objects.create(name='DELETE_CHILD_ASDT', 
                                             devices=GroupDevices())
+    delete_group = Group.objects.create(name='DELETE_ASDT', childs=[delete_child_group], 
+                                            devices=GroupDevices())    
+    delete_child_group.parent = delete_group
+    delete_child_group.save()
 
     # Create viewer
-    user = User.objects.create(email='unlink@asdt.eu', name='unlink', role='ADMIN',
-                                  group=group, hasGroup=True)
-    group.users.append(user)                                  
-    group.save()
+    delete_user = User.objects.create(email='delete@asdt.eu', name='delete', role='ADMIN',
+                                  group=delete_child_group, hasGroup=True)
+    delete_child_group.users.append(delete_user)                                  
+    delete_child_group.save()
 
-    group.unlink_resources()
+    # Launch delete recursive
+    delete_group.delete_recursive()
 
-    print("Testing unlink ....")
+    # Assertions
+    self.assertTrue(Group.objects.filter(name='DELETE_CHILD_ASDT').count() == 0)
+    self.assertTrue(Group.objects.filter(name='DELETE_ASDT').count() == 0)
+
+    user = User.objects.get(email='delete@asdt.eu')
+    self.assertTrue(user.group == None)
 
 
 
