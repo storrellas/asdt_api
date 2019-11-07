@@ -230,6 +230,8 @@ class GroupTestCase(APITestCase):
     self.assertTrue(response_json['success'])
     self.assertTrue(Group.objects.filter(name='DELETE_ASDT').count() == 0)
     self.assertTrue(Group.objects.filter(name='DELETE_CHILD_ASDT').count() == 0)
+    user = User.objects.get(email='delete@asdt.eu')
+    self.assertTrue(user.group == None)
 
     
 
