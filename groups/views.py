@@ -39,14 +39,42 @@ class GroupView(viewsets.ViewSet):
       serializer = GroupSerializer(data=request.data)
       if serializer.is_valid() == False:
         print({'message': serializer.errors})
-        return Response({'sucess': False, 'data': 'DATABASE_ERRORS'})
+        return Response({'success': False, 'data': 'DATABASE_ERRORS'})
+      data = serializer.validated_data
 
+      try:
+        # Create group
+        group = Group.objects.create(name=data['name'])
+        
+        # Determine relations
+        if 'groupToAdd' in data:
+          logger.info('Parent is specificed ', data['groupToAdd'])
+          parent_group = Group.objects.get(id=data['groupToAdd'])
+          if request.user.group == group or request.user.group.is_parent_of(group):
+            pass
+          else:
+            return Response({"success": False, "error": "NOT_ALLOWED"})
+          
+          parent_group.childs.append(group)
+          parent_group.save()
+          group.parent = parent_group
+          group.save()
+        elif request.user.group is not None:
+          logger.info('Parent is group from user requesting ...')
+          request.user.group.childs.append(group)
+          request.user.group.save()
+          group.parent = request.user.group
+          group.save()
+        else:
+          logger.info('Parent is None')
 
-
-      return Response({'sucess': True, 'data': ''})
+        return Response({'success': True, 'data': group.as_dict()})
+      except Exception as e:
+        print(e)
+        return Response({"success": False, "error": "DOES_NOT_EXIST"})
 
     # def list(self, request):
-    #   return Response({'sucess': True, 'data': ''})
+    #   return Response({'success': True, 'data': ''})
 
     def retrieve(self, request, pk=None):
       try:
@@ -62,10 +90,10 @@ class GroupView(viewsets.ViewSet):
         return Response({"success": False, "error": "DOES_NOT_EXIST"})
 
     def update(self, request, pk=None):
-      return Response({'sucess': True, 'data': ''})
+      return Response({'success': True, 'data': ''})
 
     def delete(self, request, pk=None):
-      return Response({'sucess': True, 'data': ''})
+      return Response({'success': True, 'data': ''})
 
 
 

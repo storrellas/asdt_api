@@ -86,7 +86,7 @@ class UserViewset(viewsets.ViewSet):
       serializer = UserSerializer(data=request.data)
       if serializer.is_valid() == False:
         print({'message': serializer.errors})
-        return Response({'sucess': False, 'data': 'DATABASE_ERRORS'})
+        return Response({'success': False, 'data': 'DATABASE_ERRORS'})
 
       # Create user
       data = serializer.validated_data
@@ -273,7 +273,7 @@ class UserViewset(viewsets.ViewSet):
 
       except Exception as e:
         print(str(e))
-        return Response({'sucess': False, 'data': 'DATABASE_ERRORS'})
+        return Response({'success': False, 'data': 'DATABASE_ERRORS'})
 
     def delete(self, request, pk=None):
 
