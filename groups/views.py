@@ -117,7 +117,34 @@ class GroupView(viewsets.ViewSet):
         return Response({"success": False, "error": "DOES_NOT_EXIST"})
 
     def delete(self, request, pk=None):
-      return Response({'success': True, 'data': ''})
+      # Check role
+      if request.user.role != 'ADMIN':
+        return Response({"success": False, "data": "NOT_ALLOWED"})
+
+      try:
+        group = Group.objects.get(id=pk)
+        # Check permissions
+        if request.user.group == group or request.user.group.is_parent_of(group):
+          pass
+        else:
+          return Response({"success": False, "error": "NOT_ALLOWED"})
+
+        # Do not remove if root group
+        if 'hasGroup' in group and group.hasGroup == True and group.parent is None:
+          return Response({"success": False, "data": "CANNOT_REMOVE_ROOT_GROUP"})
+
+        # Delete operation
+        # if 'recursive' in request.query_params:
+        #   group.delete_recursive()  
+        # else:
+        #   group.delete()
+        group.delete_recursive()
+
+        return Response({"success": True, "data": ""})
+      except Exception as e:
+        print(e)
+        return Response({"success": False, "error": "DOES_NOT_EXIST"})
+
 
 
 

@@ -196,11 +196,13 @@ class GroupTestCase(APITestCase):
 
 
   def test_delete(self):
+    admin_group = Group.objects.get(name='ADMIN_ASDT')
+
     # Creating scenario
     delete_child_group = Group.objects.create(name='DELETE_CHILD_ASDT', 
-                                            devices=GroupDevices())
+                                            devices=GroupDevices(), parent=admin_group)
     delete_group = Group.objects.create(name='DELETE_ASDT', childs=[delete_child_group], 
-                                            devices=GroupDevices())    
+                                            devices=GroupDevices(), parent=admin_group)    
     delete_child_group.parent = delete_group
     delete_child_group.save()
 
@@ -209,6 +211,27 @@ class GroupTestCase(APITestCase):
                                   group=delete_child_group, hasGroup=True)
     delete_child_group.users.append(delete_user)                                  
     delete_child_group.save()
+
+    admin_group.childs.append(delete_group)
+    admin_group.save()
+
+    # Get token
+    response = self.client.post('/api/v2/user/authenticate/', 
+                            { "email": "admin@asdt.eu", "password": "asdt2019" })
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    access_token = response_json['data']['token']
+    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+
+    # Delete Group
+    response = self.client.delete('/api/v2/groups/{}/'.format(delete_group.id))
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
+    self.assertTrue(Group.objects.filter(name='DELETE_ASDT').count() == 0)
+    self.assertTrue(Group.objects.filter(name='DELETE_CHILD_ASDT').count() == 0)
+
+    
 
 
   def test_add_viewer(self):
