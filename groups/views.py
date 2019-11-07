@@ -26,66 +26,23 @@ class GroupView(viewsets.ViewSet):
     permission_classes = (IsAuthenticated,)
 
     def create(self, request):
-      serializer = UserSerializer(data=request.data)
-      if serializer.is_valid():
-        data = serializer.validated_data
-
-        # Add group if any
-        group = None
-        if 'group' in data:
-          # Recover group
-          try:
-            group = Group.objects.get(id=data['group'])
-          except Exception as e:
-            logger.info("mytest")
-            print(str(e))
-            return Response({"success": False, "error": "WRONG_PARAMTERS"})
-
-          # Check permissions
-          success = False
-          if data['role'] == 'ADMIN':
-            success = request.user.group.is_parent_of(group)
-          elif data['role'] == 'VIEWER' or data['role'] == 'EMPOWERED':
-            if request.user.group.is_parent_of(group) or request.user.group == group:
-              success = True
-          else:
-            success = True
-          
-          if success == False:
-            return Response({"success": False, "error": "NOT_ALLOWED"})
-
-        # Create user        
-        user = User.objects.create(email=data['email'], name=data['name'], 
-                                    role=data['role'], hasGroup=data['hasGroup'])
-        user.set_password(data['password'])
-
-        # Add group to user        
-        if group is not None:
-          user.group = group
-          user.save()
-
-          # Append to group
-          group.users.append(user)
-          group.save()
-
-
-        # ObjectID to str
-        user_dict = user.to_mongo().to_dict()
-        user_dict['_id'] = str(user_dict['_id'])   
-        if 'group' in user_dict:       
-          user_dict['group'] = str(user_dict['group'])
-
-
-        return Response({'success': True, 'data': user_dict } )
-      else:
-        print({'message': serializer.errors})
-        return Response({'sucess': False, 'data': 'DATABASE_ERRORS'})
-
-    def list(self, request):
       return Response({'sucess': True, 'data': ''})
+
+    # def list(self, request):
+    #   return Response({'sucess': True, 'data': ''})
 
     def retrieve(self, request, pk=None):
-      return Response({'sucess': True, 'data': ''})
+      try:
+        group = Group.objects.get(id=pk)
+        if request.user.group == group or request.user.group.is_parent_of(group):
+          pass
+        else:
+          return Response({"success": False, "error": "NOT_ALLOWED"})
+
+        return Response({"success": True, "data": group.as_dict()})
+      except Exception as e:
+        print(e)
+        return Response({"success": False, "error": "DOES_NOT_EXIST"})
 
     def update(self, request, pk=None):
       return Response({'sucess': True, 'data': ''})

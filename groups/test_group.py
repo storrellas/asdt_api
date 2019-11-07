@@ -43,6 +43,41 @@ class GroupTestCase(APITestCase):
     """
     pass
 
+  def test_get(self):
+    
+    group = Group.objects.get(name='ADMIN_ASDT')
+
+    # Get token
+    response = self.client.post('/api/v2/user/authenticate/', 
+                            { "email": "admin@asdt.eu", "password": "asdt2019" })
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    access_token = response_json['data']['token']
+    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+
+    # Add groups
+    response = self.client.get('/api/v2/groups/{}/'.format(group.id))
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
+
+  def test_get_not_allowed(self):
+    
+    group = Group.objects.get(name='VIEWER_ASDT')
+
+    # Get token
+    response = self.client.post('/api/v2/user/authenticate/', 
+                            { "email": "admin@asdt.eu", "password": "asdt2019" })
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    access_token = response_json['data']['token']
+    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+
+    # Add groups
+    response = self.client.get('/api/v2/groups/{}/'.format(group.id))
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertFalse(response_json['success'])
 
   def test_get_all_admin(self):
     
@@ -78,7 +113,7 @@ class GroupTestCase(APITestCase):
     self.assertTrue(response_json['success'])
     self.assertEqual(len(response_json['data']), 1)
 
-  def test_get_add_viewer(self):
+  def test_add_viewer(self):
     
     user = User.objects.create(email='test@asdt.eu', name='test')
     viewer_group = Group.objects.get(name='VIEWER_ASDT')
@@ -126,7 +161,7 @@ class GroupTestCase(APITestCase):
     self.assertNotEqual( user.group, group )
     self.assertFalse( user in group.users )
 
-  def test_get_add_viewer_not_allowed(self):
+  def test_add_viewer_not_allowed(self):
     
     user = User.objects.get(email='viewer@asdt.eu')
     group = Group.objects.get(name='VIEWER_ASDT')
@@ -144,6 +179,8 @@ class GroupTestCase(APITestCase):
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertFalse(response_json['success'])
+  
+
 
 
 

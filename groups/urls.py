@@ -9,15 +9,15 @@ from rest_framework import routers
 from .views import *
 
 # Do not change the order as URL resolution is done in order
-# router = routers.DefaultRouter()
-# router.register(r'', UserViewset, basename='user')
+router = routers.DefaultRouter()
+router.register(r'', GroupView, basename='user')
 
 urlpatterns = [
     path('all/', GroupAllView.as_view()),
     path('<str:group_id>/users/<str:user_id>/', GroupUserView.as_view()),
     #path('me/', UserMeView.as_view()),
     #path('me/tools/', UserToolsView.as_view()),
-    #path('', include(router.urls))
+    path('', include(router.urls))
 ]
 
 
