@@ -103,4 +103,34 @@ class Group(ASDTDocument):
     self.users.remove(user_target)
     self.save()
 
-
+  def as_dict(self):
+    item = {}
+    item['id'] = str(group.id)
+    item['name'] = str(group.name)
+    item['parent'] = str(group.parent.id) if group.parent is not None else 'undef'
+    item['users'] = []
+    for user in group.users:
+      item['users'].append(str(user.id))
+    item['childs'] = []
+    for group_child in group.childs:
+      item['childs'].append(str(group_child.id))
+    
+    detectors_list = []
+    for detector in group.devices.detectors:
+      detectors_list.append( str(detector.id) )
+    inhibitor_list = []
+    for inhibitor in group.devices.inhibitors:
+      inhibitor_list.append( str(inhibitor.id) )
+    zones_list = []
+    for zone in group.devices.zones:
+      zones_list.append( str(zone.id) )
+    friend_drone_list = []
+    for friend_drone in group.devices.friendDrones:
+      friend_drone_list.append( str(friend_drone.id) )
+    item['devices'] = {
+      'detectors' : detectors_list,
+      'inhibitors' : inhibitor_list,
+      'zones' : zones_list,
+      'friendDrones' : friend_drone_list,
+    }
+    return item
