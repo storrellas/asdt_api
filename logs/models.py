@@ -78,3 +78,23 @@ class Log(ASDTDocument):
   boundingBox = EmbeddedDocumentField(LogBoundingBox, default=LogBoundingBox())
   route = EmbeddedDocumentListField(LogRoute, default=[])
 
+  def as_dict(self):
+    item = {}
+    item['_id'] = str(self.id)
+    item['dateIni'] = self.dateIni.isoformat()
+    item['dateFin'] = self.dateFin.isoformat()
+    item['productId'] = self.productId
+    item['sn'] = self.sn
+    item['model'] = self.model
+    item['maxHeight'] = self.maxHeight
+    item['distanceTravelled'] = self.distanceTravelled
+    item['distanceToDetector'] = self.distanceToDetector
+    item['driverLocation'] = {'lat': self.driverLocation.lat, 'lon': self.driverLocation.lon }
+    item['homeLocation'] = {'lat': self.homeLocation.lat, 'lon': self.homeLocation.lon }
+    detectors_list = []
+    for detector in self.detectors:
+      detectors_list.append(str(detector.id))
+    item['detectors'] = detectors_list
+    item['id'] = str(self.id)
+    
+    return item

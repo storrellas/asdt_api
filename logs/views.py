@@ -96,40 +96,10 @@ class LogViewSet(viewsets.ViewSet):
         queryset = queryset.skip(self.page_size * page)
         queryset = queryset.limit(self.page_size)
 
-        # Querying all objects
-        pipeline = [
-            {
-                "$project": {
-                    #"_id": {  "$toString": "$_id" },
-                    "dateIni": { "$dateToString": { "format": "%Y-%m-%dT%H:%M:%S", "date": "$dateIni" } },
-                    "dateFin": { "$dateToString": { "format": "%Y-%m-%dT%H:%M:%S", "date": "$dateIni" } },
-                    "productId": { "$ifNull": [ "$productId", "undef" ] },
-                    "sn": { "$ifNull": [ "$sn", "undef" ] },
-                    "model": { "$ifNull": [ "$model", "undef" ] },
-                    "owner": { "$ifNull": [ "$owner", "undef" ] },
-                    "maxHeight": { "$ifNull": [ "$maxHeight", "undef" ] },
-                    "distanceTraveled": { "$ifNull": [ "$distanceTraveled", "undef" ] },
-                    "distanceToDetector": { "$ifNull": [ "$distanceToDetector", "undef" ] },
-                    "driverLocation": { "$ifNull": [ "$driverLocation", "undef" ] },
-                    "homeLocation": { "$ifNull": [ "$homeLocation", "undef" ] },
-                    "detectors" : "$detectors"
-                    #"id": {  "$toString": "$_id" },
-                 
-                }
-            }
-        ]
-        cursor = queryset.aggregate(*pipeline)        
-
-        # NOTE: This needs to be improved
+        # Transform to dict
         data = []
-        for item in cursor:
-            item['_id'] = str(item['_id'])
-            item['id'] = str(item['_id'])
-            detectors_list = []
-            for id in item['detectors']:
-                detectors_list.append(str(id))
-            item['detectors'] = detectors_list
-            data.append(item)
+        for item in queryset:
+            data.append( item.as_dict() )            
         data = { 
             'success': True,
             'data': data
@@ -149,44 +119,21 @@ class LogViewSet(viewsets.ViewSet):
         if queryset.count() == 0:
             return Response({"success": False, "error": "NOT_ALLOWED"})
 
-        # Prepare results
-        pipeline = [
-            {
-                "$project": {
-                    #"_id": {  "$toString": "$_id" },
-                    "dateIni": { "$dateToString": { "format": "%Y-%m-%dT%H:%M:%S", "date": "$dateIni" } },
-                    "dateFin": { "$dateToString": { "format": "%Y-%m-%dT%H:%M:%S", "date": "$dateIni" } },
-                    "productId": { "$ifNull": [ "$productId", "undef" ] },
-                    "sn": { "$ifNull": [ "$sn", "undef" ] },
-                    "model": { "$ifNull": [ "$model", "undef" ] },
-                    "owner": { "$ifNull": [ "$owner", "undef" ] },
-                    "maxHeight": { "$ifNull": [ "$maxHeight", "undef" ] },
-                    "distanceTraveled": { "$ifNull": [ "$distanceTraveled", "undef" ] },
-                    "distanceToDetector": { "$ifNull": [ "$distanceToDetector", "undef" ] },
-                    "driverLocation": { "$ifNull": [ "$driverLocation", "undef" ] },
-                    "homeLocation": { "$ifNull": [ "$homeLocation", "undef" ] },
-                    #"id": {  "$toString": "$_id" },
-                    "detectors" : "$detectors",
-                    "route": { "lat": 1, "lon": 1, "aHeight": 1, "fHeight": 1, "time": { "$dateToString": { "format": "%Y-%m-%dT%H:%M:%S:%L", "date": "$dateIni" } }  },
-                }
-            }
-        ]
 
-        # Iterate cursor
-        cursor = queryset.aggregate(*pipeline)
-        #data = cursor.next()
-
-        data = []
-        for item in cursor:
-            item['_id'] = str(item['_id'])
-            item['id'] = str(item['_id'])
-            detectors_list = []
-            for id in item['detectors']:
-                detectors_list.append(str(id))
-            item['detectors'] = detectors_list
-            data.append(item)
-        data_single = data[0]
-
+        # Generate dict
+        log = queryset.first()
+        data = log.as_dict()
+        # Add route
+        route_list = []
+        for route in log.route:
+            route_list.append({
+                'lat': route.lat,
+                'lon': route.lon,
+                'aHeight': route.aHeight,
+                'fHeight': route.fHeight,
+                'time': route.time.isoformat()
+            })
+        data_single['route'] = route_list
         data = { 
             'success': True,
             'data': data_single
