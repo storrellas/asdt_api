@@ -790,6 +790,313 @@
 				}
 			],
 			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "groups",
+			"item": [
+				{
+					"name": "Groups All",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "cb4e2690-22bc-425b-8b11-3fa81e5eab1d",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"a@a.com\",\n    \"password\": \"asdt2019\",\n    \"name\": \"Oussama\",\n    \"role\": \"EMPOWERED\",\n    \"hasGroup\": false\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v2/groups/all/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v2",
+								"groups",
+								"all",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Groups Retrieve",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "cb4e2690-22bc-425b-8b11-3fa81e5eab1d",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"a@a.com\",\n    \"password\": \"asdt2019\",\n    \"name\": \"Oussama\",\n    \"role\": \"EMPOWERED\",\n    \"hasGroup\": false\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v2/groups/12345/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v2",
+								"groups",
+								"12345",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Groups Create",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "cb4e2690-22bc-425b-8b11-3fa81e5eab1d",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"TEST_GROUP\"\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v2/groups/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v2",
+								"groups",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Groups Create",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "cb4e2690-22bc-425b-8b11-3fa81e5eab1d",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"TEST_GROUP\"\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v2/groups/12345/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v2",
+								"groups",
+								"12345",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Groups Delete",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "cb4e2690-22bc-425b-8b11-3fa81e5eab1d",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"TEST_GROUP\"\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v2/groups/12345/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v2",
+								"groups",
+								"12345",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Groups - add user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "cb4e2690-22bc-425b-8b11-3fa81e5eab1d",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"a@a.com\",\n    \"password\": \"asdt2019\",\n    \"name\": \"Oussama\",\n    \"role\": \"EMPOWERED\",\n    \"hasGroup\": false\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v2/groups/123/users/123/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v2",
+								"groups",
+								"123",
+								"users",
+								"123",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
 		}
 	],
 	"protocolProfileBehavior": {}

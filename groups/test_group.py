@@ -233,9 +233,6 @@ class GroupTestCase(APITestCase):
     user = User.objects.get(email='delete@asdt.eu')
     self.assertTrue(user.group == None)
 
-    
-
-
   def test_add_viewer(self):
     
     # Create user with a group assigned
