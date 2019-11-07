@@ -94,7 +94,6 @@ class GroupTestCase(APITestCase):
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
-    print(response_json)
     self.assertEqual(len(response_json['data']), 5)
 
   def test_get_all_viewer(self):
@@ -124,7 +123,7 @@ class GroupTestCase(APITestCase):
     access_token = response_json['data']['token']
     self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
 
-    # Add user to group
+    # Create group
     body = { 'name': 'TEST_GROUP' }
     response = self.client.post('/api/v2/groups/', body)
     self.assertTrue(response.status_code == HTTPStatus.OK)
@@ -136,7 +135,10 @@ class GroupTestCase(APITestCase):
     self.assertTrue(Group.objects.filter(name='TEST_GROUP').count() > 0)
     group = Group.objects.get(name='TEST_GROUP')
     self.assertEqual(user.group, group.parent)
-
+    
+    # Remove resources
+    user.group.childs.remove(group)
+    user.group.save()
     group.delete()
 
   def test_create_group_to_add(self):
@@ -158,11 +160,14 @@ class GroupTestCase(APITestCase):
     self.assertTrue(response_json['success'])
 
     # Check created
-    user = User.objects.get(email='admin@asdt.eu')
     self.assertTrue(Group.objects.filter(name='TEST_GROUP').count() > 0)
     group = Group.objects.get(name='TEST_GROUP')
     self.assertEqual(group_to_add, group.parent)
 
+    # Remove resources
+    group_to_add = Group.objects.get(name='ADMIN_CHILD_ASDT')
+    group_to_add.childs.remove(group)
+    group_to_add.save()
     group.delete()
 
   def test_update(self):
@@ -177,7 +182,7 @@ class GroupTestCase(APITestCase):
     access_token = response_json['data']['token']
     self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
 
-    # Add user to group
+    # Update group
     body = { 'name': 'ADMIN_CHILD_ASDT_UPDATED' }
     response = self.client.put('/api/v2/groups/{}/'.format(group.id), body)
     self.assertTrue(response.status_code == HTTPStatus.OK)
