@@ -95,5 +95,10 @@ class User(ASDTDocument):
       # Return True when current group is parent of user group
       return self.group.is_parent_of(user.group)
 
+  def is_allowed_group(self, group):
+    cond =  (self.group == group or self.group.is_parent_of(group) )
+    return True if cond else False
+    
+
 
     

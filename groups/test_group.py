@@ -203,8 +203,6 @@ class GroupTestCase(APITestCase):
     former_group_parent = Group.objects.get(name='ADMIN_ASDT')
     group_parent = Group.objects.get(name='ADMIN_CHILD2_ASDT')
 
-    print("initial parent ", former_group_parent.childs)
-
     # Get token
     response = self.client.post('/api/v2/user/authenticate/', 
                             { "email": "admin@asdt.eu", "password": "asdt2019" })

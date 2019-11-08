@@ -11,6 +11,7 @@ from user.models import *
 from groups.models import *
 from logs.models import *
 from drones.models import *
+from inhibitors.models import *
 from bson.objectid import ObjectId
 from asdt_api import utils
 
