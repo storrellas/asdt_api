@@ -91,12 +91,6 @@ class Group(ASDTDocument):
         return False  
     return False
 
-  def remove_user(self, user_target):
-    """
-    Removes user from group
-    """
-    self.users.remove(user_target)
-    self.save()
 
   def delete_recursive(self):
     """

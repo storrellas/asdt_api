@@ -168,8 +168,11 @@ class UserTestCase(APITestCase):
     # User.objects.filter(email='user2@test.eu').delete()
     # Delete user
     user = User.objects.get(email='user2@test.eu')
-    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
-    group.remove_user(user)
+    group = Group.objects.get(name='ADMIN_CHILD_ASDT')    
+    group.users.remove(user)
+    group.save()
+
+    # Delete user
     user.delete()
 
 
