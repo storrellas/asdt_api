@@ -174,29 +174,6 @@ class GroupTestCase(APITestCase):
     # Target group to which add users
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')
 
-    # Get token
-    response = self.client.post('/api/v2/user/authenticate/', 
-                            { "email": "admin@asdt.eu", "password": "asdt2019" })
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    access_token = response_json['data']['token']
-    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
-
-    # Update group
-    body = { 'name': 'ADMIN_CHILD_ASDT_UPDATED' }
-    response = self.client.put('/api/v2/groups/{}/'.format(group.id), body)
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
-    self.assertTrue(Group.objects.filter(name='ADMIN_CHILD_ASDT_UPDATED').count() > 0)
-
-    # Leave it as it was
-    group.name = 'ADMIN_CHILD_ASDT'
-    group.save()
-
-  def test_update(self):
-    # Target group to which add users
-    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
 
     # Get token
     response = self.client.post('/api/v2/user/authenticate/', 
@@ -215,6 +192,7 @@ class GroupTestCase(APITestCase):
     self.assertTrue(Group.objects.filter(name='ADMIN_CHILD_ASDT_UPDATED').count() > 0)
 
     # Leave it as it was
+    group = Group.objects.get(name='ADMIN_CHILD_ASDT_UPDATED')
     group.name = 'ADMIN_CHILD_ASDT'
     group.save()
 
@@ -224,6 +202,8 @@ class GroupTestCase(APITestCase):
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')
     former_group_parent = Group.objects.get(name='ADMIN_ASDT')
     group_parent = Group.objects.get(name='ADMIN_CHILD2_ASDT')
+
+    print("initial parent ", former_group_parent.childs)
 
     # Get token
     response = self.client.post('/api/v2/user/authenticate/', 
@@ -239,6 +219,7 @@ class GroupTestCase(APITestCase):
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
+    print(response_json)
     self.assertTrue(Group.objects.filter(name='ADMIN_CHILD_ASDT_UPDATED').count() > 0)
 
     # Check parent modified
@@ -265,7 +246,7 @@ class GroupTestCase(APITestCase):
     delete_child_group.parent = delete_group
     delete_child_group.save()
 
-    # Create viewer
+    # Create user
     delete_user = User.objects.create(email='delete@asdt.eu', name='delete', role='ADMIN',
                                   group=delete_child_group, hasGroup=True)
     delete_child_group.users.append(delete_user)                                  

@@ -138,61 +138,98 @@ class MongoDummy:
     # Detectors
     ##############
     logger.info("Creating detectors ...")
-    detector1 = Detector.objects.create(name='moncloa', password='asdt2019', 
+    detector1 = Detector.objects.create(name='detector1', password='asdt2019', 
                             location=DetectorLocation(lat=0, lon=0, height=0),
                             groups=[])
-    detector2 = Detector.objects.create(name='zarzuela', password='asdt2019', 
+    detector2 = Detector.objects.create(name='detector2', password='asdt2019', 
                             location=DetectorLocation(lat=0, lon=0, height=0),
                             groups=[admin_group])
-    detector3 = Detector.objects.create(name='congreso', password='asdt2019', 
-                            location=DetectorLocation(lat=0, lon=0, height=0),
-                            groups=[viewer_group])
-    detector4 = Detector.objects.create(name='cuatrovientos', password='asdt2019', 
+    detector3 = Detector.objects.create(name='detector3', password='asdt2019', 
                             location=DetectorLocation(lat=0, lon=0, height=0),
                             groups=[admin_child_group])
-    detector5 = Detector.objects.create(name='canillas', password='asdt2019', 
+    detector4 = Detector.objects.create(name='detector4', password='asdt2019', 
                             location=DetectorLocation(lat=0, lon=0, height=0),
                             groups=[admin_child_child_group])
+    detector5 = Detector.objects.create(name='detector5', password='asdt2019', 
+                            location=DetectorLocation(lat=0, lon=0, height=0),
+                            groups=[viewer_group])                            
+
     logger.info("Created {}. Done!".format(Detector.objects.all().count()) )
 
     # Add to groups
     admin_group.devices.detectors = [detector2]
     admin_group.save()
-  
-    viewer_group.devices.detectors = [detector3]
-    viewer_group.save()
 
-    admin_child_group.devices.detectors = [detector4]
+    admin_child_group.devices.detectors = [detector3]
     admin_child_group.save()
 
-    admin_child_child_group.devices.detectors = [detector5]
+    admin_child_child_group.devices.detectors = [detector4]
     admin_child_child_group.save()
+
+    viewer_group.devices.detectors = [detector5]
+    viewer_group.save()
 
 
     # Inhibitors
     ##############
     logger.info("Creating inhibitors ...")
     inhibitor1 = Inhibitor.objects.create(name='inhibitor1', password="123",
-                                          location=Location(lat=2.3, lon=4.5), frequencies=["34", "45"])
+                                          location=Location(lat=2.3, lon=4.5), frequencies=["34", "45"],
+                                          groups=[admin_group])
     inhibitor2 = Inhibitor.objects.create(name='inhibitor2', password="123",
-                                          location=Location(lat=2.3, lon=4.5), frequencies=["34", "45"])
+                                          location=Location(lat=2.3, lon=4.5), frequencies=["34", "45"],
+                                          groups=[admin_child_group])
     inhibitor3 = Inhibitor.objects.create(name='inhibitor3', password="123",
-                                          location=Location(lat=2.3, lon=4.5), frequencies=["34", "45"])
+                                          location=Location(lat=2.3, lon=4.5), frequencies=["34", "45"],
+                                          groups=[admin_child_child_group])
+    inhibitor4 = Inhibitor.objects.create(name='inhibitor4', password="123",
+                                          location=Location(lat=2.3, lon=4.5), frequencies=["34", "45"],
+                                          groups=[viewer_group])                                          
     logger.info("Created {}. Done!".format(Inhibitor.objects.all().count()) )
+
+
+    # Add to groups
+    admin_group.devices.inhibitors = [inhibitor1]
+    admin_group.save()
+  
+    admin_child_group.devices.inhibitors = [inhibitor2]
+    admin_child_group.save()
+
+    admin_child_child_group.devices.inhibitors = [inhibitor3]
+    admin_child_child_group.save()
+
+    viewer_group.devices.inhibitors = [inhibitor4]
+    viewer_group.save()
 
     # Zone
     ##############
-    logger.info("Creating inhibitors ...")
+    logger.info("Creating zones ...")
     zone1 = Zone.objects.create(name='zone1', center=Location(lat=2.3, lon=4.5), radius=20, 
                                 perimiter=[Location(lat=2.3, lon=4.5), Location(lat=5.3, lon=6.5)],
-                                maxLat=2, maxLon=4, minLat=3, minLon=4)
+                                maxLat=2, maxLon=4, minLat=3, minLon=4, groups=[admin_group])
     zone2 = Zone.objects.create(name='zone2', center=Location(lat=2.3, lon=4.5), radius=20, 
                                 perimiter=[Location(lat=2.3, lon=4.5), Location(lat=5.3, lon=6.5)],
-                                maxLat=2, maxLon=4, minLat=3, minLon=4)
+                                maxLat=2, maxLon=4, minLat=3, minLon=4, groups=[admin_child_group])
     zone3 = Zone.objects.create(name='zone3', center=Location(lat=2.3, lon=4.5), radius=20, 
                                 perimiter=[Location(lat=2.3, lon=4.5), Location(lat=5.3, lon=6.5)],
-                                maxLat=2, maxLon=4, minLat=3, minLon=4)                                
+                                maxLat=2, maxLon=4, minLat=3, minLon=4, groups=[admin_child_child_group])
+    zone4 = Zone.objects.create(name='zone4', center=Location(lat=2.3, lon=4.5), radius=20, 
+                                perimiter=[Location(lat=2.3, lon=4.5), Location(lat=5.3, lon=6.5)],
+                                maxLat=2, maxLon=4, minLat=3, minLon=4, groups=[viewer_group])                                
     logger.info("Created {}. Done!".format(Zone.objects.all().count()) )
+
+    # Add to groups
+    admin_group.devices.zones = [zone1]
+    admin_group.save()
+  
+    admin_child_group.devices.zones = [zone2]
+    admin_child_group.save()
+
+    admin_child_child_group.devices.zones = [zone3]
+    admin_child_child_group.save()
+
+    viewer_group.devices.zones = [zone4]
+    viewer_group.save()
 
 
     # Drones
@@ -209,10 +246,24 @@ class MongoDummy:
     logger.info("Created {}. Done!".format(DroneModel.objects.all().count()) )
 
     logger.info("Creating drones ...")
-    Drone.objects.create(sn='1', owner='owner', hide=False)
-    Drone.objects.create(sn='2', owner='owner', hide=False)
-    Drone.objects.create(sn='3', owner='owner', hide=False)        
+    drone1 = Drone.objects.create(sn='1', owner='owner', hide=False, groups=[admin_group])
+    drone2 = Drone.objects.create(sn='2', owner='owner', hide=False, groups=[admin_child_group])
+    drone3 = Drone.objects.create(sn='3', owner='owner', hide=False, groups=[admin_child_child_group])
+    drone4 = Drone.objects.create(sn='4', owner='owner', hide=False, groups=[viewer_group])
     logger.info("Created {}. Done!".format(Drone.objects.all().count()) )
+
+    # Add to groups
+    admin_group.devices.friendDrones = [drone1]
+    admin_group.save()
+  
+    admin_child_group.devices.friendDrones = [drone2]
+    admin_child_group.save()
+
+    admin_child_child_group.devices.friendDrones = [drone3]
+    admin_child_child_group.save()
+
+    viewer_group.devices.friendDrones = [drone4]
+    viewer_group.save()
 
     # Logs
     ##############

@@ -155,6 +155,10 @@ class GroupView(viewsets.ViewSet):
         #   group.delete_recursive()  
         # else:
         #   group.delete()
+        # Remove group from childs in parent
+        group.parent.childs.remove(group)
+        group.parent.save()
+        # Delete grouip recursively
         group.delete_recursive()
 
         return Response({"success": True, "data": ""})
