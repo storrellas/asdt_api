@@ -104,8 +104,25 @@ class GroupView(viewsets.ViewSet):
         else:
           return Response({"success": False, "error": "NOT_ALLOWED"})
 
-        # NOTE: In NODE.JS implementation there is a newParent paramter not used here
-        # It was not referenced in front. It was skipped
+        # Update parent
+        # NOTE: I would rename this parameter by parent
+        if 'newParent' in request.data:
+          parent_group = Group.objects.get(id=request.data['newParent'])
+          if request.user.group == group or request.user.group.is_parent_of(group):
+            pass
+          else:
+            return Response({"success": False, "error": "NOT_ALLOWED"})
+
+          # Remove group from old parent
+          group.parent.childs.remove(group)
+          group.parent.save()
+
+          # Set new configuration
+          group.parent = parent_group
+          group.save()
+          parent_group.childs.append(group)
+          parent_group.save()
+
 
         # Update operation
         group.name = request.data['name']

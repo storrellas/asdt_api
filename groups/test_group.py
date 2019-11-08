@@ -194,6 +194,65 @@ class GroupTestCase(APITestCase):
     group.name = 'ADMIN_CHILD_ASDT'
     group.save()
 
+  def test_update(self):
+    # Target group to which add users
+    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
+
+    # Get token
+    response = self.client.post('/api/v2/user/authenticate/', 
+                            { "email": "admin@asdt.eu", "password": "asdt2019" })
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    access_token = response_json['data']['token']
+    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+
+    # Update group
+    body = { 'name': 'ADMIN_CHILD_ASDT_UPDATED' }
+    response = self.client.put('/api/v2/groups/{}/'.format(group.id), body)
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
+    self.assertTrue(Group.objects.filter(name='ADMIN_CHILD_ASDT_UPDATED').count() > 0)
+
+    # Leave it as it was
+    group.name = 'ADMIN_CHILD_ASDT'
+    group.save()
+
+
+  def test_update_parent(self):
+    # Target group to which add users
+    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
+    former_group_parent = Group.objects.get(name='ADMIN_ASDT')
+    group_parent = Group.objects.get(name='ADMIN_CHILD2_ASDT')
+
+    # Get token
+    response = self.client.post('/api/v2/user/authenticate/', 
+                            { "email": "admin@asdt.eu", "password": "asdt2019" })
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    access_token = response_json['data']['token']
+    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+
+    # Update group
+    body = { 'name': 'ADMIN_CHILD_ASDT_UPDATED', 'newParent': group_parent.id }
+    response = self.client.put('/api/v2/groups/{}/'.format(group.id), body)
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
+    self.assertTrue(Group.objects.filter(name='ADMIN_CHILD_ASDT_UPDATED').count() > 0)
+
+    # Check parent modified
+    group = Group.objects.get(name='ADMIN_CHILD_ASDT_UPDATED')
+    former_group_parent = Group.objects.get(name='ADMIN_ASDT')
+    group_parent = Group.objects.get(name='ADMIN_CHILD2_ASDT')
+    self.assertTrue(group.parent == group_parent)
+    self.assertFalse( group in former_group_parent.childs )
+    self.assertTrue( group in group_parent.childs )
+
+    # Leave it as it was
+    group.name = 'ADMIN_CHILD_ASDT'
+    group.parent = former_group_parent
+    group.save()
 
   def test_delete(self):
     admin_group = Group.objects.get(name='ADMIN_ASDT')
