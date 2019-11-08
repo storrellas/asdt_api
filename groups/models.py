@@ -46,13 +46,13 @@ class Group(ASDTDocument):
         devices.detectors.extend(child_group.devices.detectors)
       
       if child_group.devices.inhibitors is not None:
-        devices.detectors.extend(child_group.devices.inhibitors)
+        devices.inhibitors.extend(child_group.devices.inhibitors)
 
       if child_group.devices.zones is not None:
-        devices.detectors.extend(child_group.devices.zones)
+        devices.zones.extend(child_group.devices.zones)
 
       if child_group.devices.friendDrones is not None:
-        devices.detectors.extend(child_group.devices.friendDrones)
+        devices.friendDrones.extend(child_group.devices.friendDrones)
     
     return devices
 

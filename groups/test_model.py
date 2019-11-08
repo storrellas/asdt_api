@@ -47,7 +47,7 @@ class GroupModelTestCase(APITestCase):
   def test_group_get_full_devices(self):
     group = Group.objects.get(name='ADMIN_ASDT')
     devices = group.get_full_devices()
-    self.assertTrue(len(devices.detectors) == 3)
+    self.assertEqual(len(devices.detectors), 3)
     
 
   def test_group_is_parent_of(self):
