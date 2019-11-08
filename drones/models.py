@@ -26,7 +26,7 @@ class DroneModel(Document):
 class Drone(ASDTDocument):
   meta = {'collection': 'drones'}
   sn = StringField(required=True, unique=True, default='')
-  owner = StringField(required=True, unique=True, default='')
+  owner = StringField(required=True, default='')
   hide = BooleanField(default=False)
   groups = ListField(ReferenceField(Group, reverse_delete_rule = NULLIFY))
 

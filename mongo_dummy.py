@@ -208,6 +208,12 @@ class MongoDummy:
                               imageUrl='/api/v2/media/drones/model/51.png', image=True, imageCode=1)
     logger.info("Created {}. Done!".format(DroneModel.objects.all().count()) )
 
+    logger.info("Creating drones ...")
+    Drone.objects.create(sn='1', owner='owner', hide=False)
+    Drone.objects.create(sn='2', owner='owner', hide=False)
+    Drone.objects.create(sn='3', owner='owner', hide=False)        
+    logger.info("Created {}. Done!".format(Drone.objects.all().count()) )
+
     # Logs
     ##############
     logger.info("Creating logs ...")
