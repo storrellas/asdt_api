@@ -135,41 +135,6 @@ class MongoDummy:
     viewer_group.save()
 
 
-    # Detectors
-    ##############
-    logger.info("Creating detectors ...")
-    detector1 = Detector.objects.create(name='detector1', password='asdt2019', 
-                            location=DetectorLocation(lat=0, lon=0, height=0),
-                            groups=[])
-    detector2 = Detector.objects.create(name='detector2', password='asdt2019', 
-                            location=DetectorLocation(lat=0, lon=0, height=0),
-                            groups=[admin_group])
-    detector3 = Detector.objects.create(name='detector3', password='asdt2019', 
-                            location=DetectorLocation(lat=0, lon=0, height=0),
-                            groups=[admin_child_group])
-    detector4 = Detector.objects.create(name='detector4', password='asdt2019', 
-                            location=DetectorLocation(lat=0, lon=0, height=0),
-                            groups=[admin_child_child_group])
-    detector5 = Detector.objects.create(name='detector5', password='asdt2019', 
-                            location=DetectorLocation(lat=0, lon=0, height=0),
-                            groups=[viewer_group])                            
-
-    logger.info("Created {}. Done!".format(Detector.objects.all().count()) )
-
-    # Add to groups
-    admin_group.devices.detectors = [detector2]
-    admin_group.save()
-
-    admin_child_group.devices.detectors = [detector3]
-    admin_child_group.save()
-
-    admin_child_child_group.devices.detectors = [detector4]
-    admin_child_child_group.save()
-
-    viewer_group.devices.detectors = [detector5]
-    viewer_group.save()
-
-
     # Inhibitors
     ##############
     logger.info("Creating inhibitors ...")
@@ -265,6 +230,40 @@ class MongoDummy:
     viewer_group.devices.friendDrones = [drone4]
     viewer_group.save()
 
+    # Detectors
+    ##############
+    logger.info("Creating detectors ...")
+    detector1 = Detector.objects.create(name='detector1', password='asdt2019', 
+                            location=DetectorLocation(lat=0, lon=0, height=0),
+                            groups=[])
+    detector2 = Detector.objects.create(name='detector2', password='asdt2019', 
+                            location=DetectorLocation(lat=0, lon=0, height=0),
+                            groups=[admin_group])
+    detector3 = Detector.objects.create(name='detector3', password='asdt2019', 
+                            location=DetectorLocation(lat=0, lon=0, height=0),
+                            groups=[admin_child_group])
+    detector4 = Detector.objects.create(name='detector4', password='asdt2019', 
+                            location=DetectorLocation(lat=0, lon=0, height=0),
+                            groups=[admin_child_child_group])
+    detector5 = Detector.objects.create(name='detector5', password='asdt2019', 
+                            location=DetectorLocation(lat=0, lon=0, height=0),
+                            groups=[viewer_group])                            
+
+    logger.info("Created {}. Done!".format(Detector.objects.all().count()) )
+
+    # Add to groups
+    admin_group.devices.detectors = [detector2]
+    admin_group.save()
+
+    admin_child_group.devices.detectors = [detector3]
+    admin_child_group.save()
+
+    admin_child_child_group.devices.detectors = [detector4]
+    admin_child_child_group.save()
+
+    viewer_group.devices.detectors = [detector5]
+    viewer_group.save()
+
     # Logs
     ##############
     logger.info("Creating logs ...")
@@ -296,7 +295,7 @@ class MongoDummy:
     Log.objects.create(dateIni=datetime.datetime.strptime('2019-10-24T23:00:00.000Z', "%Y-%m-%dT%H:%M:%S.%fZ"), 
                         dateFin=datetime.datetime.strptime('2019-10-24T23:00:00.000Z', "%Y-%m-%dT%H:%M:%S.%fZ"),
                       model='ABC', sn='4', productId=1234,
-                      detectors=[detector1, detector4],
+                      detectors=[detector1, detector5],
                       driverLocation=Location(lat=1.2,lon=3.4), homeLocation=Location(lat=1.2,lon=3.4),
                       maxHeight=12, distanceTravelled=12, distanceToDetector=12,
                       centerPoint=LogCenterPoint(lat=1.0, lon=2.0, aHeight=1.2, fHeight=2.3),

@@ -219,7 +219,6 @@ class GroupTestCase(APITestCase):
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
-    print(response_json)
     self.assertTrue(Group.objects.filter(name='ADMIN_CHILD_ASDT_UPDATED').count() > 0)
 
     # Check parent modified
