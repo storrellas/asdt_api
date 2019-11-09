@@ -16,7 +16,7 @@ from mongo_dummy import MongoDummy
 from .models import *
 from user.models import User
 from inhibitors.models import Inhibitor
-from logs.models import Detector
+from detectors.models import Detector
 
 logger = utils.get_logger()
 

@@ -20,7 +20,8 @@ from asdt_api.models import Location
 
 from .models import *
 from inhibitors.models import Inhibitor
-from logs.models import Detector, Zone
+from zones.models import Zone
+from detectors.models import Detector
 from drones.models import Drone
 
 logger = get_logger()

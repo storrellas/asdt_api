@@ -15,11 +15,15 @@ from asdt_api.models import Location
 
 logger = get_logger()
 
+# Dynamically import modules
+inhibitors = importlib.import_module('inhibitors')
+detectors = importlib.import_module('detectors')
+zones = importlib.import_module('zones')
+drones = importlib.import_module('drones')
 
 ###############################
 # GROUP
 ###############################
-
 
 class GroupDevices(EmbeddedDocument):
   detectors = ListField(LazyReferenceField('Detector'), reverse_delete_rule = NULLIFY)
@@ -106,18 +110,14 @@ class Group(ASDTDocument):
     """
     Appends item from list
     """
-    
-    inhibitors = importlib.import_module('inhibitors')
-    logs = importlib.import_module('logs')
-    drones = importlib.import_module('drones')
 
     if isinstance(instance, inhibitors.models.Inhibitor):
       self.devices.inhibitors.append(instance)
 
-    if isinstance(instance, logs.models.Detector):
+    if isinstance(instance, detectors.models.Detector):
       self.devices.detectors.append(instance)
     
-    if isinstance(instance, logs.models.Zone):
+    if isinstance(instance, zones.models.Zone):
       self.devices.zones.append(instance)
 
     if isinstance(instance, drones.models.Drone):
@@ -130,17 +130,13 @@ class Group(ASDTDocument):
     Removes item from list
     """
 
-    inhibitors = importlib.import_module('inhibitors')
-    logs = importlib.import_module('logs')
-    drones = importlib.import_module('drones')
-
     if isinstance(instance, inhibitors.models.Inhibitor):
       self.devices.inhibitors.remove(instance)
 
-    if isinstance(instance, logs.models.Detector):
+    if isinstance(instance, detectors.models.Detector):
       self.devices.detectors.remove(instance)
     
-    if isinstance(instance, logs.models.Zone):
+    if isinstance(instance, zones.models.Zone):
       self.devices.zones.remove(instance)
 
     if isinstance(instance, drones.models.Drone):
