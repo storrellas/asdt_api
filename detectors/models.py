@@ -13,8 +13,6 @@ from mongoengine import *
 from asdt_api.models import ASDTDocument, Location
 from user.models import Group
 
-
-
 class DetectorLocation(EmbeddedDocument):
   lat = FloatField(default=41.778443)
   lon = FloatField(default=1.890383)

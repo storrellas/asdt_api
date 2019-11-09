@@ -233,19 +233,27 @@ class GroupViewset(viewsets.ViewSet):
 
     @action(detail=True, methods=['get'], url_path='drones')
     def drones(self, request, pk=None):
-      return self.get_devices(request, (lambda group: [item.fetch().as_dict() for item in group.devices.friendDrones] ), pk )
+      return self.get_devices(request, 
+                  (lambda group: [item.fetch().as_dict() for item in group.devices.friendDrones] ), 
+                  pk )
 
     @action(detail=True, methods=['get'], url_path='devices/detectors')
     def detectors(self, request, pk=None):
-      return self.get_devices(request, (lambda group: [item.fetch().as_dict() for item in group.devices.detectors] ), pk )
+      return self.get_devices(request, 
+                  (lambda group: [item.fetch().as_dict() for item in group.devices.detectors] ), 
+                  pk )
 
     @action(detail=True, methods=['get'], url_path='devices/inhibitors')
     def inhibitors(self, request, pk=None):
-      return self.get_devices(request, (lambda group: [item.fetch().as_dict() for item in group.devices.inhibitors] ), pk )
+      return self.get_devices(request, 
+                  (lambda group: [item.fetch().as_dict() for item in group.devices.inhibitors] ), 
+                  pk )
 
     @action(detail=True, methods=['get'], url_path='devices/zones')
     def zones(self, request, pk=None):
-      return self.get_devices(request, (lambda group: [item.fetch().as_dict() for item in group.devices.zones] ), pk )
+      return self.get_devices(request, 
+                  (lambda group: [item.fetch().as_dict() for item in group.devices.zones] ), 
+                  pk )
 
 
     # @action(detail=True, methods=['get'], url_path='drones')
