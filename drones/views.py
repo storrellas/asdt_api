@@ -16,6 +16,7 @@ from rest_framework.permissions import IsAuthenticated
 
 # Project imports
 from asdt_api.authentication import ASDTAuthentication
+from asdt_api.views import DeviceViewset
 from bson.objectid import ObjectId
 from .models import *
 
@@ -37,6 +38,39 @@ class DroneModelView(APIView):
         } 
         return Response(data)
 
+
+class DroneViewset(DeviceViewset):
+    authentication_classes = [ASDTAuthentication]
+    permission_classes = (IsAuthenticated,)
+
+    model = Drone
+
+    def get_queryset(self, request):
+      """
+      Used for list method
+      """
+      id_list = []
+      for item in self.devices.friendDrones:
+        id_list.append(str(item.fetch().id) )
+      return id_list
+
+    def create(self, request):
+      return Response({"success": True, "data": "create"})
+
+    def list(self, request):
+      """
+      Retrieve all inhibitors 
+      """
+      return super().list(request)
+
+    def retrieve(self, request, pk=None):
+      return Response({"success": True, "data": "retrieve"})
+
+    def update(self, request, pk=None):
+      return Response({"success": True, "data": "update"})
+
+    def delete(self, request, pk=None):
+      return Response({"success": True, "data": "delete"})
 
 # class DroneModelImgView(APIView):
 #     authentication_classes = [ASDTAuthentication]

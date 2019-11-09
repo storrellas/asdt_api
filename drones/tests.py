@@ -14,7 +14,7 @@ from mongo_dummy import MongoDummy
 
 logger = utils.get_logger()
 
-class DroneTestCase(APITestCase):
+class TestCase(APITestCase):
 
 
   @classmethod
@@ -39,6 +39,16 @@ class DroneTestCase(APITestCase):
     """
     pass
 
+  def authenticate(self, user, password):
+    # Get token
+    response = self.client.post('/api/v2/user/authenticate/', 
+                            { "email": user, "password": password })
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    access_token = response_json['data']['token']
+    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+
+
   def test_get_model(self):
     # Get token
     response = self.client.post('/api/v2/user/authenticate/', 
@@ -53,4 +63,16 @@ class DroneTestCase(APITestCase):
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(len(response_json['data']) > 0)
+
+  def test_list(self):
+    
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
+
+    # Get All
+    response = self.client.get('/api/v2/drones/')
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    print(response_json)
+    self.assertTrue(response_json['success'])
 

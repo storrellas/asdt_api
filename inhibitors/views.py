@@ -18,15 +18,29 @@ from rest_framework.decorators import action, permission_classes
 from asdt_api.utils import get_logger
 from asdt_api.authentication import *
 from asdt_api.models import Location
+from asdt_api.views import DeviceViewset
 
 from .models import *
 from groups.models import *
 
 logger = get_logger()
 
-class InhibitorViewset(viewsets.ViewSet):
+
+
+class InhibitorViewset(DeviceViewset):
     authentication_classes = [ASDTAuthentication]
     permission_classes = (IsAuthenticated,)
+
+    model = Inhibitor
+
+    def get_queryset(self, request):
+      """
+      Used for list method
+      """
+      id_list = []
+      for item in self.devices.inhibitors:
+        id_list.append(str(item.fetch().id) )
+      return id_list
 
     def create(self, request):
       return Response({"success": True, "data": "create"})
@@ -35,23 +49,7 @@ class InhibitorViewset(viewsets.ViewSet):
       """
       Retrieve all inhibitors 
       """
-      try:
-        # Get ids
-        devices = request.user.group.get_full_devices()
-        id_list = []
-        for item in devices.inhibitors:
-          id_list.append(str(item.fetch().id) )
-        
-        # Generate queryset
-        queryset = Inhibitor.objects.filter(id__in=id_list)
-        inhibitor_dict = []
-        for inhibitor in queryset:
-          inhibitor_dict.append(inhibitor.as_dict())
-
-        return Response({'success': True, 'data': inhibitor_dict})
-      except Exception as e:
-        print(e)
-        return Response({"success": False, "error": str(e)})
+      return super().list(request)
 
     def retrieve(self, request, pk=None):
       return Response({"success": True, "data": "retrieve"})
