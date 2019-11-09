@@ -43,17 +43,21 @@ class GroupTestCase(APITestCase):
     """
     pass
 
-  def test_get(self):
-    
-    group = Group.objects.get(name='ADMIN_ASDT')
-
+  def authenticate(self, user, password):
     # Get token
     response = self.client.post('/api/v2/user/authenticate/', 
-                            { "email": "admin@asdt.eu", "password": "asdt2019" })
+                            { "email": user, "password": password })
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     access_token = response_json['data']['token']
     self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+
+  def test_get(self):
+    
+    group = Group.objects.get(name='ADMIN_ASDT')
+
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Add groups
     response = self.client.get('/api/v2/groups/{}/'.format(group.id))
@@ -65,13 +69,8 @@ class GroupTestCase(APITestCase):
     
     group = Group.objects.get(name='VIEWER_ASDT')
 
-    # Get token
-    response = self.client.post('/api/v2/user/authenticate/', 
-                            { "email": "admin@asdt.eu", "password": "asdt2019" })
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    access_token = response_json['data']['token']
-    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Add groups
     response = self.client.get('/api/v2/groups/{}/'.format(group.id))
@@ -81,13 +80,8 @@ class GroupTestCase(APITestCase):
 
   def test_get_all_admin(self):
     
-    # Get token
-    response = self.client.post('/api/v2/user/authenticate/', 
-                                { "email": "admin@asdt.eu", "password": "asdt2019" })
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    access_token = response_json['data']['token']
-    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Get All
     response = self.client.get('/api/v2/groups/all/')
@@ -98,13 +92,8 @@ class GroupTestCase(APITestCase):
 
   def test_get_all_viewer(self):
     
-    # Get token
-    response = self.client.post('/api/v2/user/authenticate/', 
-                                { "email": "viewer@asdt.eu", "password": "asdt2019" })
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    access_token = response_json['data']['token']
-    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+    # Get Token
+    self.authenticate("viewer@asdt.eu", "asdt2019")
 
     # Get All
     response = self.client.get('/api/v2/groups/all/')
@@ -115,13 +104,8 @@ class GroupTestCase(APITestCase):
 
   def test_create(self):
     
-    # Get token
-    response = self.client.post('/api/v2/user/authenticate/', 
-                            { "email": "admin@asdt.eu", "password": "asdt2019" })
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    access_token = response_json['data']['token']
-    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Create group
     body = { 'name': 'TEST_GROUP' }
@@ -142,14 +126,9 @@ class GroupTestCase(APITestCase):
     group.delete()
 
   def test_create_group_to_add(self):
-    
-    # Get token
-    response = self.client.post('/api/v2/user/authenticate/', 
-                            { "email": "admin@asdt.eu", "password": "asdt2019" })
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    access_token = response_json['data']['token']
-    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Add user to group
     group_to_add = Group.objects.get(name='ADMIN_CHILD_ASDT')
@@ -174,14 +153,8 @@ class GroupTestCase(APITestCase):
     # Target group to which add users
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')
 
-
-    # Get token
-    response = self.client.post('/api/v2/user/authenticate/', 
-                            { "email": "admin@asdt.eu", "password": "asdt2019" })
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    access_token = response_json['data']['token']
-    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Update group
     body = { 'name': 'ADMIN_CHILD_ASDT_UPDATED' }
@@ -203,13 +176,8 @@ class GroupTestCase(APITestCase):
     former_group_parent = Group.objects.get(name='ADMIN_ASDT')
     group_parent = Group.objects.get(name='ADMIN_CHILD2_ASDT')
 
-    # Get token
-    response = self.client.post('/api/v2/user/authenticate/', 
-                            { "email": "admin@asdt.eu", "password": "asdt2019" })
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    access_token = response_json['data']['token']
-    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Update group
     body = { 'name': 'ADMIN_CHILD_ASDT_UPDATED', 'newParent': group_parent.id }
@@ -251,14 +219,9 @@ class GroupTestCase(APITestCase):
 
     admin_group.childs.append(delete_group)
     admin_group.save()
-
-    # Get token
-    response = self.client.post('/api/v2/user/authenticate/', 
-                            { "email": "admin@asdt.eu", "password": "asdt2019" })
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    access_token = response_json['data']['token']
-    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+    
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Delete Group
     response = self.client.delete('/api/v2/groups/{}/'.format(delete_group.id))
@@ -271,7 +234,7 @@ class GroupTestCase(APITestCase):
     self.assertTrue(user.group == None)
 
 
-  
+
 
 
 
