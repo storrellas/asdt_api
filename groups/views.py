@@ -117,46 +117,6 @@ class GroupUserView(APIView):
 
 class GroupDevicesView(APIView):
 
-    def append_element(self, group, instance):
-      """
-      Appends item from list
-      """
-      if isinstance(instance,  Inhibitor):
-        group.devices.inhibitors.append(instance)
-
-      if isinstance(instance, Detector):
-        group.devices.detectors.append(instance)
-      
-      if isinstance(instance, Zone):
-        group.devices.zones.append(instance)
-
-      if isinstance(instance, Drone):
-        group.devices.friendDrones.append(instance)
-
-      if isinstance(instance, User):
-        group.users.append(instance)
-      group.save()
-
-    def remove_element(self, group, instance):
-      """
-      Removes item from list
-      """
-      if isinstance(instance, Inhibitor):
-        group.devices.inhibitors.remove(instance)
-
-      if isinstance(instance, Detector):
-        group.devices.detectors.remove(instance)
-      
-      if isinstance(instance, Zone):
-        group.devices.zones.remove(instance)
-
-      if isinstance(instance, Drone):
-        group.devices.friendDrones.remove(instance)
-
-      if isinstance(instance, User):
-        group.users.remove(instance)
-      group.save()
-
     def post(self, request, *args, **kwargs):
       try:
         # TODO: Put all this logic into a function
@@ -172,7 +132,7 @@ class GroupDevicesView(APIView):
         # Add device to group        
         instance.groups.append(group)
         instance.save()
-        self.append_element(group, instance)
+        group.append_device(instance)
         group.save()
 
         return Response({"success": True, "data": str(instance.id)})
@@ -196,7 +156,7 @@ class GroupDevicesView(APIView):
         # Add inhibitor to group        
         instance.groups.remove(group)
         instance.save()
-        self.remove_element(group, instance)
+        group.remove_device(instance)
         group.save()
 
         return Response({"success": True, "data": str(instance.id)})

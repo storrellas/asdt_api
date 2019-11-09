@@ -1,3 +1,5 @@
+import importlib
+
 from django.db import models
 
 from asdt_api.models import ASDTDocument, Location
@@ -99,6 +101,51 @@ class Group(ASDTDocument):
     for child in self.childs:
       child.delete_recursive()
     self.delete()
+
+  def append_device(self, instance):
+    """
+    Appends item from list
+    """
+    
+    inhibitors = importlib.import_module('inhibitors')
+    logs = importlib.import_module('logs')
+    drones = importlib.import_module('drones')
+
+    if isinstance(instance, inhibitors.models.Inhibitor):
+      self.devices.inhibitors.append(instance)
+
+    if isinstance(instance, logs.models.Detector):
+      self.devices.detectors.append(instance)
+    
+    if isinstance(instance, logs.models.Zone):
+      self.devices.zones.append(instance)
+
+    if isinstance(instance, drones.models.Drone):
+      self.devices.friendDrones.append(instance)
+
+    self.save()
+
+  def remove_device(self, instance):
+    """
+    Removes item from list
+    """
+
+    inhibitors = importlib.import_module('inhibitors')
+    logs = importlib.import_module('logs')
+    drones = importlib.import_module('drones')
+
+    if isinstance(instance, inhibitors.models.Inhibitor):
+      self.devices.inhibitors.remove(instance)
+
+    if isinstance(instance, logs.models.Detector):
+      self.devices.detectors.remove(instance)
+    
+    if isinstance(instance, logs.models.Zone):
+      self.devices.zones.remove(instance)
+
+    if isinstance(instance, drones.models.Drone):
+      self.devices.friendDrones.remove(instance)
+    self.save()
 
   def as_dict(self):
     item = {}
