@@ -58,9 +58,36 @@ class TestCase(APITestCase):
     # Get Token
     self.authenticate("admin@asdt.eu", "asdt2019")
 
-    # Get All
+    # Get list
     response = self.client.get('/api/v2/detectors/')
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
-    print(response_json)
     self.assertTrue(response_json['success'])
+
+  def test_retrieve(self):
+    
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
+
+    # Retrieve detector
+    detector = Detector.objects.get(name='detector2')
+
+    # Get All
+    response = self.client.get('/api/v2/detectors/{}/'.format(detector.id))
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
+
+  def test_retrieve_not_allowed(self):
+    
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
+
+    # Retrieve detector
+    detector = Detector.objects.get(name='detector1')
+
+    # Get single
+    response = self.client.get('/api/v2/detectors/{}/'.format(detector.id))
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertFalse(response_json['success'])

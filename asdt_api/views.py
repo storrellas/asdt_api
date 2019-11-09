@@ -58,3 +58,24 @@ class DeviceViewset(viewsets.ViewSet):
         print(e)
         return Response({"success": False, "error": str(e)})
 
+    def retrieve(self, request, pk=None):
+      #return Response({"success": True, "data": "retrieve"})
+      try:
+        # Get ids
+        self.devices = request.user.group.get_full_devices()
+
+        # Get queryset
+        id_list = self.get_id_list_allowed(request)
+
+        # check if allowed
+        if pk not in id_list:
+          raise APIException('NOT_ALLOWED')
+
+        # Generate queryset
+        item = self.model.objects.get(id=pk)
+
+        return Response({'success': True, 'data': item.as_dict() })
+      except Exception as e:
+        print(e)
+        return Response({"success": False, "error": str(e)})
+

@@ -62,5 +62,18 @@ class TestCase(APITestCase):
     response = self.client.get('/api/v2/zones/')
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
-    print(response_json)
+    self.assertTrue(response_json['success'])
+
+  def test_retrieve(self):
+    
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
+
+    # Retrieve detector
+    zone = Zone.objects.get(name='zone1')
+
+    # Get single
+    response = self.client.get('/api/v2/drones/{}/'.format(zone.id))
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])

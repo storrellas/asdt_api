@@ -62,9 +62,21 @@ class TestCase(APITestCase):
     response = self.client.get('/api/v2/inhibitors/')
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
-    print(response_json)
     self.assertTrue(response_json['success'])
 
+  def test_retrieve(self):
+    
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
+
+    # Retrieve detector
+    inhibitor = Inhibitor.objects.get(name='inhibitor1')
+
+    # Get All
+    response = self.client.get('/api/v2/inhibitors/{}/'.format(inhibitor.id))
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
 
 
 

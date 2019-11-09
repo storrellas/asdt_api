@@ -11,6 +11,7 @@ from unittest.mock import patch
 # Projet imports
 from asdt_api import utils
 from mongo_dummy import MongoDummy
+from .models import *
 
 logger = utils.get_logger()
 
@@ -73,6 +74,19 @@ class TestCase(APITestCase):
     response = self.client.get('/api/v2/drones/')
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
-    print(response_json)
+    self.assertTrue(response_json['success'])
+
+  def test_retrieve(self):
+    
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
+
+    # Retrieve detector
+    drone = Drone.objects.get(sn='1')
+
+    # Get single
+    response = self.client.get('/api/v2/drones/{}/'.format(drone.id))
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
 
