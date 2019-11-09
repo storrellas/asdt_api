@@ -103,10 +103,12 @@ class TestCase(APITestCase):
     body = {
       'name' : 'myname',
       'password': 'mypassword',
+      'location' : {'lat': 12.3, 'lon': 3.2, 'height': 5.4 },
       'groups': ['123', '3456']
     }
-    response = self.client.get('/api/v2/detectors/', body)
+    print(body)
+    response = self.client.post('/api/v2/detectors/', body, format='json')
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     print(response_json)
-    self.assertFalse(response_json['success'])
+    self.assertTrue(response_json['success'])

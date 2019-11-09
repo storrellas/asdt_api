@@ -33,7 +33,7 @@ class LocationUserSerializer(serializers.Serializer):
 class DetectorSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=200)
     password = serializers.CharField(max_length=72)
-    #location = LocationUserSerializer()
+    location = LocationUserSerializer()
     groups = serializers.ListField(child=serializers.CharField())
 
 
@@ -56,7 +56,7 @@ class DetectorViewset(DeviceViewset):
       #print("Creating ...")
       #return Response({"success": True, "data": "create"})
       try:
-        if request.user.role != 'ADMIN' or request.user.hasGroup == True:
+        if request.user.role != 'ADMIN':
           raise APIException("NOT_ALLOWED")
 
         
