@@ -87,7 +87,26 @@ class TestCase(APITestCase):
     detector = Detector.objects.get(name='detector1')
 
     # Get single
-    response = self.client.get('/api/v2/detectors/{}/'.format(detector.id))
+    response = self.client.get('/api/v2/detectors/'.format(detector.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
+    self.assertFalse(response_json['success'])
+
+  def test_create(self):
+    
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
+
+
+
+    # Get single
+    body = {
+      'name' : 'myname',
+      'password': 'mypassword',
+      'groups': ['123', '3456']
+    }
+    response = self.client.get('/api/v2/detectors/', body)
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    print(response_json)
     self.assertFalse(response_json['success'])

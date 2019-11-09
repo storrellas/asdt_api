@@ -59,7 +59,6 @@ class DeviceViewset(viewsets.ViewSet):
         return Response({"success": False, "error": str(e)})
 
     def retrieve(self, request, pk=None):
-      #return Response({"success": True, "data": "retrieve"})
       try:
         # Get ids
         self.devices = request.user.group.get_full_devices()

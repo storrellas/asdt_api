@@ -25,6 +25,18 @@ from groups.models import *
 
 logger = get_logger()
 
+class LocationUserSerializer(serializers.Serializer):
+    lat = serializers.FloatField()
+    lon = serializers.FloatField()
+    height = serializers.FloatField()
+
+class DetectorSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=200)
+    password = serializers.CharField(max_length=72)
+    #location = LocationUserSerializer()
+    groups = serializers.ListField(child=serializers.CharField())
+
+
 class DetectorViewset(DeviceViewset):
     authentication_classes = [ASDTAuthentication]
     permission_classes = (IsAuthenticated,)
@@ -41,7 +53,24 @@ class DetectorViewset(DeviceViewset):
       return id_list
 
     def create(self, request):
-      return Response({"success": True, "data": "create"})
+      #print("Creating ...")
+      #return Response({"success": True, "data": "create"})
+      try:
+        if request.user.role != 'ADMIN' or request.user.hasGroup == True:
+          raise APIException("NOT_ALLOWED")
+
+        
+        serializer = DetectorSerializer(data=request.data)
+        if serializer.is_valid() == False:
+          print({'message': serializer.errors})
+          raise APIException(serializer.errors)
+
+        print("FDKFLDSJFÑDSLKJ", serializer.validated_data)
+
+        return Response({'success': True, 'data': '' })
+      except Exception as e:
+        print(e)
+        return Response({"success": False, "error": str(e)})
 
     # def list(self, request):
     #   """
