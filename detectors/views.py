@@ -55,8 +55,8 @@ class DetectorViewset(DeviceViewset):
     #   """
     #   return super().retrieve(request, pk)
 
-    def update(self, request, pk=None):
-      return Response({"success": True, "data": "update"})
+    # def update(self, request, pk=None):
+    #   return Response({"success": True, "data": "update"})
 
-    def delete(self, request, pk=None):
-      return Response({"success": True, "data": "delete"})
+    # def delete(self, request, pk=None):
+    #   return Response({"success": True, "data": "delete"})

@@ -43,17 +43,17 @@ class ZoneViewset(DeviceViewset):
     def create(self, request):
       return Response({"success": True, "data": "create"})
 
-    def list(self, request):
-      """
-      Retrieve all inhibitors 
-      """
-      return super().list(request)
+    # def list(self, request):
+    #   """
+    #   Retrieve all inhibitors 
+    #   """
+    #   return super().list(request)
 
-    def retrieve(self, request, pk=None):
-      return Response({"success": True, "data": "retrieve"})
+    # def retrieve(self, request, pk=None):
+    #   return super().retrieve(request, pk)
 
-    def update(self, request, pk=None):
-      return Response({"success": True, "data": "update"})
+    # def update(self, request, pk=None):
+    #   return Response({"success": True, "data": "update"})
 
-    def delete(self, request, pk=None):
-      return Response({"success": True, "data": "delete"})
+    # def delete(self, request, pk=None):
+    #   return Response({"success": True, "data": "delete"})

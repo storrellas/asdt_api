@@ -73,7 +73,7 @@ class TestCase(APITestCase):
     zone = Zone.objects.get(name='zone1')
 
     # Get single
-    response = self.client.get('/api/v2/drones/{}/'.format(zone.id))
+    response = self.client.get('/api/v2/zones/{}/'.format(zone.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
