@@ -30,3 +30,14 @@ class Drone(ASDTDocument):
   hide = BooleanField(default=False)
   groups = ListField(ReferenceField(Group, reverse_delete_rule = NULLIFY))
 
+  def as_dict(self):
+    item = {}
+    item['id'] = str(self.id)
+    item['sn'] = self.sn
+    item['owner'] = self.owner
+    item['hide'] = self.hide
+    groups_dict = []
+    for group in self.groups:
+      groups_dict.append(str(group.id))
+    item['groups'] = groups_dict
+    return item

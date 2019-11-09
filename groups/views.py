@@ -196,19 +196,71 @@ class GroupView(viewsets.ViewSet):
     
     @action(detail=True, methods=['get'], url_path='drones')
     def drones(self, request, sport_id = None, pk=None):
-      return Response({"success": True, "data": "drones"})
+      try:
+        group = Group.objects.get(id=pk)
+        if request.user.is_allowed_group(group) == False:
+          return Response({"success": False, "error": "NOT_ALLOWED"})
+
+        # Generate data
+        data = []
+        for drone in group.devices.friendDrones:
+          data.append(drone.fetch().as_dict())
+
+        return Response({"success": True, "data": data})
+      except Exception as e:
+        print(e)
+        return Response({"success": False, "error": "DOES_NOT_EXIST"})
 
     @action(detail=True, methods=['get'], url_path='devices/detectors')
     def detectors(self, request, sport_id = None, pk=None):
-      return Response({"success": True, "data": "detectors"})
+      try:
+        group = Group.objects.get(id=pk)
+        if request.user.is_allowed_group(group) == False:
+          return Response({"success": False, "error": "NOT_ALLOWED"})
+
+        # Generate data
+        data = []
+        for detector in group.devices.detectors:
+          data.append({'detectors': 'sergi'})
+
+        return Response({"success": True, "data": data})
+      except Exception as e:
+        print(e)
+        return Response({"success": False, "error": "DOES_NOT_EXIST"})
 
     @action(detail=True, methods=['get'], url_path='devices/inhibitors')
     def inhibitors(self, request, sport_id = None, pk=None):
-      return Response({"success": True, "data": "inhibitors"})
+      try:
+        group = Group.objects.get(id=pk)
+        if request.user.is_allowed_group(group) == False:
+          return Response({"success": False, "error": "NOT_ALLOWED"})
+
+        # Generate data
+        data = []
+        for detector in group.devices.inhibitors:
+          data.append({'inhibitors': 'sergi'})
+
+        return Response({"success": True, "data": data})
+      except Exception as e:
+        print(e)
+        return Response({"success": False, "error": "DOES_NOT_EXIST"})
 
     @action(detail=True, methods=['get'], url_path='devices/zones')
     def zones(self, request, sport_id = None, pk=None):
-      return Response({"success": True, "data": "zones"})
+      try:
+        group = Group.objects.get(id=pk)
+        if request.user.is_allowed_group(group) == False:
+          return Response({"success": False, "error": "NOT_ALLOWED"})
+
+        # Generate data
+        data = []
+        for detector in group.devices.zones:
+          data.append({'zones': 'sergi'})
+
+        return Response({"success": True, "data": data})
+      except Exception as e:
+        print(e)
+        return Response({"success": False, "error": "DOES_NOT_EXIST"})
 
 
 class GroupAllView(APIView):
