@@ -23,6 +23,7 @@ from rest_framework.views import APIView
 from rest_framework import authentication
 from rest_framework import exceptions
 from rest_framework.permissions import IsAuthenticated
+from rest_framework import serializers
 
 # Project imports
 from asdt_api.utils import get_logger
@@ -30,11 +31,17 @@ from asdt_api.authentication import *
 from asdt_api.models import Location
 
 from .models import *
-from .serializers import *
 
 logger = get_logger()
 
-     
+class UserSerializer(serializers.Serializer):
+    email = serializers.CharField(max_length=200, required=False)
+    password = serializers.CharField(max_length=72, required=False)
+    name = serializers.CharField(max_length=200, required=False)
+    role = serializers.ChoiceField(choices=['MASTER', 'ADMIN', 'EMPOWERED', 'VIEWER'], required=False)
+    hasGroup = serializers.BooleanField(required=False)
+    group = serializers.CharField(max_length=200, required=False)
+
 class UserAuthenticateView(APIView):
 
     def post(self, request):
