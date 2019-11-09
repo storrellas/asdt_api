@@ -99,6 +99,32 @@ class User(ASDTDocument):
     cond =  (self.group == group or self.group.is_parent_of(group) )
     return True if cond else False
     
+  def as_dict(self):
+    item = {}
+    item['id'] = str(self.id)
+    item['name'] = self.name
+    item['email'] = self.email
+    item['role'] = self.role
+    item['createdAt'] = self.createdAt.isoformat()
+    item['updatedAt'] = self.updatedAt.isoformat()
+    item['hasGroup'] = self.hasGroup
+    item['group'] = str(self.group)    
+    zone_dict = []
+    for zone in self.displayOptions.zone:
+      zone_dict.append(zone)
+    cicleZone_dict = []      
+    for circleZone in self.displayOptions.circleZone:
+      cicleZone_dict.append({
+        'id': str(circleZone.id), 
+        'center': {'latitude':circleZone.center.latitude, 'longitude':circleZone.center.longitude},
+        'radius': circleZone.radius, 'color': circleZone.color,
+        'opacity': circleZone.opacity, 'droneID': circleZone.droneID,
+        'visible': circleZone.visible, 'active': circleZone.active
+      })
+    item['displayOptions'] = { 'zone': zone_dict, 'circleZone': cicleZone_dict }
+
+    return item
+
 
 
     

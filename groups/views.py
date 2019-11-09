@@ -162,27 +162,58 @@ class GroupView(viewsets.ViewSet):
 
     @action(detail=True, methods=['get'], url_path='users')
     def users(self, request, sport_id = None, pk=None):
-      return Response({"success": True, "data": ""})
+      try:
+        print("MyTest ----->")
+        group = Group.objects.get(id=pk)
+        if request.user.is_allowed_group(group) == False:
+          return Response({"success": False, "error": "NOT_ALLOWED"})
+
+        print("MyTest 123456 ----->")
+
+        # Generate data
+        data = []
+        for user in group.users:
+           data.append(user.fetch().as_dict())
+
+        print("MyTest 6789 ----->")
+
+        return Response({"success": True, "data": data})
+      except Exception as e:
+        print(str(e))
+        return Response({"success": False, "error": "DOES_NOT_EXIST"})
 
     @action(detail=True, methods=['get'], url_path='groups')
     def groups(self, request, sport_id = None, pk=None):
-      return Response({"success": True, "data": ""})
+      try:
+        group = Group.objects.get(id=pk)
+        if request.user.is_allowed_group(group) == False:
+          return Response({"success": False, "error": "NOT_ALLOWED"})
+
+        # Generate data
+        data = []
+        for group in group.childs:
+          data.append(group.as_dict())
+
+        return Response({"success": True, "data": data})
+      except Exception as e:
+        print(e)
+        return Response({"success": False, "error": "DOES_NOT_EXIST"})
     
     @action(detail=True, methods=['get'], url_path='drones')
     def drones(self, request, sport_id = None, pk=None):
-      return Response({"success": True, "data": ""})
+      return Response({"success": True, "data": "drones"})
 
     @action(detail=True, methods=['get'], url_path='devices/detectors')
     def detectors(self, request, sport_id = None, pk=None):
-      return Response({"success": True, "data": ""})
+      return Response({"success": True, "data": "detectors"})
 
     @action(detail=True, methods=['get'], url_path='devices/inhibitors')
     def inhibitors(self, request, sport_id = None, pk=None):
-      return Response({"success": True, "data": ""})
+      return Response({"success": True, "data": "inhibitors"})
 
     @action(detail=True, methods=['get'], url_path='devices/zones')
     def zones(self, request, sport_id = None, pk=None):
-      return Response({"success": True, "data": ""})
+      return Response({"success": True, "data": "zones"})
 
 
 class GroupAllView(APIView):
