@@ -31,9 +31,9 @@ class ZoneViewset(DeviceViewset):
 
     model = Zone
 
-    def get_queryset(self, request):
+    def get_id_list_allowed(self, request):
       """
-      Used for list method
+      Returns all ids allowed for current user
       """
       id_list = []
       for item in self.devices.zones:

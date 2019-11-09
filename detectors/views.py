@@ -31,9 +31,9 @@ class DetectorViewset(DeviceViewset):
 
     model = Detector
 
-    def get_queryset(self, request):
+    def get_id_list_allowed(self, request):
       """
-      Used for list method
+      Returns all ids allowed for current user
       """
       id_list = []
       for item in self.devices.detectors:
@@ -51,6 +51,27 @@ class DetectorViewset(DeviceViewset):
 
     def retrieve(self, request, pk=None):
       return Response({"success": True, "data": "retrieve"})
+      # try:
+      #   # Get ids
+      #   self.devices = request.user.group.get_full_devices()
+
+      #   # Get queryset
+      #   id_list = self.get_queryset(request)
+
+      #   # check if allowed
+      #   if pk not in id_list:
+      #     raise APIException('NOT_ALLOWED')
+
+      #   # Generate queryset
+      #   item = self.model.objects.filter(id__in=id_list)
+      #   device_dict = []
+      #   for item in queryset:
+      #     device_dict.append(item.as_dict())
+
+      #   return Response({'success': True, 'data': device_dict})
+      # except Exception as e:
+      #   print(e)
+      #   return Response({"success": False, "error": str(e)})
 
     def update(self, request, pk=None):
       return Response({"success": True, "data": "update"})

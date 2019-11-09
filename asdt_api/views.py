@@ -30,8 +30,11 @@ class DeviceViewset(viewsets.ViewSet):
     model = None
     devices = None
 
-    def get_queryset(self, request):
-      pass
+    def get_id_list_allowed(self, request):
+      """
+      Returns all ids allowed for current user
+      """
+      return []
 
     def list(self, request):
       """
@@ -42,7 +45,7 @@ class DeviceViewset(viewsets.ViewSet):
         self.devices = request.user.group.get_full_devices()
 
         # Get queryset
-        id_list = self.get_queryset(request)
+        id_list = self.get_id_list_allowed(request)
         
         # Generate queryset
         queryset = self.model.objects.filter(id__in=id_list)
