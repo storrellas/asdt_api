@@ -237,8 +237,8 @@ class GroupView(viewsets.ViewSet):
 
         # Generate data
         data = []
-        for detector in group.devices.inhibitors:
-          data.append({'inhibitors': 'sergi'})
+        for inhbitor in group.devices.inhibitors:          
+          data.append(inhbitor.fetch().as_dict())
 
         return Response({"success": True, "data": data})
       except Exception as e:
@@ -254,8 +254,8 @@ class GroupView(viewsets.ViewSet):
 
         # Generate data
         data = []
-        for detector in group.devices.zones:
-          data.append({'zones': 'sergi'})
+        for zone in group.devices.zones:          
+          data.append(zone.fetch().as_dict())
 
         return Response({"success": True, "data": data})
       except Exception as e:

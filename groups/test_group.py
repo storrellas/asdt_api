@@ -243,7 +243,6 @@ class GroupTestCase(APITestCase):
     response = self.client.get('/api/v2/groups/{}/users/'.format(admin_group.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
-    print(response_json)
     self.assertTrue(response_json['success'])
 
   def test_get_group_groups(self):
@@ -256,7 +255,6 @@ class GroupTestCase(APITestCase):
     response = self.client.get('/api/v2/groups/{}/groups/'.format(admin_group.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
-    print(response_json)
     self.assertTrue(response_json['success'])
 
   def test_get_group_drones(self):
@@ -269,7 +267,6 @@ class GroupTestCase(APITestCase):
     response = self.client.get('/api/v2/groups/{}/drones/'.format(admin_group.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
-    print(response_json)
     self.assertTrue(response_json['success'])
 
   def test_get_group_detectors(self):
@@ -282,7 +279,6 @@ class GroupTestCase(APITestCase):
     response = self.client.get('/api/v2/groups/{}/devices/detectors/'.format(admin_group.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
-    print(response_json)
     self.assertTrue(response_json['success'])
 
   def test_get_group_inhibitors(self):
@@ -295,7 +291,6 @@ class GroupTestCase(APITestCase):
     response = self.client.get('/api/v2/groups/{}/devices/inhibitors/'.format(admin_group.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
-    print(response_json)
     self.assertTrue(response_json['success'])
 
   def test_get_group_zones(self):
@@ -308,7 +303,6 @@ class GroupTestCase(APITestCase):
     response = self.client.get('/api/v2/groups/{}/devices/zones/'.format(admin_group.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
-    print(response_json)
     self.assertTrue(response_json['success'])
 
 
