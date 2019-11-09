@@ -218,7 +218,7 @@ class GroupViewset(viewsets.ViewSet):
         if request.user.is_allowed_group(group) == False:
           return Response({"success": False, "error": "NOT_ALLOWED"})
         
-        # Generate data
+        # Generate data - Old version
         # data = []
         # for drone in group.devices.friendDrones:
         #   data.append(drone.fetch().as_dict())
