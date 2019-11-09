@@ -6,8 +6,8 @@ from django.urls import path
 from rest_framework import routers
 
 # Project imports
+from .views_devices import *
 from .views import *
-from .views_crud import *
 
 # Do not change the order as URL resolution is done in order
 router = routers.DefaultRouter()
