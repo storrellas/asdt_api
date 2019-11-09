@@ -41,7 +41,10 @@ INSTALLED_APPS = [
     'user',
     'groups',
     'logs',
-    'drones'
+    'drones',
+    'inhibitors',
+    'detectors',
+    'zones'
 ]
 
 ADMIN_ENABLED = False

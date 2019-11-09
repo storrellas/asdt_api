@@ -27,6 +27,9 @@ urlpatterns = [
     path(PREFIX + 'groups/', include('groups.urls')),
     path(PREFIX + 'logs/', include('logs.urls')),
     path(PREFIX + 'drones/', include('drones.urls')),
+    #path(PREFIX + 'detectors/', include('detectors.urls')),
+    path(PREFIX + 'inhibitors/', include('inhibitors.urls')),
+    #path(PREFIX + 'zones/', include('zones.urls')),
 ]
 urlpatterns += staticfiles_urlpatterns()
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

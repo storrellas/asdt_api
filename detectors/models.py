@@ -27,3 +27,19 @@ class Detector(ASDTDocument):
   password = StringField(required=True, default='')
   location = EmbeddedDocumentField(DetectorLocation)
   groups = ListField(ReferenceField(Group, reverse_delete_rule = NULLIFY))
+
+  def as_dict(self):
+    item = {}
+    item['id'] = str(self.id)
+    item['name'] = self.name  
+    item['location'] = {
+      'lat': self.location.lat, 
+      'lon': self.location.lon,
+      'height': self.location.height
+    }
+    groups_dict = []
+    for group in self.groups:
+      groups_dict.append(str(group.id))
+    item['groups'] = groups_dict
+    return item
+

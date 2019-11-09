@@ -11,7 +11,7 @@ from .views import *
 
 # Do not change the order as URL resolution is done in order
 router = routers.DefaultRouter()
-router.register(r'', GroupView, basename='user')
+router.register(r'', GroupViewset, basename='user')
 
 urlpatterns = [
     path('all/', GroupAllView.as_view()),
