@@ -11,6 +11,8 @@ from rest_framework import authentication
 from rest_framework import exceptions
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import serializers
+from rest_framework.exceptions import APIException
+from rest_framework.decorators import action, permission_classes
 
 # Project imports
 from asdt_api.utils import get_logger
@@ -158,7 +160,29 @@ class GroupView(viewsets.ViewSet):
         print(e)
         return Response({"success": False, "error": "DOES_NOT_EXIST"})
 
+    @action(detail=True, methods=['get'], url_path='users')
+    def users(self, request, sport_id = None, pk=None):
+      return Response({"success": True, "data": ""})
 
+    @action(detail=True, methods=['get'], url_path='groups')
+    def groups(self, request, sport_id = None, pk=None):
+      return Response({"success": True, "data": ""})
+    
+    @action(detail=True, methods=['get'], url_path='drones')
+    def drones(self, request, sport_id = None, pk=None):
+      return Response({"success": True, "data": ""})
+
+    @action(detail=True, methods=['get'], url_path='devices/detectors')
+    def detectors(self, request, sport_id = None, pk=None):
+      return Response({"success": True, "data": ""})
+
+    @action(detail=True, methods=['get'], url_path='devices/inhibitors')
+    def inhibitors(self, request, sport_id = None, pk=None):
+      return Response({"success": True, "data": ""})
+
+    @action(detail=True, methods=['get'], url_path='devices/zones')
+    def zones(self, request, sport_id = None, pk=None):
+      return Response({"success": True, "data": ""})
 
 
 class GroupAllView(APIView):
