@@ -42,19 +42,23 @@ class UserTestCase(APITestCase):
     """
     pass
 
+  def authenticate(self, user, password):
+    # Get token
+    response = self.client.post('/api/v2/user/authenticate/', 
+                            { "email": user, "password": password })
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    access_token = response_json['data']['token']
+    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+
   def test_get_token_admin(self):
     
     # Check not workin without login
     response = self.client.get('/api/v2/user/me/')
     self.assertTrue(response.status_code == HTTPStatus.FORBIDDEN)
 
-    # Get token
-    response = self.client.post('/api/v2/user/authenticate/', 
-                                { "email": "admin@asdt.eu", "password": "asdt2019" })
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    access_token = response_json['data']['token']
-    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Check user info
     response = self.client.get('/api/v2/user/me/')
@@ -75,13 +79,8 @@ class UserTestCase(APITestCase):
     response = self.client.get('/api/v2/user/me/')
     self.assertTrue(response.status_code == HTTPStatus.FORBIDDEN)
 
-    # Get token
-    response = self.client.post('/api/v2/user/authenticate/', 
-                                { "email": "viewer@asdt.eu", "password": "asdt2019" })
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    access_token = response_json['data']['token']
-    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+    # Get Token
+    self.authenticate("viewer@asdt.eu", "asdt2019")
 
     # Check user info
     response = self.client.get('/api/v2/user/me/')
@@ -99,13 +98,8 @@ class UserTestCase(APITestCase):
 
   def test_create_user(self):
     
-    # Get token
-    response = self.client.post('/api/v2/user/authenticate/', 
-                                { "email": "admin@asdt.eu", "password": "asdt2019" })
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    access_token = response_json['data']['token']
-    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Check not workin without login
     body = {
@@ -116,6 +110,7 @@ class UserTestCase(APITestCase):
       "hasGroup": False
     }
     response = self.client.post('/api/v2/user/', body)
+    response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
 
     # Get token
@@ -131,13 +126,8 @@ class UserTestCase(APITestCase):
 
   def test_create_user_group(self):
     
-    # Get token
-    response = self.client.post('/api/v2/user/authenticate/', 
-                                { "email": "admin@asdt.eu", "password": "asdt2019" })
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    access_token = response_json['data']['token']
-    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Add user to group
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')
@@ -178,13 +168,8 @@ class UserTestCase(APITestCase):
 
   def test_create_user_forbidden(self):
     
-    # Get token
-    response = self.client.post('/api/v2/user/authenticate/', 
-                                { "email": "viewer@asdt.eu", "password": "asdt2019" })
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    access_token = response_json['data']['token']
-    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+    # Get Token
+    self.authenticate("viewer@asdt.eu", "asdt2019")
 
     # Check not workin without login
     body = {
@@ -199,13 +184,8 @@ class UserTestCase(APITestCase):
 
   def test_create_user_group_not_allowed(self):
     
-    # Get token
-    response = self.client.post('/api/v2/user/authenticate/', 
-                                { "email": "admin@asdt.eu", "password": "asdt2019" })
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    access_token = response_json['data']['token']
-    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Add user to group
     group = Group.objects.get(name='VIEWER_ASDT')
@@ -227,13 +207,8 @@ class UserTestCase(APITestCase):
 
   def test_list_admin(self):
     
-    # Get token
-    response = self.client.post('/api/v2/user/authenticate/', 
-                                { "email": "admin@asdt.eu", "password": "asdt2019" })
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    access_token = response_json['data']['token']
-    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Get list of users
     response = self.client.get('/api/v2/user/')
@@ -244,13 +219,8 @@ class UserTestCase(APITestCase):
 
   def test_list_admin_child(self):
     
-    # Get token
-    response = self.client.post('/api/v2/user/authenticate/', 
-                                { "email": "admin_child@asdt.eu", "password": "asdt2019" })
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    access_token = response_json['data']['token']
-    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+    # Get Token
+    self.authenticate("admin_child@asdt.eu", "asdt2019")
 
     # Get list of users
     response = self.client.get('/api/v2/user/')
@@ -261,13 +231,8 @@ class UserTestCase(APITestCase):
 
   def test_retreive(self):
     
-    # Get token
-    response = self.client.post('/api/v2/user/authenticate/', 
-                                { "email": "admin@asdt.eu", "password": "asdt2019" })
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    access_token = response_json['data']['token']
-    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
 
     user = User.objects.get(email='admin_child@asdt.eu')
 
@@ -280,13 +245,8 @@ class UserTestCase(APITestCase):
 
   def test_update(self):
     
-    # Get token
-    response = self.client.post('/api/v2/user/authenticate/', 
-                                { "email": "admin@asdt.eu", "password": "asdt2019" })
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    access_token = response_json['data']['token']
-    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
 
     user = User.objects.get(email='admin_child@asdt.eu')
 
@@ -302,13 +262,8 @@ class UserTestCase(APITestCase):
 
   def test_delete(self):
     
-    # Get token
-    response = self.client.post('/api/v2/user/authenticate/', 
-                                { "email": "admin@asdt.eu", "password": "asdt2019" })
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    access_token = response_json['data']['token']
-    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Create custom user    
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')
