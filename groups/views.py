@@ -163,19 +163,14 @@ class GroupView(viewsets.ViewSet):
     @action(detail=True, methods=['get'], url_path='users')
     def users(self, request, sport_id = None, pk=None):
       try:
-        print("MyTest ----->")
         group = Group.objects.get(id=pk)
         if request.user.is_allowed_group(group) == False:
           return Response({"success": False, "error": "NOT_ALLOWED"})
-
-        print("MyTest 123456 ----->")
 
         # Generate data
         data = []
         for user in group.users:
            data.append(user.fetch().as_dict())
-
-        print("MyTest 6789 ----->")
 
         return Response({"success": True, "data": data})
       except Exception as e:
