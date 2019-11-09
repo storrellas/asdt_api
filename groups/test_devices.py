@@ -45,6 +45,15 @@ class GroupTestCase(APITestCase):
     """
     pass
 
+  def authenticate(self, user, password):
+    # Get token
+    response = self.client.post('/api/v2/user/authenticate/', 
+                            { "email": user, "password": password })
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    access_token = response_json['data']['token']
+    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+
   def test_add_user(self):
     
     # Create user with a group assigned
@@ -59,13 +68,8 @@ class GroupTestCase(APITestCase):
     # Target group to which add users
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')
 
-    # Get token
-    response = self.client.post('/api/v2/user/authenticate/', 
-                            { "email": "admin@asdt.eu", "password": "asdt2019" })
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    access_token = response_json['data']['token']
-    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Add user to group
     response = self.client.post('/api/v2/groups/{}/users/{}/'.format(group.id, user.id), {})
@@ -100,13 +104,8 @@ class GroupTestCase(APITestCase):
     user = User.objects.get(email='viewer@asdt.eu')
     group = Group.objects.get(name='VIEWER_ASDT')
 
-    # Get token
-    response = self.client.post('/api/v2/user/authenticate/', 
-                            { "email": "admin@asdt.eu", "password": "asdt2019" })
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    access_token = response_json['data']['token']
-    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Add groups
     response = self.client.post('/api/v2/groups/{}/users/{}/'.format(group.id, user.id), {})
@@ -119,13 +118,8 @@ class GroupTestCase(APITestCase):
     inhibitor = Inhibitor.objects.get(name='inhibitor4')
     group = Group.objects.get(name='ADMIN_ASDT')
 
-    # Get token
-    response = self.client.post('/api/v2/user/authenticate/', 
-                            { "email": "admin@asdt.eu", "password": "asdt2019" })
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    access_token = response_json['data']['token']
-    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Add inhibitor to group
     response = self.client.post('/api/v2/groups/{}/devices/inhibitors/{}/'.format(group.id, inhibitor.id), {})
@@ -156,13 +150,8 @@ class GroupTestCase(APITestCase):
     detector = Detector.objects.get(name='detector4')
     group = Group.objects.get(name='ADMIN_ASDT')
 
-    # Get token
-    response = self.client.post('/api/v2/user/authenticate/', 
-                            { "email": "admin@asdt.eu", "password": "asdt2019" })
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    access_token = response_json['data']['token']
-    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Add inhibitor to group
     response = self.client.post('/api/v2/groups/{}/devices/detectors/{}/'.format(group.id, detector.id), {})
