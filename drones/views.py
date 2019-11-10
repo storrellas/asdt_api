@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import authentication
 from rest_framework import exceptions
+from rest_framework import serializers
 from rest_framework.permissions import IsAuthenticated
 
 # Project imports
@@ -39,11 +40,17 @@ class DroneModelView(APIView):
         return Response(data)
 
 
+class DroneSerializer(serializers.Serializer):
+    sn = serializers.CharField(max_length=200, required=False)
+    owner = serializers.CharField(max_length=72, required=False)
+    hide = serializers.BooleanField(required=False)
+
 class DroneViewset(DeviceViewset):
     authentication_classes = [ASDTAuthentication]
     permission_classes = (IsAuthenticated,)
 
     model = Drone
+    serializer = DroneSerializer
 
     def get_id_list_allowed(self, request):
       """

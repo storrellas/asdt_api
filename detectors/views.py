@@ -31,9 +31,9 @@ class LocationUserSerializer(serializers.Serializer):
     height = serializers.FloatField()
 
 class DetectorSerializer(serializers.Serializer):
-    name = serializers.CharField(max_length=200)
-    password = serializers.CharField(max_length=72)
-    location = LocationUserSerializer()
+    name = serializers.CharField(max_length=200, required=False)
+    password = serializers.CharField(max_length=72, required=False)
+    location = LocationUserSerializer(required=False)
 
 class DetectorViewset(DeviceViewset):
     authentication_classes = [ASDTAuthentication]
