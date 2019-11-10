@@ -92,7 +92,7 @@ class TestCase(APITestCase):
     response_json = json.loads(response.content.decode())
     self.assertFalse(response_json['success'])
 
-  def test_create(self):
+  def test_create_update_delete(self):
     
     # Get Token
     self.authenticate("admin@asdt.eu", "asdt2019")
@@ -138,4 +138,15 @@ class TestCase(APITestCase):
     self.assertFalse( detector in group.devices.detectors )
     self.assertTrue( detector in group2.devices.detectors )
     self.assertTrue( group2 in detector.groups )
+
+    # Delete
+    response = self.client.delete('/api/v2/detectors/{}/'.format(detector.id), body, format='json')
+    self.assertTrue(response.status_code == HTTPStatus.OK)    
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
+
+    # Check properly created    
+    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
+    group2 = Group.objects.get(name='ADMIN_CHILD2_ASDT')
+    self.assertTrue( Detector.objects.filter( name='mynameupdated' ).count() == 0 )
 

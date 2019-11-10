@@ -143,5 +143,21 @@ class DetectorViewset(DeviceViewset):
         return Response({"success": False, "error": str(e)})
 
 
-    # def delete(self, request, pk=None):
-    #   return Response({"success": True, "data": "delete"})
+    def delete(self, request, pk=None):
+      try:
+        if request.user.role != 'ADMIN':
+          raise APIException("NOT_ALLOWED")
+
+        # Update object        
+        instance = self.model.objects.get(id=pk)
+
+        # Remove item from groups
+        for group in instance.groups:
+          group.remove_device(instance)
+
+        # Delete instance        
+        instance.delete()
+        return Response({'success': True, 'data': '' })
+      except Exception as e:
+        print(e)
+        return Response({"success": False, "error": str(e)})
