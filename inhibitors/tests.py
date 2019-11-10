@@ -106,25 +106,26 @@ class TestCase(APITestCase):
     self.assertTrue( group in inhibitor.groups )
 
 
-  #   # Update
-  #   body = {
-  #     'sn' : 'mysnupdated',
-  #     'owner': 'myowner',
-  #     'hide' : True,
-  #     'groups': [ str(group_2.id) ]
-  #   }
-  #   response = self.client.put('/api/v2/drones/{}/'.format(drone.id), body, format='json')
-  #   self.assertTrue(response.status_code == HTTPStatus.OK)    
-  #   response_json = json.loads(response.content.decode())
-  #   self.assertTrue(response_json['success'])
+    # Update
+    body = {
+      'name' : 'mynameupdated',
+      'password': 'mypassword',
+      'location' : {'lat': 12.3, 'lon': 3.2 },
+      'frequencies' : ['abc', 'cde'],
+      'groups': [ str(group.id) ]
+    }
+    response = self.client.put('/api/v2/drones/{}/'.format(drone.id), body, format='json')
+    self.assertTrue(response.status_code == HTTPStatus.OK)    
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
 
-  #   # Check properly created
-  #   drone = Drone.objects.get( sn='mysnupdated' )
-  #   group = Group.objects.get(name='ADMIN_CHILD_ASDT')
-  #   group2 = Group.objects.get(name='ADMIN_CHILD2_ASDT')
-  #   self.assertFalse( drone in group.devices.friendDrones )
-  #   self.assertTrue( drone in group2.devices.friendDrones )
-  #   self.assertTrue( group2 in drone.groups )
+    # Check properly created
+    inhibitor = Inhibitor.objects.get( name='mynameupdated' )
+    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
+    group2 = Group.objects.get(name='ADMIN_CHILD2_ASDT')
+    self.assertFalse( inhibitor in group.devices.inhibitors )
+    self.assertTrue( inhibitor in group2.devices.inhibitors )
+    self.assertTrue( group2 in inhibitor.groups )
 
   #   # Delete
   #   response = self.client.delete('/api/v2/drones/{}/'.format(drone.id), body, format='json')
