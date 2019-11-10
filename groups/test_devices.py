@@ -20,7 +20,7 @@ from detectors.models import Detector
 
 logger = utils.get_logger()
 
-class GroupTestCase(APITestCase):
+class TestCase(APITestCase):
 
 
   @classmethod
@@ -177,6 +177,53 @@ class GroupTestCase(APITestCase):
     self.assertFalse( detector in group.devices.detectors )
     self.assertFalse( group in inhibitor.groups )
 
+  def test_get_group_drones(self):
+    admin_group = Group.objects.get(name='ADMIN_ASDT')
+
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
+
+    # Request drones
+    response = self.client.get('/api/v2/groups/{}/drones/'.format(admin_group.id))
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
+
+  def test_get_group_detectors(self):
+    admin_group = Group.objects.get(name='ADMIN_ASDT')
+
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
+
+    # Request detectors
+    response = self.client.get('/api/v2/groups/{}/devices/detectors/'.format(admin_group.id))
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
+
+  def test_get_group_inhibitors(self):
+    admin_group = Group.objects.get(name='ADMIN_ASDT')
+
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
+
+    # Request inhibitors
+    response = self.client.get('/api/v2/groups/{}/devices/inhibitors/'.format(admin_group.id))
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
+
+  def test_get_group_zones(self):
+    admin_group = Group.objects.get(name='ADMIN_ASDT')
+
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
+
+    # Request zones
+    response = self.client.get('/api/v2/groups/{}/devices/zones/'.format(admin_group.id))
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
 
 
 
