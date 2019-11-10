@@ -280,22 +280,8 @@ class UserMeView(APIView):
     authentication_classes = [ASDTAuthentication]
     permission_classes = (IsAuthenticated,)
 
-
-    def get(self, request):
-        data = {
-          'success': True,
-          'data': {
-            'id': str(request.user.id),
-            'email': request.user.email,
-            'name': request.user.name,
-            'detectors' : [],
-            'inhibitors' : [],
-            'role' : request.user.role,
-          }
-        } 
-
-        
-        return Response(data)
+    def get(self, request):     
+        return Response({'success': True, 'data': request.user.as_dict()})
 
 class UserToolsView(APIView):
 
@@ -321,11 +307,7 @@ class UserToolsView(APIView):
     }
 
     def get(self, request):
-      data = {
-        'success': True,
-        'data': self.allowed_tools[ request.user.role ]
-      }
-      return Response(data)
+      return Response({'success': True, 'data': self.allowed_tools[ request.user.role ]})
 
 # class DisplayOptions(APIView):
 
