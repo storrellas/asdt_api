@@ -81,7 +81,11 @@ class UserSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=200, required=False)
     role = serializers.ChoiceField(choices=['MASTER', 'ADMIN', 'EMPOWERED', 'VIEWER'], required=False)
     hasGroup = serializers.BooleanField(required=False)
-    #group = serializers.CharField(max_length=200, required=False)
+
+class UserSerializerExtended(UserSerializer):
+    group = serializers.CharField(max_length=200, required=False)
+
+
 
 class UserViewset(viewsets.ViewSet):
     authentication_classes = [ASDTAuthentication]
@@ -135,7 +139,7 @@ class UserViewset(viewsets.ViewSet):
 
     def create(self, request):
       
-      serializer = UserSerializer(data=request.data)
+      serializer = UserSerializerExtended(data=request.data)
       if serializer.is_valid() == False:
         print({'message': serializer.errors})
         return Response({'success': False, 'data': 'DATABASE_ERRORS'})
@@ -150,7 +154,6 @@ class UserViewset(viewsets.ViewSet):
         try:
           group = Group.objects.get(id=data['group'])
         except Exception as e:
-          logger.info("mytest")
           print(str(e))
           return Response({"success": False, "error": "WRONG_PARAMTERS"})
 
