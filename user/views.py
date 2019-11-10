@@ -183,7 +183,7 @@ class UserViewset(viewsets.ViewSet):
         group.users.append(user)
         group.save()
 
-    return Response({'success': True, 'data': user.as_dict() } )
+      return Response({'success': True, 'data': user.as_dict() } )
 
       # # ObjectID to str
       # user_dict = user.to_mongo().to_dict()
