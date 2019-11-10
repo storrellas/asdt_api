@@ -194,24 +194,6 @@ class GroupViewset(viewsets.ViewSet):
         print(e)
         return Response({"success": False, "error": "DOES_NOT_EXIST"})
 
-    @action(detail=True, methods=['get'], url_path='users')
-    def users(self, request, sport_id = None, pk=None):
-      try:
-        group = Group.objects.get(id=pk)
-        if request.user.is_allowed_group(group) == False:
-          return Response({"success": False, "error": "NOT_ALLOWED"})
-
-        # Generate data
-        data = []
-        for user in group.users:
-           data.append(user.fetch().as_dict())
-
-        return Response({"success": True, "data": data})
-      except Exception as e:
-        print(str(e))
-        return Response({"success": False, "error": "DOES_NOT_EXIST"})
-
-    
     def get_devices(self, request, func, pk=None):
       try:
         group = Group.objects.get(id=pk)
