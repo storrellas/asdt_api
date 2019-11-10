@@ -81,7 +81,7 @@ class UserSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=200, required=False)
     role = serializers.ChoiceField(choices=['MASTER', 'ADMIN', 'EMPOWERED', 'VIEWER'], required=False)
     hasGroup = serializers.BooleanField(required=False)
-    group = serializers.CharField(max_length=200, required=False)
+    #group = serializers.CharField(max_length=200, required=False)
 
 class UserViewset(viewsets.ViewSet):
     authentication_classes = [ASDTAuthentication]
@@ -196,24 +196,21 @@ class UserViewset(viewsets.ViewSet):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
           data = serializer.validated_data
-          user.email = data['email'] if 'email' in data else user.email
-          user.name = data['name'] if 'name' in data else user.name
-          user.role = data['role'] if 'role' in data else user.role
+          user.update(**data)
+          # user.email = data['email'] if 'email' in data else user.email
+          # user.name = data['name'] if 'name' in data else user.name
+          # user.role = data['role'] if 'role' in data else user.role
           if 'password' in data:
             user.set_password(data['password'])
-          if 'group' in data:
-            if data['group'] == "0":
-              pass
-            else:            
-              target_group = Group.objects.get(id=data['group'])
-              if target_group == request.user.group or request.user.group.is_parent_of(target_group):
-                user.hasGroup = True
-                user.group = target_group
-                user.save()
+          if 'group' in request.data:       
+            group = Group.objects.get(id=data['group'])
+            if request.user.is_allowed_group(group):
+              user.hasGroup = True
+              user.group = group
 
-                # Append to group
-                target_group.users.append(user.id)
-                target_group.save()
+              # Append to group
+              group.users.append(user.id)
+              group.save()
           user.save()   
 
         # Generate response

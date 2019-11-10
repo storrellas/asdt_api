@@ -246,17 +246,18 @@ class TestCase(APITestCase):
     # Get Token
     self.authenticate("admin@asdt.eu", "asdt2019")
 
-    user = User.objects.get(email='admin_child@asdt.eu')
+    user = User.objects.create(email='sergi@asdt.eu', name='Josep')
+    user.set_password('asdt2019')
 
     # Update user
     body = {
-      "name": "Albert",
+      "email": "albert@asdt.eu",
     }
     response = self.client.put('/{}/user/{}/'.format(settings.PREFIX, user.id), body)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
-    self.assertTrue(response_json['data']['name'] == 'Albert')
+    self.assertTrue(response_json['data']['email'] == 'albert@asdt.eu')
 
   def test_delete(self):
     
