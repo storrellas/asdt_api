@@ -197,20 +197,20 @@ class UserViewset(viewsets.ViewSet):
         if serializer.is_valid():
           data = serializer.validated_data
           user.update(**data)
-          # user.email = data['email'] if 'email' in data else user.email
-          # user.name = data['name'] if 'name' in data else user.name
-          # user.role = data['role'] if 'role' in data else user.role
           if 'password' in data:
             user.set_password(data['password'])
-          if 'group' in request.data:       
-            group = Group.objects.get(id=data['group'])
+          if 'group' in request.data:    
+            group = Group.objects.get(id=request.data['group'])
             if request.user.is_allowed_group(group):
               user.hasGroup = True
               user.group = group
+              user.save()
 
               # Append to group
-              group.users.append(user.id)
+              group.users.append(user)
               group.save()
+            else:
+              raise APIException("NOT_ALLOWED")
           user.save()   
 
         # Generate response

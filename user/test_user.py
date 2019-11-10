@@ -241,23 +241,47 @@ class TestCase(APITestCase):
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
 
-  def test_update(self):
+  # def test_update(self):
     
-    # Get Token
-    self.authenticate("admin@asdt.eu", "asdt2019")
+  #   # Get Token
+  #   self.authenticate("admin@asdt.eu", "asdt2019")
 
-    user = User.objects.create(email='sergi@asdt.eu', name='Josep')
-    user.set_password('asdt2019')
 
-    # Update user
-    body = {
-      "email": "albert@asdt.eu",
-    }
-    response = self.client.put('/{}/user/{}/'.format(settings.PREFIX, user.id), body)
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
-    self.assertTrue(response_json['data']['email'] == 'albert@asdt.eu')
+  #   # Create custom user    
+  #   group = Group.objects.get(name='ADMIN_CHILD_ASDT')
+  #   user = User.objects.create(email='sergi@asdt.eu', name='Sergi')
+  #   user.set_password('asdt2019')
+    
+  #   # Update user
+  #   body = {
+  #     "email": "albert@asdt.eu",
+  #     "password": "asdt2018",
+  #     "group": str(group.id)
+  #   }
+  #   response = self.client.put('/{}/user/{}/'.format(settings.PREFIX, user.id), body)
+  #   self.assertTrue(response.status_code == HTTPStatus.OK)
+  #   response_json = json.loads(response.content.decode())
+  #   self.assertTrue(response_json['success'])
+  #   self.assertTrue(response_json['data']['email'] == 'albert@asdt.eu')
+
+  #   # Get token
+  #   self.client.credentials(HTTP_AUTHORIZATION='')
+  #   response = self.client.post('/{}/user/authenticate/'.format(settings.PREFIX), 
+  #                               { "email": "albert@asdt.eu", "password": "asdt2018" })
+  #   self.assertTrue(response.status_code == HTTPStatus.OK)
+  #   response_json = json.loads(response.content.decode())
+  #   self.assertTrue(response_json['success'])
+
+  #   # Check properly created
+  #   group = Group.objects.get(name='ADMIN_CHILD_ASDT')
+  #   user = User.objects.get(email='albert@asdt.eu')
+  #   self.assertTrue(user in group.users)
+  #   self.assertTrue(user.group == group)
+
+  #   # Leave it as it was
+  #   group.users.remove(user)
+  #   group.save()
+  #   user.delete()
 
   def test_delete(self):
     
