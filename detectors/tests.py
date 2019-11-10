@@ -97,18 +97,45 @@ class TestCase(APITestCase):
     # Get Token
     self.authenticate("admin@asdt.eu", "asdt2019")
 
+    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
+    group_2 = Group.objects.get(name='ADMIN_CHILD2_ASDT')
 
-
-    # Get single
+    # Create
     body = {
       'name' : 'myname',
       'password': 'mypassword',
       'location' : {'lat': 12.3, 'lon': 3.2, 'height': 5.4 },
-      'groups': ['123', '3456']
+      'groups': [ str(group.id) ]
     }
-    print(body)
     response = self.client.post('/api/v2/detectors/', body, format='json')
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
-    print(response_json)
     self.assertTrue(response_json['success'])
+
+    # Check properly created
+    detector = Detector.objects.get( name='myname' )
+    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
+    self.assertTrue( detector in group.devices.detectors )
+    self.assertTrue( group in detector.groups )
+
+
+    # Update
+    body = {
+      'name' : 'mynameupdated',
+      'password': 'mypassword',
+      'location' : {'lat': 12.3, 'lon': 3.2, 'height': 5.4 },
+      'groups': [ str(group_2.id) ]
+    }
+    response = self.client.put('/api/v2/detectors/{}/'.format(detector.id), body, format='json')
+    self.assertTrue(response.status_code == HTTPStatus.OK)    
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
+
+    # Check properly created
+    detector = Detector.objects.get( name='mynameupdated' )
+    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
+    group2 = Group.objects.get(name='ADMIN_CHILD2_ASDT')
+    self.assertFalse( detector in group.devices.detectors )
+    self.assertTrue( detector in group2.devices.detectors )
+    self.assertTrue( group2 in detector.groups )
+
