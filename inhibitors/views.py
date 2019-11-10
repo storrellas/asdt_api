@@ -25,13 +25,22 @@ from groups.models import *
 
 logger = get_logger()
 
+class LocationInhibitorSerializer(serializers.Serializer):
+    lat = serializers.FloatField()
+    lon = serializers.FloatField()
 
+class InhibitorSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=200, required=False)
+    password = serializers.CharField(max_length=72, required=False)
+    location = LocationInhibitorSerializer(required=False)
+    frequencies = serializers.ListField(child=serializers.CharField(max_length=200), required=False)
 
 class InhibitorViewset(DeviceViewset):
     authentication_classes = [ASDTAuthentication]
     permission_classes = (IsAuthenticated,)
 
     model = Inhibitor
+    serializer = InhibitorSerializer
 
     def get_id_list_allowed(self, request):
       """

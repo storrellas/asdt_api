@@ -78,6 +78,64 @@ class TestCase(APITestCase):
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
 
+  def test_create_update_delete(self):
+    
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
+
+    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
+    group_2 = Group.objects.get(name='ADMIN_CHILD2_ASDT')
+
+    # Create
+    body = {
+      'name' : 'myname',
+      'password': 'mypassword',
+      'location' : {'lat': 12.3, 'lon': 3.2 },
+      'frequencies' : ['abc', 'cde'],
+      'groups': [ str(group.id) ]
+    }
+    response = self.client.post('/api/v2/inhibitors/', body, format='json')
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
+
+    # Check properly created
+    inhibitor = Inhibitor.objects.get( name='myname' )
+    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
+    self.assertTrue( inhibitor in group.devices.inhibitors )
+    self.assertTrue( group in inhibitor.groups )
+
+
+  #   # Update
+  #   body = {
+  #     'sn' : 'mysnupdated',
+  #     'owner': 'myowner',
+  #     'hide' : True,
+  #     'groups': [ str(group_2.id) ]
+  #   }
+  #   response = self.client.put('/api/v2/drones/{}/'.format(drone.id), body, format='json')
+  #   self.assertTrue(response.status_code == HTTPStatus.OK)    
+  #   response_json = json.loads(response.content.decode())
+  #   self.assertTrue(response_json['success'])
+
+  #   # Check properly created
+  #   drone = Drone.objects.get( sn='mysnupdated' )
+  #   group = Group.objects.get(name='ADMIN_CHILD_ASDT')
+  #   group2 = Group.objects.get(name='ADMIN_CHILD2_ASDT')
+  #   self.assertFalse( drone in group.devices.friendDrones )
+  #   self.assertTrue( drone in group2.devices.friendDrones )
+  #   self.assertTrue( group2 in drone.groups )
+
+  #   # Delete
+  #   response = self.client.delete('/api/v2/drones/{}/'.format(drone.id), body, format='json')
+  #   self.assertTrue(response.status_code == HTTPStatus.OK)    
+  #   response_json = json.loads(response.content.decode())
+  #   self.assertTrue(response_json['success'])
+
+  #   # Check properly created    
+  #   group = Group.objects.get(name='ADMIN_CHILD_ASDT')
+  #   group2 = Group.objects.get(name='ADMIN_CHILD2_ASDT')
+  #   self.assertTrue( Drone.objects.filter( sn='mysnupdated' ).count() == 0 )
 
 
 

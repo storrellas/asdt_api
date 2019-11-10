@@ -25,7 +25,7 @@ from groups.models import *
 
 logger = get_logger()
 
-class LocationUserSerializer(serializers.Serializer):
+class LocationDetectorSerializer(serializers.Serializer):
     lat = serializers.FloatField()
     lon = serializers.FloatField()
     height = serializers.FloatField()
@@ -33,7 +33,7 @@ class LocationUserSerializer(serializers.Serializer):
 class DetectorSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=200, required=False)
     password = serializers.CharField(max_length=72, required=False)
-    location = LocationUserSerializer(required=False)
+    location = LocationDetectorSerializer(required=False)
 
 class DetectorViewset(DeviceViewset):
     authentication_classes = [ASDTAuthentication]

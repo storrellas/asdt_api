@@ -29,12 +29,13 @@ class Detector(ASDTDocument):
   def as_dict(self):
     item = {}
     item['id'] = str(self.id)
-    item['name'] = self.name  
-    item['location'] = {
-      'lat': self.location.lat, 
-      'lon': self.location.lon,
-      'height': self.location.height
-    }
+    item['name'] = self.name
+    if self.location is not None:  
+      item['location'] = {
+        'lat': self.location.lat, 
+        'lon': self.location.lon,
+        'height': self.location.height
+      }
     groups_dict = []
     for group in self.groups:
       groups_dict.append(str(group.id))
