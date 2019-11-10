@@ -24,6 +24,7 @@ from rest_framework import authentication
 from rest_framework import exceptions
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import serializers
+from rest_framework.exceptions import APIException
 
 # Project imports
 from asdt_api.utils import get_logger
@@ -82,11 +83,6 @@ class UserSerializer(serializers.Serializer):
     role = serializers.ChoiceField(choices=['MASTER', 'ADMIN', 'EMPOWERED', 'VIEWER'], required=False)
     hasGroup = serializers.BooleanField(required=False)
 
-class UserSerializerExtended(UserSerializer):
-    group = serializers.CharField(max_length=200, required=False)
-
-
-
 class UserViewset(viewsets.ViewSet):
     authentication_classes = [ASDTAuthentication]
     permission_classes = (IsAuthenticated, ASDTIsAdminPermission,)
@@ -139,52 +135,37 @@ class UserViewset(viewsets.ViewSet):
 
     def create(self, request):
       
-      serializer = UserSerializerExtended(data=request.data)
-      if serializer.is_valid() == False:
-        print({'message': serializer.errors})
-        return Response({'success': False, 'data': 'DATABASE_ERRORS'})
+      try:
+        group = None
+        if 'group' in request.data:    
+          group = Group.objects.get(id=request.data['group'])
+          if request.user.is_allowed_group(group) == False:
+            raise APIException("NOT_ALLOWED")
 
-      # Create user
-      data = serializer.validated_data
+        # Update User
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+          data = serializer.validated_data
+          user = User.objects.create(**data)
+          if 'password' in data:
+            user.set_password(data['password'])
+          if group is not None:
+            user.hasGroup = True
+            user.group = group
+            user.save()
 
-      # Add group if any
-      group = None
-      if 'group' in data:
-        # Recover group
-        try:
-          group = Group.objects.get(id=data['group'])
-        except Exception as e:
-          print(str(e))
-          return Response({"success": False, "error": "WRONG_PARAMTERS"})
+            # Append to group
+            group.users.append(user)
+            group.save()
 
-        # Check permissions
-        success = False
-        if data['role'] == 'ADMIN':
-          success = request.user.group.is_parent_of(group)
-        elif data['role'] == 'VIEWER' or data['role'] == 'EMPOWERED':
-          if request.user.group.is_parent_of(group) or request.user.group == group:
-            success = True
-        else:
-          success = True
-        
-        if success == False:
-          return Response({"success": False, "error": "NOT_ALLOWED"})
+          user.save()   
 
-      # Create user        
-      user = User.objects.create(email=data['email'], name=data['name'], 
-                                  role=data['role'], hasGroup=data['hasGroup'])
-      user.set_password(data['password'])
+        # Generate response
+        return Response({'success': True, 'data': user.as_dict() } )
 
-      # Add group to user        
-      if group is not None:
-        user.group = group
-        user.save()
-
-        # Append to group
-        group.users.append(user)
-        group.save()
-
-      return Response({'success': True, 'data': user.as_dict() } )
+      except Exception as e:
+        print(str(e))
+        return Response({'success': False, 'data': str(e)})
 
     def update(self, request, pk=None):
 
@@ -195,6 +176,12 @@ class UserViewset(viewsets.ViewSet):
         if request.user.has_power_over(user) == False:
           raise APIException("NOT_ALLOWED")
 
+        group = None
+        if 'group' in request.data:    
+          group = Group.objects.get(id=request.data['group'])
+          if request.user.is_allowed_group(group) == False:
+            raise APIException("NOT_ALLOWED")
+
         # Update User
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
@@ -202,18 +189,14 @@ class UserViewset(viewsets.ViewSet):
           user.update(**data)
           if 'password' in data:
             user.set_password(data['password'])
-          if 'group' in request.data:    
-            group = Group.objects.get(id=request.data['group'])
-            if request.user.is_allowed_group(group):
-              user.hasGroup = True
-              user.group = group
-              user.save()
+          if group is not None:    
+            user.hasGroup = True
+            user.group = group
+            user.save()
 
-              # Append to group
-              group.users.append(user)
-              group.save()
-            else:
-              raise APIException("NOT_ALLOWED")
+            # Append to group
+            group.users.append(user)
+            group.save()
           user.save()   
 
         # Generate response
@@ -222,7 +205,7 @@ class UserViewset(viewsets.ViewSet):
 
       except Exception as e:
         print(str(e))
-        return Response({'success': False, 'data': 'DATABASE_ERRORS'})
+        return Response({'success': False, 'data': str(e)})
 
     def delete(self, request, pk=None):
 
