@@ -38,7 +38,7 @@ class DeviceViewset(viewsets.ViewSet):
 
     def list(self, request):
       """
-      Retrieve all inhibitors 
+      Retrieve all models 
       """
       try:
         # Get ids
@@ -59,6 +59,9 @@ class DeviceViewset(viewsets.ViewSet):
         return Response({"success": False, "error": str(e)})
 
     def retrieve(self, request, pk=None):
+      """
+      Retrieve single model
+      """
       try:
         # Get ids
         self.devices = request.user.group.get_full_devices()
@@ -78,3 +81,108 @@ class DeviceViewset(viewsets.ViewSet):
         print(e)
         return Response({"success": False, "error": str(e)})
 
+    def create(self, request):
+      """
+      Create model
+      """
+      try:
+        if request.user.role != 'ADMIN':
+          raise APIException("NOT_ALLOWED")
+
+        # Validate Serializer
+        serializer = self.serializer(data=request.data)
+        if serializer.is_valid() == False:
+          print({'message': serializer.errors})
+          raise APIException(serializer.errors)
+
+        # Create object
+        data = serializer.validated_data
+        instance = self.model.objects.create(**data)
+
+        # Check whether groups exist and apply them to model
+        if 'groups' in request.data:
+          
+          # Adding to groups
+          for group_id in request.data['groups']:
+            # Add device to group
+            group = Group.objects.get(id=group_id)
+            group.append_device(instance)
+
+            # Add group to device
+            instance.groups.append(group)
+          
+          # Save instance
+          instance.save()
+
+        return Response({'success': True, 'data': instance.as_dict() })
+      except Exception as e:
+        print(e)
+        return Response({"success": False, "error": str(e)})
+
+    def update(self, request, pk=None):
+      """
+      Update model
+      """
+      try:
+        if request.user.role != 'ADMIN':
+          raise APIException("NOT_ALLOWED")
+
+        # Validate Serializer
+        serializer = self.serializer(data=request.data)
+        if serializer.is_valid() == False:
+          print({'message': serializer.errors})
+          raise APIException(serializer.errors)
+
+        # Update object        
+        data = serializer.validated_data
+        instance = self.model.objects.get(id=pk)
+        instance.update(**data)
+        
+        # Check whether groups exist and apply them to model        
+        if 'groups' in request.data:
+          # Remove device from groups
+          for group in instance.groups:
+            group.remove_device(instance)
+
+          # Adding to groups
+          instance.groups = []
+          for group_id in request.data['groups']:
+            
+            # Add device to group
+            group = Group.objects.get(id=group_id)
+            group.append_device(instance)
+
+            # Add group to device
+            instance.groups.append(group)
+          
+          instance.save()
+
+        # Get updated object
+        instance = self.model.objects.get(id=pk)
+        return Response({'success': True, 'data': instance.as_dict() })
+      except Exception as e:
+        print(e)
+        return Response({"success": False, "error": str(e)})
+
+
+    def delete(self, request, pk=None):
+      """
+      Delete model
+      """
+      try:
+        if request.user.role != 'ADMIN':
+          raise APIException("NOT_ALLOWED")
+
+        # Update object        
+        instance = self.model.objects.get(id=pk)
+
+        # Remove item from groups
+        for group in instance.groups:
+          group.remove_device(instance)
+
+        # Delete instance        
+        instance.delete()
+        return Response({'success': True, 'data': '' })
+      except Exception as e:
+        print(e)
+        return Response({"success": False, "error": str(e)})
