@@ -185,16 +185,6 @@ class UserViewset(viewsets.ViewSet):
 
       return Response({'success': True, 'data': user.as_dict() } )
 
-      # # ObjectID to str
-      # user_dict = user.to_mongo().to_dict()
-      # user_dict['_id'] = str(user_dict['_id'])   
-      # if 'group' in user_dict:       
-      #   user_dict['group'] = str(user_dict['group'])
-
-      #return Response({'success': True, 'data': user_dict } )
-
-
-
     def update(self, request, pk=None):
 
       try:
@@ -235,21 +225,7 @@ class UserViewset(viewsets.ViewSet):
                 
 
         # Generate response
-        user_dict = []
-        for item in [user]:
-          item = item.to_mongo().to_dict()
-          item['_id'] = str(item['_id'])
-          if 'group' in item:       
-            item['group'] = str(item['group'])
-
-          # Filtering items
-          del item['__v']
-          del item['password']
-
-          user_dict.append( item )
-
-        user_dict = user_dict[0]
-        return Response({ 'success': True, 'data': user_dict } )
+        return Response({'success': True, 'data': user.as_dict() } )
 
       except Exception as e:
         print(str(e))
