@@ -76,42 +76,77 @@ class GroupDevicesView(APIView):
         print(e)
         return Response({"success": False, "error": str(e)})
 
-class GroupInhibitorView(GroupDevicesView):
-    authentication_classes = [ASDTAuthentication]
-    permission_classes = (IsAuthenticated, )
-    
-    model = Inhibitor
-    
-    def post(self, request, *args, **kwargs):
-      """
-      Adds inhibitor to group
-      """
-      return super().post(request, *args, **kwargs)
-
-
-    def delete(self, request, *args, **kwargs):
-      """
-      Removes inhibitor from group
-      """
-      return super().delete(request, *args, **kwargs)
-
-
-
 class GroupDetectorView(GroupDevicesView):
     authentication_classes = [ASDTAuthentication]
     permission_classes = (IsAuthenticated,)
 
     model = Detector
     
-    def post(self, request, *args, **kwargs):
-      """
-      Adds inhibitor to group
-      """
-      return super().post(request, *args, **kwargs)
+    # def post(self, request, *args, **kwargs):
+    #   """
+    #   Adds inhibitor to group
+    #   """
+    #   return super().post(request, *args, **kwargs)
 
-    def delete(self, request, *args, **kwargs):
-      """
-      Removes inhibitor from group
-      """
-      return super().delete(request, *args, **kwargs)
+    # def delete(self, request, *args, **kwargs):
+    #   """
+    #   Removes inhibitor from group
+    #   """
+    #   return super().delete(request, *args, **kwargs)
+
+class GroupDroneView(GroupDevicesView):
+    authentication_classes = [ASDTAuthentication]
+    permission_classes = (IsAuthenticated,)
+
+    model = Drone
+    
+    # def post(self, request, *args, **kwargs):
+    #   """
+    #   Adds inhibitor to group
+    #   """
+    #   return super().post(request, *args, **kwargs)
+
+    # def delete(self, request, *args, **kwargs):
+    #   """
+    #   Removes inhibitor from group
+    #   """
+    #   return super().delete(request, *args, **kwargs)
+
+class GroupInhibitorView(GroupDevicesView):
+    authentication_classes = [ASDTAuthentication]
+    permission_classes = (IsAuthenticated, )
+    
+    model = Inhibitor
+    
+    # def post(self, request, *args, **kwargs):
+    #   """
+    #   Adds inhibitor to group
+    #   """
+    #   return super().post(request, *args, **kwargs)
+
+
+    # def delete(self, request, *args, **kwargs):
+    #   """
+    #   Removes inhibitor from group
+    #   """
+    #   return super().delete(request, *args, **kwargs)
+
+
+class GroupZoneView(GroupDevicesView):
+    authentication_classes = [ASDTAuthentication]
+    permission_classes = (IsAuthenticated,)
+
+    model = Detector
+    
+    # def post(self, request, *args, **kwargs):
+    #   """
+    #   Adds inhibitor to group
+    #   """
+    #   return super().post(request, *args, **kwargs)
+
+    # def delete(self, request, *args, **kwargs):
+    #   """
+    #   Removes inhibitor from group
+    #   """
+    #   return super().delete(request, *args, **kwargs)
 

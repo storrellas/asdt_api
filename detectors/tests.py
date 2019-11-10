@@ -87,7 +87,7 @@ class TestCase(APITestCase):
     detector = Detector.objects.get(name='detector1')
 
     # Get single
-    response = self.client.get('/api/v2/detectors/'.format(detector.id))
+    response = self.client.get('/api/v2/detectors/{}/'.format(detector.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertFalse(response_json['success'])

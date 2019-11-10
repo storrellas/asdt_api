@@ -53,67 +53,72 @@ class TestCase(APITestCase):
     response_json = json.loads(response.content.decode())
     access_token = response_json['data']['token']
     self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
-
-  def test_add_user(self):
-    
-    # Create user with a group assigned
-    user = User.objects.create(email='test@asdt.eu', name='test')
-    viewer_group = Group.objects.get(name='VIEWER_ASDT')
-    viewer_group.users.append(user)
-    viewer_group.save()
-    user.hasGroup = True
-    user.group = viewer_group
-    user.save()
-
-    # Target group to which add users
-    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
-
-    # Get Token
-    self.authenticate("admin@asdt.eu", "asdt2019")
-
-    # Add user to group
-    response = self.client.post('/api/v2/groups/{}/users/{}/'.format(group.id, user.id), {})
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
-
-    # Check groups properly configured
-    group_id = user.group.id
-    former_group = Group.objects.get(id=group_id)
-    self.assertFalse( user in group.users )
-
-    user = User.objects.get(email='test@asdt.eu')
-    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
-    self.assertEqual( user.group, group )
-    self.assertTrue( user in group.users )
-
-    # Delete user from group
-    response = self.client.delete('/api/v2/groups/{}/users/{}/'.format(group.id, user.id), {})
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
-
-    user = User.objects.get(email='test@asdt.eu')
-    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
-    self.assertNotEqual( user.group, group )
-    self.assertFalse( user in group.users )
-    user.delete()
-
-  def test_add_user_not_allowed(self):
-    
-    user = User.objects.get(email='viewer@asdt.eu')
-    group = Group.objects.get(name='VIEWER_ASDT')
-
-    # Get Token
-    self.authenticate("admin@asdt.eu", "asdt2019")
-
-    # Add groups
-    response = self.client.post('/api/v2/groups/{}/users/{}/'.format(group.id, user.id), {})
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertFalse(response_json['success'])
   
-  def test_add_inhibitor(self):
+  def test_add_delete_detector(self):
+    
+    detector = Detector.objects.get(name='detector4')
+    group = Group.objects.get(name='ADMIN_ASDT')
+
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
+
+    # Add inhibitor to group
+    response = self.client.post('/api/v2/groups/{}/devices/detectors/{}/'.format(group.id, detector.id), {})
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
+
+    # Check operation
+    detector = Detector.objects.get(name='detector4')
+    group = Group.objects.get(name='ADMIN_ASDT')
+    self.assertTrue( detector in group.devices.detectors )
+    self.assertTrue( group in detector.groups )
+
+    # Remove inhibitor from group
+    response = self.client.delete('/api/v2/groups/{}/devices/detectors/{}/'.format(group.id, detector.id), {})
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
+
+    # Check operation
+    inhibitor = Detector.objects.get(name='detector4')
+    group = Group.objects.get(name='ADMIN_ASDT')
+    self.assertFalse( detector in group.devices.detectors )
+    self.assertFalse( group in inhibitor.groups )
+
+  # def test_add_delete_drone(self):
+    
+  #   detector = Detector.objects.get(name='drone1')
+  #   group = Group.objects.get(name='ADMIN_ASDT')
+
+  #   # Get Token
+  #   self.authenticate("admin@asdt.eu", "asdt2019")
+
+  #   # Add inhibitor to group
+  #   response = self.client.post('/api/v2/groups/{}/devices/detectors/{}/'.format(group.id, detector.id), {})
+  #   self.assertTrue(response.status_code == HTTPStatus.OK)
+  #   response_json = json.loads(response.content.decode())
+  #   self.assertTrue(response_json['success'])
+
+  #   # Check operation
+  #   detector = Detector.objects.get(name='detector4')
+  #   group = Group.objects.get(name='ADMIN_ASDT')
+  #   self.assertTrue( detector in group.devices.detectors )
+  #   self.assertTrue( group in detector.groups )
+
+  #   # Remove inhibitor from group
+  #   response = self.client.delete('/api/v2/groups/{}/devices/detectors/{}/'.format(group.id, detector.id), {})
+  #   self.assertTrue(response.status_code == HTTPStatus.OK)
+  #   response_json = json.loads(response.content.decode())
+  #   self.assertTrue(response_json['success'])
+
+  #   # Check operation
+  #   inhibitor = Detector.objects.get(name='detector4')
+  #   group = Group.objects.get(name='ADMIN_ASDT')
+  #   self.assertFalse( detector in group.devices.detectors )
+  #   self.assertFalse( group in inhibitor.groups )
+
+  def test_add_delete_inhibitor(self):
     
     inhibitor = Inhibitor.objects.get(name='inhibitor4')
     group = Group.objects.get(name='ADMIN_ASDT')
@@ -145,37 +150,7 @@ class TestCase(APITestCase):
     self.assertFalse( inhibitor in group.devices.inhibitors )
     self.assertFalse( group in inhibitor.groups )
 
-  def test_add_detector(self):
-    
-    detector = Detector.objects.get(name='detector4')
-    group = Group.objects.get(name='ADMIN_ASDT')
 
-    # Get Token
-    self.authenticate("admin@asdt.eu", "asdt2019")
-
-    # Add inhibitor to group
-    response = self.client.post('/api/v2/groups/{}/devices/detectors/{}/'.format(group.id, detector.id), {})
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
-
-    # Check operation
-    detector = Detector.objects.get(name='detector4')
-    group = Group.objects.get(name='ADMIN_ASDT')
-    self.assertTrue( detector in group.devices.detectors )
-    self.assertTrue( group in detector.groups )
-
-    # Remove inhibitor from group
-    response = self.client.delete('/api/v2/groups/{}/devices/detectors/{}/'.format(group.id, detector.id), {})
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
-
-    # Check operation
-    inhibitor = Detector.objects.get(name='detector4')
-    group = Group.objects.get(name='ADMIN_ASDT')
-    self.assertFalse( detector in group.devices.detectors )
-    self.assertFalse( group in inhibitor.groups )
 
   def test_get_group_drones(self):
     admin_group = Group.objects.get(name='ADMIN_ASDT')

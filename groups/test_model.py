@@ -20,7 +20,6 @@ logger = utils.get_logger()
 
 class GroupModelTestCase(APITestCase):
 
-
   @classmethod
   def setUpClass(cls):
     """
