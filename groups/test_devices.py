@@ -17,6 +17,8 @@ from .models import *
 from user.models import User
 from inhibitors.models import Inhibitor
 from detectors.models import Detector
+from drones.models import Drone
+from zones.models import Zone
 
 logger = utils.get_logger()
 
@@ -81,42 +83,42 @@ class TestCase(APITestCase):
     self.assertTrue(response_json['success'])
 
     # Check operation
-    inhibitor = Detector.objects.get(name='detector4')
+    detector = Detector.objects.get(name='detector4')
     group = Group.objects.get(name='ADMIN_ASDT')
     self.assertFalse( detector in group.devices.detectors )
-    self.assertFalse( group in inhibitor.groups )
+    self.assertFalse( group in detector.groups )
 
-  # def test_add_delete_drone(self):
+  def test_add_delete_drone(self):
     
-  #   detector = Detector.objects.get(name='drone1')
-  #   group = Group.objects.get(name='ADMIN_ASDT')
+    drone = Drone.objects.get(sn='4')
+    group = Group.objects.get(name='ADMIN_ASDT')
 
-  #   # Get Token
-  #   self.authenticate("admin@asdt.eu", "asdt2019")
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
 
-  #   # Add inhibitor to group
-  #   response = self.client.post('/api/v2/groups/{}/devices/detectors/{}/'.format(group.id, detector.id), {})
-  #   self.assertTrue(response.status_code == HTTPStatus.OK)
-  #   response_json = json.loads(response.content.decode())
-  #   self.assertTrue(response_json['success'])
+    # Add inhibitor to group
+    response = self.client.post('/api/v2/groups/{}/devices/drones/{}/'.format(group.id, drone.id), {})
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
 
-  #   # Check operation
-  #   detector = Detector.objects.get(name='detector4')
-  #   group = Group.objects.get(name='ADMIN_ASDT')
-  #   self.assertTrue( detector in group.devices.detectors )
-  #   self.assertTrue( group in detector.groups )
+    # Check operation
+    drone = Drone.objects.get(sn='4')
+    group = Group.objects.get(name='ADMIN_ASDT')
+    self.assertTrue( drone in group.devices.friendDrones )
+    self.assertTrue( group in drone.groups )
 
-  #   # Remove inhibitor from group
-  #   response = self.client.delete('/api/v2/groups/{}/devices/detectors/{}/'.format(group.id, detector.id), {})
-  #   self.assertTrue(response.status_code == HTTPStatus.OK)
-  #   response_json = json.loads(response.content.decode())
-  #   self.assertTrue(response_json['success'])
+    # Remove inhibitor from group
+    response = self.client.delete('/api/v2/groups/{}/devices/drones/{}/'.format(group.id, drone.id), {})
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
 
-  #   # Check operation
-  #   inhibitor = Detector.objects.get(name='detector4')
-  #   group = Group.objects.get(name='ADMIN_ASDT')
-  #   self.assertFalse( detector in group.devices.detectors )
-  #   self.assertFalse( group in inhibitor.groups )
+    # Check operation
+    drone = Drone.objects.get(sn='4')
+    group = Group.objects.get(name='ADMIN_ASDT')
+    self.assertFalse( drone in group.devices.friendDrones )
+    self.assertFalse( group in drone.groups )
 
   def test_add_delete_inhibitor(self):
     
@@ -150,7 +152,37 @@ class TestCase(APITestCase):
     self.assertFalse( inhibitor in group.devices.inhibitors )
     self.assertFalse( group in inhibitor.groups )
 
+  def test_add_delete_zone(self):
+    
+    zone = Zone.objects.get(name='zone4')
+    group = Group.objects.get(name='ADMIN_ASDT')
 
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
+
+    # Add inhibitor to group
+    response = self.client.post('/api/v2/groups/{}/devices/zones/{}/'.format(group.id, zone.id), {})
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
+
+    # Check operation
+    zone = Zone.objects.get(name='zone4')
+    group = Group.objects.get(name='ADMIN_ASDT')
+    self.assertTrue( zone in group.devices.zones )
+    self.assertTrue( group in zone.groups )
+
+    # Remove inhibitor from group
+    response = self.client.delete('/api/v2/groups/{}/devices/zones/{}/'.format(group.id, zone.id), {})
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
+
+    # Check operation
+    zone = Zone.objects.get(name='zone4')
+    group = Group.objects.get(name='ADMIN_ASDT')
+    self.assertFalse( zone in group.devices.zones )
+    self.assertFalse( group in zone.groups )
 
   def test_get_group_drones(self):
     admin_group = Group.objects.get(name='ADMIN_ASDT')
