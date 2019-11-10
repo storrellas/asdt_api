@@ -107,8 +107,8 @@ class User(ASDTDocument):
     item['role'] = self.role
     item['createdAt'] = self.createdAt.isoformat()
     item['updatedAt'] = self.updatedAt.isoformat()
-    item['hasGroup'] = self.hasGroup
-    item['group'] = str(self.group)    
+    item['hasGroup'] = self.hasGroup    
+    item['group'] = str(self.group.id) if self.group is not None else None   
     zone_dict = []
     for zone in self.displayOptions.zone:
       zone_dict.append(zone)
@@ -124,7 +124,4 @@ class User(ASDTDocument):
     item['displayOptions'] = { 'zone': zone_dict, 'circleZone': cicleZone_dict }
 
     return item
-
-
-
     

@@ -17,7 +17,7 @@ from .models import *
 
 logger = utils.get_logger()
 
-class UserTestCase(APITestCase):
+class TestCase(APITestCase):
 
 
   @classmethod
@@ -44,7 +44,7 @@ class UserTestCase(APITestCase):
 
   def authenticate(self, user, password):
     # Get token
-    response = self.client.post('/api/v2/user/authenticate/', 
+    response = self.client.post('/{}/user/authenticate/'.format(settings.PREFIX), 
                             { "email": user, "password": password })
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
@@ -54,20 +54,20 @@ class UserTestCase(APITestCase):
   def test_get_token_admin(self):
     
     # Check not workin without login
-    response = self.client.get('/api/v2/user/me/')
+    response = self.client.get('/{}/user/me/'.format(settings.PREFIX))
     self.assertTrue(response.status_code == HTTPStatus.FORBIDDEN)
 
     # Get Token
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Check user info
-    response = self.client.get('/api/v2/user/me/')
+    response = self.client.get('/{}/user/me/'.format(settings.PREFIX))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['data']['email'], 'admin@asdt.eu')
 
     # Check tools
-    response = self.client.get('/api/v2/user/me/tools/')
+    response = self.client.get('/{}/user/me/tools/'.format(settings.PREFIX))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['data']['SETTING'], True)
@@ -76,21 +76,21 @@ class UserTestCase(APITestCase):
   def test_get_token_viewer(self):
     
     # Check not workin without login
-    response = self.client.get('/api/v2/user/me/')
+    response = self.client.get('/{}/user/me/'.format(settings.PREFIX))
     self.assertTrue(response.status_code == HTTPStatus.FORBIDDEN)
 
     # Get Token
     self.authenticate("viewer@asdt.eu", "asdt2019")
 
     # Check user info
-    response = self.client.get('/api/v2/user/me/')
+    response = self.client.get('/{}/user/me/'.format(settings.PREFIX))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['data']['email'], 'viewer@asdt.eu')
     self.assertTrue(response_json['success'])
 
     # Check tools
-    response = self.client.get('/api/v2/user/me/tools/')
+    response = self.client.get('/{}/user/me/tools/'.format(settings.PREFIX))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['data']['SETTING'], False)
@@ -109,17 +109,12 @@ class UserTestCase(APITestCase):
       "role": "EMPOWERED",
       "hasGroup": False
     }
-    response = self.client.post('/api/v2/user/', body)
+    response = self.client.post('/{}/user/'.format(settings.PREFIX), body)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
 
-    # Get token
-    self.client.credentials(HTTP_AUTHORIZATION='')
-    response = self.client.post('/api/v2/user/authenticate/', 
-                                { "email": "user@test.eu", "password": "asdt2019" })
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
+    # Get Token
+    self.authenticate("user@asdt.eu", "asdt2019")
 
     # Delete created user
     User.objects.filter(email='user@test.eu').delete()
@@ -141,18 +136,14 @@ class UserTestCase(APITestCase):
       "hasGroup": True,
       "group": group.id
     }
-    response = self.client.post('/api/v2/user/', body)
+    response = self.client.post('/{}/user/'.format(settings.PREFIX), body)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
     self.assertTrue(response_json['data']['group'] == str(group.id))
 
-    # Get token
-    self.client.credentials(HTTP_AUTHORIZATION='')
-    response = self.client.post('/api/v2/user/authenticate/', 
-                                { "email": "user2@test.eu", "password": "asdt2019" })
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
+    # Get Token
+    self.authenticate("user2@asdt.eu", "asdt2019")
 
     # # Delete created user
     # User.objects.filter(email='user2@test.eu').delete()
@@ -179,7 +170,7 @@ class UserTestCase(APITestCase):
       "role": "EMPOWERED",
       "hasGroup": False
     }
-    response = self.client.post('/api/v2/user/', body)
+    response = self.client.post('/{}/user/'.format(settings.PREFIX), body)
     self.assertTrue(response.status_code == HTTPStatus.FORBIDDEN)
 
   def test_create_user_group_not_allowed(self):
@@ -199,7 +190,7 @@ class UserTestCase(APITestCase):
       "hasGroup": True,
       "group": group.id
     }
-    response = self.client.post('/api/v2/user/', body)
+    response = self.client.post('/{}/user/'.format(settings.PREFIX), body)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertFalse(response_json['success'])
@@ -211,11 +202,12 @@ class UserTestCase(APITestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Get list of users
-    response = self.client.get('/api/v2/user/')
+    response = self.client.get('/{}/user/'.format(settings.PREFIX))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
-    self.assertTrue(len(response_json['data']) == 7)
+    print(response_json)
+    self.assertEqual(len(response_json['data']), 7)
 
   def test_list_admin_child(self):
     
@@ -223,7 +215,7 @@ class UserTestCase(APITestCase):
     self.authenticate("admin_child@asdt.eu", "asdt2019")
 
     # Get list of users
-    response = self.client.get('/api/v2/user/')
+    response = self.client.get('/{}/user/'.format(settings.PREFIX))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -237,7 +229,7 @@ class UserTestCase(APITestCase):
     user = User.objects.get(email='admin_child@asdt.eu')
 
     # Get list of users
-    response = self.client.get('/api/v2/user/{}/'.format(user.id))
+    response = self.client.get('/{}/user/{}/'.format(settings.PREFIX, user.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -254,7 +246,7 @@ class UserTestCase(APITestCase):
     body = {
       "name": "Albert",
     }
-    response = self.client.put('/api/v2/user/{}/'.format(user.id), body)
+    response = self.client.put('/{}/user/{}/'.format(settings.PREFIX, user.id), body)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -274,7 +266,7 @@ class UserTestCase(APITestCase):
     group.save()
 
     # Delete user
-    response = self.client.delete('/api/v2/user/{}/'.format(user.id))
+    response = self.client.delete('/{}/user/{}/'.format(settings.PREFIX, user.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])

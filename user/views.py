@@ -87,7 +87,50 @@ class UserAuthenticateView(APIView):
 
 class UserViewset(viewsets.ViewSet):
     authentication_classes = [ASDTAuthentication]
-    permission_classes = (IsAuthenticated,ASDTIsAdminPermission,)
+    permission_classes = (IsAuthenticated, ASDTIsAdminPermission,)
+
+    def list(self, request):
+
+      try:
+        if request.user.group is None:
+          raise APIException("NOT_ALLOWED")
+
+        # Get groups assigned
+        groups = request.user.group.get_full_children() 
+        groups.append( request.user.group )        
+
+        # Queryset
+        group_list = [ item.id for item in groups ]
+        queryset = User.objects.filter(group__in=group_list)
+
+        # Generate response
+        user_dict = []
+        for item in queryset:
+          user = item.as_dict()
+          # Remove non-necessary
+          del user['displayOptions']
+          user_dict.append( user )
+
+        return Response({ 'success': True, 'data': user_dict } )
+
+      except Exception as e:
+        print(e)
+        return Response({"success": False, "error": str(e)})
+
+    def retrieve(self, request, pk=None):
+
+      # Get user
+      queryset = User.objects.filter(id=pk)
+      if len(queryset) != 1:
+        logger.info("Retreived: " + str(len(queryset)))
+        return Response({"success": False, "error": "NOT_FOUND"})
+      
+      # Get user instance
+      user = queryset.first()
+      if request.user.has_power_over(user) == False:
+        return Response({"success": False, "error": "NOT_ALLOWED"})
+
+      return Response({ 'success': True, 'data': user.as_dict() } )
 
     def create(self, request):
       serializer = UserSerializer(data=request.data)
@@ -143,84 +186,9 @@ class UserViewset(viewsets.ViewSet):
       if 'group' in user_dict:       
         user_dict['group'] = str(user_dict['group'])
 
-
       return Response({'success': True, 'data': user_dict } )
 
 
-
-    def list(self, request):
-
-      # List all users
-      queryset = None
-      if request.user.group.parent is None:
-        queryset = User.objects.all()
-      else:
-
-        # Get groups assigned
-        groups = []
-        if request.user.group is not None:
-          # Get referenced groups
-          groups.extend( request.user.group.get_full_children() ) 
-          # Add user group
-          groups.append( request.user.group )
-
-        # Get group List
-        group_list = []
-        for item in groups:
-          group_list.append(item.id)
-
-        # Queryset
-        queryset = User.objects.filter(group__in=group_list)
-
-
-      # Generate response
-      user_dict = []
-      for item in queryset:
-        item = item.to_mongo().to_dict()
-        item['_id'] = str(item['_id'])
-        if 'group' in item:       
-          item['group'] = str(item['group'])
-
-        # Filtering items
-        del item['displayOptions']
-        del item['__v']
-        del item['createdAt']
-        del item['updatedAt']
-        del item['password']
-
-        user_dict.append( item )
-
-      return Response({ 'success': True, 'data': user_dict } )
-
-    def retrieve(self, request, pk=None):
-
-      # Get user
-      queryset = User.objects.filter(id=pk)
-      if len(queryset) != 1:
-        logger.info("Retreived: " + str(len(queryset)))
-        return Response({"success": False, "error": "NOT_FOUND"})
-      
-      # Get user instance
-      user = queryset.first()
-      if request.user.has_power_over(user) == False:
-        return Response({"success": False, "error": "NOT_ALLOWED"})
-
-      # Generate response
-      user_dict = []
-      for item in queryset:
-        item = item.to_mongo().to_dict()
-        item['_id'] = str(item['_id'])
-        if 'group' in item:       
-          item['group'] = str(item['group'])
-
-        # Filtering items
-        del item['__v']
-        del item['password']
-
-        user_dict.append( item )
-
-      user_dict = user_dict[0]
-      return Response({ 'success': True, 'data': user_dict } )
 
     def update(self, request, pk=None):
 
@@ -285,15 +253,9 @@ class UserViewset(viewsets.ViewSet):
     def delete(self, request, pk=None):
 
       try:
-
-        # Get user
-        queryset = User.objects.filter(id=pk)
-        if len(queryset) != 1:
-          logger.info("Retreived: " + str(len(queryset)))
-          return Response({"success": False, "error": "NOT_FOUND"})
-        
+       
         # Get user instance
-        user = queryset.first()
+        user = User.objects.get(id=pk)
         if request.user.has_power_over(user) == False:
           return Response({"success": False, "error": "NOT_ALLOWED"})
 
@@ -308,7 +270,7 @@ class UserViewset(viewsets.ViewSet):
 
       except Exception as e:
         print(str(e))
-        return Response({'sucess': False, 'data': 'DATABASE_ERRORS'})
+        return Response({'sucess': False, 'data': str(e)})
 
 class UserMeView(APIView):
     authentication_classes = [ASDTAuthentication]

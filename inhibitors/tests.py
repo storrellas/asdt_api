@@ -45,7 +45,7 @@ class TestCase(APITestCase):
 
   def authenticate(self, user, password):
     # Get token
-    response = self.client.post('/api/v2/user/authenticate/', 
+    response = self.client.post('/{}/user/authenticate/'.format(settings.PREFIX), 
                             { "email": user, "password": password })
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
@@ -59,7 +59,7 @@ class TestCase(APITestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Get All
-    response = self.client.get('/api/v2/inhibitors/')
+    response = self.client.get('/{}/inhibitors/'.format(settings.PREFIX))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -73,7 +73,7 @@ class TestCase(APITestCase):
     inhibitor = Inhibitor.objects.get(name='inhibitor1')
 
     # Get All
-    response = self.client.get('/api/v2/inhibitors/{}/'.format(inhibitor.id))
+    response = self.client.get('/{}/inhibitors/{}/'.format(settings.PREFIX, inhibitor.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -94,7 +94,7 @@ class TestCase(APITestCase):
       'frequencies' : ['abc', 'cde'],
       'groups': [ str(group.id) ]
     }
-    response = self.client.post('/api/v2/inhibitors/', body, format='json')
+    response = self.client.post('/{}/inhibitors/'.format(settings.PREFIX), body, format='json')
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -114,7 +114,7 @@ class TestCase(APITestCase):
       'frequencies' : ['abc', 'cde'],
       'groups': [ str(group_2.id) ]
     }
-    response = self.client.put('/api/v2/inhibitors/{}/'.format(inhibitor.id), body, format='json')
+    response = self.client.put('/{}/inhibitors/{}/'.format(settings.PREFIX, inhibitor.id), body, format='json')
     self.assertTrue(response.status_code == HTTPStatus.OK)    
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -128,7 +128,7 @@ class TestCase(APITestCase):
     self.assertTrue( group2 in inhibitor.groups )
 
     # Delete
-    response = self.client.delete('/api/v2/inhibitors/{}/'.format(inhibitor.id), body, format='json')
+    response = self.client.delete('/{}/inhibitors/{}/'.format(settings.PREFIX, inhibitor.id), body, format='json')
     self.assertTrue(response.status_code == HTTPStatus.OK)    
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])

@@ -58,18 +58,22 @@ class LogsTestCase(APITestCase):
     """
     pass
 
-  def test_logs(self):
-
+  def authenticate(self, user, password):
     # Get token
-    response = self.client.post('/api/v2/user/authenticate/', 
-                                { "email": "admin@asdt.eu", "password": "asdt2019" })
+    response = self.client.post('/{}/user/authenticate/'.format(settings.PREFIX), 
+                            { "email": user, "password": password })
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     access_token = response_json['data']['token']
     self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
 
+  def test_logs(self):
+
+    # Get token
+    self.authenticate('admin@asdt.eu', 'asdt2019')
+
     # Get Logs
-    response = self.client.get('/api/v2/logs/')
+    response = self.client.get('/{}/logs/'.format(settings.PREFIX))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['success'], True)    
@@ -77,19 +81,14 @@ class LogsTestCase(APITestCase):
 
   def test_logs_bydate(self):
     # Get token
-    response = self.client.post('/api/v2/user/authenticate/', 
-                                { "email": "admin@asdt.eu", "password": "asdt2019" })
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    access_token = response_json['data']['token']
-    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+    self.authenticate('admin@asdt.eu', 'asdt2019')
 
     # Get Logs
     url_params = {
       "dateIni": "2019-08-01T23:00:00.000Z",
       "dateFin": "2019-11-01T00:00:00.000Z"
     }
-    response = self.client.get('/api/v2/logs/', url_params)
+    response = self.client.get('/{}/logs/'.format(settings.PREFIX), url_params)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['success'], True)
@@ -100,7 +99,7 @@ class LogsTestCase(APITestCase):
       "dateIni": "2019-10-01T23:00:00.000Z",
       "dateFin": "2019-11-01T00:00:00.000Z"
     }
-    response = self.client.get('/api/v2/logs/', url_params)
+    response = self.client.get('/{}/logs/'.format(settings.PREFIX), url_params)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['success'], True)
@@ -108,12 +107,7 @@ class LogsTestCase(APITestCase):
 
   def test_logs_bypage(self):
     # Get token
-    response = self.client.post('/api/v2/user/authenticate/', 
-                                { "email": "admin@asdt.eu", "password": "asdt2019" })
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    access_token = response_json['data']['token']
-    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+    self.authenticate('admin@asdt.eu', 'asdt2019')
 
     # Get Logs
     url_params = {
@@ -121,7 +115,7 @@ class LogsTestCase(APITestCase):
       "dateFin": "2019-11-01T00:00:00.000Z",
       "page": 0
     }
-    response = self.client.get('/api/v2/logs/', url_params)
+    response = self.client.get('/{}/logs/'.format(settings.PREFIX), url_params)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['success'], True)
@@ -134,30 +128,25 @@ class LogsTestCase(APITestCase):
       "dateFin": "2019-11-01T00:00:00.000Z",
       "page" : 1
     }
-    response = self.client.get('/api/v2/logs/', url_params)
+    response = self.client.get('/{}/logs/'.format(settings.PREFIX), url_params)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['success'], True)
     self.assertEqual(len(response_json['data']), 0)
 
     # Get by ID
-    response = self.client.get('/api/v2/logs/{}/'.format(log_id))
+    response = self.client.get('/{}/logs/{}/'.format(settings.PREFIX, log_id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
 
 
     # Get KML
-    response = self.client.get('/api/v2/logs/{}/kml/'.format(log_id))
+    response = self.client.get('/{}/logs/{}/kml/'.format(settings.PREFIX, log_id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     self.assertEqual(response.get('Content-Type'), 'application/xml')
 
   def test_logs_bysn(self):
     # Get token
-    response = self.client.post('/api/v2/user/authenticate/', 
-                                { "email": "admin@asdt.eu", "password": "asdt2019" })
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    access_token = response_json['data']['token']
-    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+    self.authenticate('admin@asdt.eu', 'asdt2019')
 
     # Get Logs
     url_params = {
@@ -165,7 +154,7 @@ class LogsTestCase(APITestCase):
       "dateFin": "2019-11-01T00:00:00.000Z",
       "sn": "1"
     }
-    response = self.client.get('/api/v2/logs/', url_params)
+    response = self.client.get('/{}/logs/'.format(settings.PREFIX), url_params)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['success'], True)
@@ -177,7 +166,7 @@ class LogsTestCase(APITestCase):
       "dateFin": "2019-11-01T00:00:00.000Z",
       "sn" : "6"
     }
-    response = self.client.get('/api/v2/logs/', url_params)
+    response = self.client.get('/{}/logs/'.format(settings.PREFIX), url_params)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['success'], True)
@@ -186,19 +175,14 @@ class LogsTestCase(APITestCase):
 
   def test_logs_not_allowed(self):
     # Get token
-    response = self.client.post('/api/v2/user/authenticate/', 
-                                { "email": "master@asdt.eu", "password": "asdt2019" })
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    access_token = response_json['data']['token']
-    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+    self.authenticate('master@asdt.eu', 'asdt2019')
 
     # Get Logs
     url_params = {
       "dateIni": "2019-08-01T23:00:00.000Z",
       "dateFin": "2019-11-01T00:00:00.000Z"
     }
-    response = self.client.get('/api/v2/logs/', url_params)
+    response = self.client.get('/{}/logs/'.format(settings.PREFIX), url_params)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['success'], False)

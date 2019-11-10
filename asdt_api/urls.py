@@ -19,17 +19,15 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.conf.urls.static import static
 from django.conf import settings
 
-PREFIX = 'api/v2/'
-
 urlpatterns = [
-    path(PREFIX + 'admin/', admin.site.urls),
-    path(PREFIX + 'user/', include('user.urls')),
-    path(PREFIX + 'groups/', include('groups.urls')),
-    path(PREFIX + 'logs/', include('logs.urls')),
-    path(PREFIX + 'drones/', include('drones.urls')),
-    path(PREFIX + 'detectors/', include('detectors.urls')),
-    path(PREFIX + 'inhibitors/', include('inhibitors.urls')),
-    path(PREFIX + 'zones/', include('zones.urls')),
+    path(settings.PREFIX + '/admin/', admin.site.urls),
+    path(settings.PREFIX + '/user/', include('user.urls')),
+    path(settings.PREFIX + '/groups/', include('groups.urls')),
+    path(settings.PREFIX + '/logs/', include('logs.urls')),
+    path(settings.PREFIX + '/drones/', include('drones.urls')),
+    path(settings.PREFIX + '/detectors/', include('detectors.urls')),
+    path(settings.PREFIX + '/inhibitors/', include('inhibitors.urls')),
+    path(settings.PREFIX + '/zones/', include('zones.urls')),
 ]
 urlpatterns += staticfiles_urlpatterns()
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

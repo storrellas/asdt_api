@@ -45,7 +45,7 @@ class TestCase(APITestCase):
 
   def authenticate(self, user, password):
     # Get token
-    response = self.client.post('/api/v2/user/authenticate/', 
+    response = self.client.post('/{}/user/authenticate/'.format(settings.PREFIX), 
                             { "email": user, "password": password })
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
@@ -60,7 +60,7 @@ class TestCase(APITestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Add groups
-    response = self.client.get('/api/v2/groups/{}/'.format(group.id))
+    response = self.client.get('/{}/groups/{}/'.format(settings.PREFIX, group.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -73,7 +73,7 @@ class TestCase(APITestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Add groups
-    response = self.client.get('/api/v2/groups/{}/'.format(group.id))
+    response = self.client.get('/{}/groups/{}/'.format(settings.PREFIX, group.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertFalse(response_json['success'])
@@ -84,7 +84,7 @@ class TestCase(APITestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Get All
-    response = self.client.get('/api/v2/groups/all/')
+    response = self.client.get('/{}/groups/all/'.format(settings.PREFIX))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -96,7 +96,7 @@ class TestCase(APITestCase):
     self.authenticate("viewer@asdt.eu", "asdt2019")
 
     # Get All
-    response = self.client.get('/api/v2/groups/all/')
+    response = self.client.get('/{}/groups/all/'.format(settings.PREFIX))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -109,7 +109,7 @@ class TestCase(APITestCase):
 
     # Create group
     body = { 'name': 'TEST_GROUP' }
-    response = self.client.post('/api/v2/groups/', body)
+    response = self.client.post('/{}/groups/'.format(settings.PREFIX), body)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -133,7 +133,7 @@ class TestCase(APITestCase):
     # Add user to group
     group_to_add = Group.objects.get(name='ADMIN_CHILD_ASDT')
     body = { 'name': 'TEST_GROUP', 'groupToAdd':  group_to_add.id }
-    response = self.client.post('/api/v2/groups/', body)
+    response = self.client.post('/{}/groups/'.format(settings.PREFIX), body)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -158,7 +158,7 @@ class TestCase(APITestCase):
 
     # Update group
     body = { 'name': 'ADMIN_CHILD_ASDT_UPDATED' }
-    response = self.client.put('/api/v2/groups/{}/'.format(group.id), body)
+    response = self.client.put('/{}/groups/{}/'.format(settings.PREFIX, group.id), body)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -181,7 +181,7 @@ class TestCase(APITestCase):
 
     # Update group
     body = { 'name': 'ADMIN_CHILD_ASDT_UPDATED', 'newParent': group_parent.id }
-    response = self.client.put('/api/v2/groups/{}/'.format(group.id), body)
+    response = self.client.put('/{}/groups/{}/'.format(settings.PREFIX, group.id), body)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -224,7 +224,7 @@ class TestCase(APITestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Delete Group
-    response = self.client.delete('/api/v2/groups/{}/'.format(delete_group.id))
+    response = self.client.delete('/{}/groups/{}/'.format(settings.PREFIX, delete_group.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -240,7 +240,7 @@ class TestCase(APITestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Request users
-    response = self.client.get('/api/v2/groups/{}/users/'.format(admin_group.id))
+    response = self.client.get('/{}/groups/{}/users/'.format(settings.PREFIX, admin_group.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -252,7 +252,7 @@ class TestCase(APITestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Request groups
-    response = self.client.get('/api/v2/groups/{}/groups/'.format(admin_group.id))
+    response = self.client.get('/{}/groups/{}/groups/'.format(settings.PREFIX, admin_group.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -275,7 +275,7 @@ class TestCase(APITestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Add user to group
-    response = self.client.post('/api/v2/groups/{}/users/{}/'.format(group.id, user.id), {})
+    response = self.client.post('/{}/groups/{}/users/{}/'.format(settings.PREFIX, group.id, user.id), {})
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -291,7 +291,7 @@ class TestCase(APITestCase):
     self.assertTrue( user in group.users )
 
     # Delete user from group
-    response = self.client.delete('/api/v2/groups/{}/users/{}/'.format(group.id, user.id), {})
+    response = self.client.delete('/{}/groups/{}/users/{}/'.format(settings.PREFIX, group.id, user.id), {})
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -311,7 +311,7 @@ class TestCase(APITestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Add groups
-    response = self.client.post('/api/v2/groups/{}/users/{}/'.format(group.id, user.id), {})
+    response = self.client.post('/{}/groups/{}/users/{}/'.format(settings.PREFIX, group.id, user.id), {})
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertFalse(response_json['success'])

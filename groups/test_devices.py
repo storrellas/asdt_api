@@ -49,7 +49,7 @@ class TestCase(APITestCase):
 
   def authenticate(self, user, password):
     # Get token
-    response = self.client.post('/api/v2/user/authenticate/', 
+    response = self.client.post('/{}/user/authenticate/'.format(settings.PREFIX), 
                             { "email": user, "password": password })
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
@@ -65,7 +65,7 @@ class TestCase(APITestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Add inhibitor to group
-    response = self.client.post('/api/v2/groups/{}/devices/detectors/{}/'.format(group.id, detector.id), {})
+    response = self.client.post('/{}/groups/{}/devices/detectors/{}/'.format(settings.PREFIX, group.id, detector.id), {})
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -77,7 +77,7 @@ class TestCase(APITestCase):
     self.assertTrue( group in detector.groups )
 
     # Remove inhibitor from group
-    response = self.client.delete('/api/v2/groups/{}/devices/detectors/{}/'.format(group.id, detector.id), {})
+    response = self.client.delete('/{}/groups/{}/devices/detectors/{}/'.format(settings.PREFIX, group.id, detector.id), {})
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -97,7 +97,7 @@ class TestCase(APITestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Add inhibitor to group
-    response = self.client.post('/api/v2/groups/{}/devices/drones/{}/'.format(group.id, drone.id), {})
+    response = self.client.post('/{}/groups/{}/devices/drones/{}/'.format(settings.PREFIX, group.id, drone.id), {})
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -109,7 +109,7 @@ class TestCase(APITestCase):
     self.assertTrue( group in drone.groups )
 
     # Remove inhibitor from group
-    response = self.client.delete('/api/v2/groups/{}/devices/drones/{}/'.format(group.id, drone.id), {})
+    response = self.client.delete('/{}/groups/{}/devices/drones/{}/'.format(settings.PREFIX, group.id, drone.id), {})
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -129,7 +129,7 @@ class TestCase(APITestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Add inhibitor to group
-    response = self.client.post('/api/v2/groups/{}/devices/inhibitors/{}/'.format(group.id, inhibitor.id), {})
+    response = self.client.post('/{}/groups/{}/devices/inhibitors/{}/'.format(settings.PREFIX, group.id, inhibitor.id), {})
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -141,7 +141,7 @@ class TestCase(APITestCase):
     self.assertTrue( group in inhibitor.groups )
 
     # Remove inhibitor from group
-    response = self.client.delete('/api/v2/groups/{}/devices/inhibitors/{}/'.format(group.id, inhibitor.id), {})
+    response = self.client.delete('/{}/groups/{}/devices/inhibitors/{}/'.format(settings.PREFIX, group.id, inhibitor.id), {})
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -161,7 +161,7 @@ class TestCase(APITestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Add inhibitor to group
-    response = self.client.post('/api/v2/groups/{}/devices/zones/{}/'.format(group.id, zone.id), {})
+    response = self.client.post('/{}/groups/{}/devices/zones/{}/'.format(settings.PREFIX, group.id, zone.id), {})
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -173,7 +173,7 @@ class TestCase(APITestCase):
     self.assertTrue( group in zone.groups )
 
     # Remove inhibitor from group
-    response = self.client.delete('/api/v2/groups/{}/devices/zones/{}/'.format(group.id, zone.id), {})
+    response = self.client.delete('/{}/groups/{}/devices/zones/{}/'.format(settings.PREFIX, group.id, zone.id), {})
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -191,7 +191,7 @@ class TestCase(APITestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Request drones
-    response = self.client.get('/api/v2/groups/{}/drones/'.format(admin_group.id))
+    response = self.client.get('/{}/groups/{}/drones/'.format(settings.PREFIX, admin_group.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -203,7 +203,7 @@ class TestCase(APITestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Request detectors
-    response = self.client.get('/api/v2/groups/{}/devices/detectors/'.format(admin_group.id))
+    response = self.client.get('/{}/groups/{}/devices/detectors/'.format(settings.PREFIX, admin_group.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -215,7 +215,7 @@ class TestCase(APITestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Request inhibitors
-    response = self.client.get('/api/v2/groups/{}/devices/inhibitors/'.format(admin_group.id))
+    response = self.client.get('/{}/groups/{}/devices/inhibitors/'.format(settings.PREFIX, admin_group.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -227,7 +227,7 @@ class TestCase(APITestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Request zones
-    response = self.client.get('/api/v2/groups/{}/devices/zones/'.format(admin_group.id))
+    response = self.client.get('/{}/groups/{}/devices/zones/'.format(settings.PREFIX, admin_group.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])

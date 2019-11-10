@@ -45,13 +45,12 @@ class TestCase(APITestCase):
 
   def authenticate(self, user, password):
     # Get token
-    response = self.client.post('/api/v2/user/authenticate/', 
+    response = self.client.post('/{}/user/authenticate/'.format(settings.PREFIX), 
                             { "email": user, "password": password })
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     access_token = response_json['data']['token']
     self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
-
 
   def test_list(self):
     
@@ -59,7 +58,7 @@ class TestCase(APITestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Get All
-    response = self.client.get('/api/v2/zones/')
+    response = self.client.get('/{}/zones/'.format(settings.PREFIX))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -73,7 +72,7 @@ class TestCase(APITestCase):
     zone = Zone.objects.get(name='zone1')
 
     # Get single
-    response = self.client.get('/api/v2/zones/{}/'.format(zone.id))
+    response = self.client.get('/{}/zones/{}/'.format(settings.PREFIX, zone.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -98,7 +97,7 @@ class TestCase(APITestCase):
       'minLon' : 2,
       'groups': [ str(group.id) ]
     }
-    response = self.client.post('/api/v2/zones/', body, format='json')
+    response = self.client.post('/{}/zones/'.format(settings.PREFIX), body, format='json')
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -122,7 +121,7 @@ class TestCase(APITestCase):
       'minLon' : 2,
       'groups': [ str(group_2.id) ]
     }
-    response = self.client.put('/api/v2/zones/{}/'.format(zone.id), body, format='json')
+    response = self.client.put('/{}/zones/{}/'.format(settings.PREFIX, zone.id), body, format='json')
     self.assertTrue(response.status_code == HTTPStatus.OK)    
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -136,7 +135,7 @@ class TestCase(APITestCase):
     self.assertTrue( group2 in zone.groups )
 
     # Delete
-    response = self.client.delete('/api/v2/zones/{}/'.format(zone.id), body, format='json')
+    response = self.client.delete('/{}/zones/{}/'.format(settings.PREFIX, zone.id), body, format='json')
     self.assertTrue(response.status_code == HTTPStatus.OK)    
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])

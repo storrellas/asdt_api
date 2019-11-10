@@ -18,7 +18,7 @@ from user.models import User
 
 logger = utils.get_logger()
 
-class GroupModelTestCase(APITestCase):
+class TestCase(APITestCase):
 
   @classmethod
   def setUpClass(cls):
