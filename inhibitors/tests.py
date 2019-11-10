@@ -112,9 +112,9 @@ class TestCase(APITestCase):
       'password': 'mypassword',
       'location' : {'lat': 12.3, 'lon': 3.2 },
       'frequencies' : ['abc', 'cde'],
-      'groups': [ str(group.id) ]
+      'groups': [ str(group_2.id) ]
     }
-    response = self.client.put('/api/v2/drones/{}/'.format(drone.id), body, format='json')
+    response = self.client.put('/api/v2/inhibitors/{}/'.format(inhibitor.id), body, format='json')
     self.assertTrue(response.status_code == HTTPStatus.OK)    
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
@@ -127,16 +127,16 @@ class TestCase(APITestCase):
     self.assertTrue( inhibitor in group2.devices.inhibitors )
     self.assertTrue( group2 in inhibitor.groups )
 
-  #   # Delete
-  #   response = self.client.delete('/api/v2/drones/{}/'.format(drone.id), body, format='json')
-  #   self.assertTrue(response.status_code == HTTPStatus.OK)    
-  #   response_json = json.loads(response.content.decode())
-  #   self.assertTrue(response_json['success'])
+    # Delete
+    response = self.client.delete('/api/v2/inhibitors/{}/'.format(inhibitor.id), body, format='json')
+    self.assertTrue(response.status_code == HTTPStatus.OK)    
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
 
-  #   # Check properly created    
-  #   group = Group.objects.get(name='ADMIN_CHILD_ASDT')
-  #   group2 = Group.objects.get(name='ADMIN_CHILD2_ASDT')
-  #   self.assertTrue( Drone.objects.filter( sn='mysnupdated' ).count() == 0 )
+    # Check properly created    
+    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
+    group2 = Group.objects.get(name='ADMIN_CHILD2_ASDT')
+    self.assertTrue( Inhibitor.objects.filter( name='mynameupdated' ).count() == 0 )
 
 
 
