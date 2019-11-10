@@ -190,13 +190,7 @@ class UserViewset(viewsets.ViewSet):
       try:
 
         # Get user
-        queryset = User.objects.filter(id=pk)
-        if len(queryset) != 1:
-          logger.info("Retreived: " + str(len(queryset)))
-          return Response({"success": False, "error": "NOT_FOUND"})
-        
-        # Get user instance
-        user = queryset.first()
+        user = User.objects.get(id=pk)
         if request.user.has_power_over(user) == False:
           return Response({"success": False, "error": "NOT_ALLOWED"})
 
@@ -225,6 +219,7 @@ class UserViewset(viewsets.ViewSet):
                 
 
         # Generate response
+        user = User.objects.get(id=pk)
         return Response({'success': True, 'data': user.as_dict() } )
 
       except Exception as e:
