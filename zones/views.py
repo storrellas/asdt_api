@@ -25,11 +25,26 @@ from groups.models import *
 
 logger = get_logger()
 
+class LocationZoneSerializer(serializers.Serializer):
+    lat = serializers.FloatField()
+    lon = serializers.FloatField()
+
+class ZoneSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=200, required=False)
+    center = LocationZoneSerializer(required=False)
+    radius = serializers.IntegerField(required=False)
+    perimiter = serializers.ListField(child=LocationZoneSerializer(), required=False)
+    maxLat = serializers.IntegerField(required=False)
+    maxLon = serializers.IntegerField(required=False)
+    minLat = serializers.IntegerField(required=False)
+    minLon = serializers.IntegerField(required=False)
+
 class ZoneViewset(DeviceViewset):
     authentication_classes = [ASDTAuthentication]
     permission_classes = (IsAuthenticated,)
 
     model = Zone
+    serializer = ZoneSerializer
 
     def get_id_list_allowed(self, request):
       """
@@ -40,8 +55,8 @@ class ZoneViewset(DeviceViewset):
         id_list.append(str(item.fetch().id) )
       return id_list
 
-    def create(self, request):
-      return Response({"success": True, "data": "create"})
+    # def create(self, request):
+    #   return Response({"success": True, "data": "create"})
 
     # def list(self, request):
     #   """

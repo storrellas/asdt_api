@@ -77,3 +77,71 @@ class TestCase(APITestCase):
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
+
+  def test_create_update_delete(self):
+    
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
+
+    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
+    group_2 = Group.objects.get(name='ADMIN_CHILD2_ASDT')
+
+    # Create
+    body = {
+      'name' : 'myname',
+      'center' : {'lat': 12.3, 'lon': 3.2 },
+      'radius' : 2,
+      'perimiter' : [{'lat': 12.3, 'lon': 3.2 }],
+      'maxLat' : 2,
+      'maxLon' : 2,
+      'minLat' : 2,
+      'minLon' : 2,
+      'groups': [ str(group.id) ]
+    }
+    response = self.client.post('/api/v2/zones/', body, format='json')
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
+
+    # Check properly created
+    zone = Zone.objects.get( name='myname' )
+    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
+    self.assertTrue( zone in group.devices.zones )
+    self.assertTrue( group in zone.groups )
+
+
+    # Update
+    body = {
+      'name' : 'mynameupdated',
+      'center' : {'lat': 12.3, 'lon': 3.2 },
+      'radius' : 2,
+      'perimiter' : [{'lat': 12.3, 'lon': 3.2 }],
+      'maxLat' : 2,
+      'maxLon' : 2,
+      'minLat' : 2,
+      'minLon' : 2,
+      'groups': [ str(group_2.id) ]
+    }
+    response = self.client.put('/api/v2/zones/{}/'.format(zone.id), body, format='json')
+    self.assertTrue(response.status_code == HTTPStatus.OK)    
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
+
+    # Check properly created
+    zone = Zone.objects.get( name='mynameupdated' )
+    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
+    group2 = Group.objects.get(name='ADMIN_CHILD2_ASDT')
+    self.assertFalse( zone in group.devices.zones )
+    self.assertTrue( zone in group2.devices.zones )
+    self.assertTrue( group2 in zone.groups )
+
+    # Delete
+    response = self.client.delete('/api/v2/zones/{}/'.format(zone.id), body, format='json')
+    self.assertTrue(response.status_code == HTTPStatus.OK)    
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
+
+    # Check properly created    
+    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
+    group2 = Group.objects.get(name='ADMIN_CHILD2_ASDT')
+    self.assertTrue( Zone.objects.filter( name='mynameupdated' ).count() == 0 )
