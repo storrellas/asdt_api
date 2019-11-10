@@ -241,23 +241,22 @@ class TestCase(APITestCase):
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['success'])
 
-
-  # def test_update(self):
+  def test_update(self):
     
-  #   # Get Token
-  #   self.authenticate("admin@asdt.eu", "asdt2019")
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
 
-  #   user = User.objects.get(email='admin_child@asdt.eu')
+    user = User.objects.get(email='admin_child@asdt.eu')
 
-  #   # Update user
-  #   body = {
-  #     "name": "Albert",
-  #   }
-  #   response = self.client.put('/{}/user/{}/'.format(settings.PREFIX, user.id), body)
-  #   self.assertTrue(response.status_code == HTTPStatus.OK)
-  #   response_json = json.loads(response.content.decode())
-  #   self.assertTrue(response_json['success'])
-  #   self.assertTrue(response_json['data']['name'] == 'Albert')
+    # Update user
+    body = {
+      "name": "Albert",
+    }
+    response = self.client.put('/{}/user/{}/'.format(settings.PREFIX, user.id), body)
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
+    self.assertTrue(response_json['data']['name'] == 'Albert')
 
   def test_delete(self):
     

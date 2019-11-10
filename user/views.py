@@ -34,14 +34,6 @@ from .models import *
 
 logger = get_logger()
 
-class UserSerializer(serializers.Serializer):
-    email = serializers.CharField(max_length=200, required=False)
-    password = serializers.CharField(max_length=72, required=False)
-    name = serializers.CharField(max_length=200, required=False)
-    role = serializers.ChoiceField(choices=['MASTER', 'ADMIN', 'EMPOWERED', 'VIEWER'], required=False)
-    hasGroup = serializers.BooleanField(required=False)
-    group = serializers.CharField(max_length=200, required=False)
-
 class UserAuthenticateView(APIView):
 
     def post(self, request):
@@ -83,7 +75,13 @@ class UserAuthenticateView(APIView):
         return Response({"success": False, "error": "DOES_NOT_EXIST"})
 
 
-
+class UserSerializer(serializers.Serializer):
+    email = serializers.CharField(max_length=200, required=False)
+    password = serializers.CharField(max_length=72, required=False)
+    name = serializers.CharField(max_length=200, required=False)
+    role = serializers.ChoiceField(choices=['MASTER', 'ADMIN', 'EMPOWERED', 'VIEWER'], required=False)
+    hasGroup = serializers.BooleanField(required=False)
+    group = serializers.CharField(max_length=200, required=False)
 
 class UserViewset(viewsets.ViewSet):
     authentication_classes = [ASDTAuthentication]
@@ -192,7 +190,7 @@ class UserViewset(viewsets.ViewSet):
         # Get user
         user = User.objects.get(id=pk)
         if request.user.has_power_over(user) == False:
-          return Response({"success": False, "error": "NOT_ALLOWED"})
+          raise APIException("NOT_ALLOWED")
 
         # Update User
         serializer = UserSerializer(data=request.data)
@@ -216,7 +214,7 @@ class UserViewset(viewsets.ViewSet):
                 # Append to group
                 target_group.users.append(user.id)
                 target_group.save()
-                
+          user.save()   
 
         # Generate response
         user = User.objects.get(id=pk)
