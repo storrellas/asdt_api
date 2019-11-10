@@ -96,28 +96,28 @@ class TestCase(APITestCase):
     self.assertEqual(response_json['data']['SETTING'], False)
     self.assertTrue(response_json['success'])
 
-  # def test_create_user(self):
+  def test_create_user(self):
     
-  #   # Get Token
-  #   self.authenticate("admin@asdt.eu", "asdt2019")
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
 
-  #   # Check not workin without login
-  #   body = {
-  #     "email": "user@test.eu",
-  #     "password": "asdt2019",
-  #     "name": "Oussama",
-  #     "role": "EMPOWERED",
-  #     "hasGroup": False
-  #   }
-  #   response = self.client.post('/{}/user/'.format(settings.PREFIX), body)
-  #   response_json = json.loads(response.content.decode())
-  #   self.assertTrue(response_json['success'])
+    # Check not workin without login
+    body = {
+      "email": "user@test.eu",
+      "password": "asdt2019",
+      "name": "Oussama",
+      "role": "EMPOWERED",
+      "hasGroup": False
+    }
+    response = self.client.post('/{}/user/'.format(settings.PREFIX), body)
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
 
-  #   # Get Token
-  #   self.authenticate("user@asdt.eu", "asdt2019")
+    # Get Token
+    self.authenticate("user@asdt.eu", "asdt2019")
 
-  #   # Delete created user
-  #   User.objects.filter(email='user@test.eu').delete()
+    # Delete created user
+    User.objects.filter(email='user@test.eu').delete()
 
   # def test_create_user_group(self):
     
@@ -196,17 +196,17 @@ class TestCase(APITestCase):
   #   self.assertFalse(response_json['success'])
 
 
-  # def test_list_admin(self):
+  def test_list_admin(self):
     
-  #   # Get Token
-  #   self.authenticate("admin@asdt.eu", "asdt2019")
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
 
-  #   # Get list of users
-  #   response = self.client.get('/{}/user/'.format(settings.PREFIX))
-  #   self.assertTrue(response.status_code == HTTPStatus.OK)
-  #   response_json = json.loads(response.content.decode())
-  #   self.assertTrue(response_json['success'])
-  #   self.assertEqual(len(response_json['data']), 7)
+    # Get list of users
+    response = self.client.get('/{}/user/'.format(settings.PREFIX))
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
+    self.assertEqual(len(response_json['data']), 7)
 
   def test_list_admin_child(self):
     

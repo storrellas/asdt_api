@@ -90,18 +90,20 @@ class UserViewset(viewsets.ViewSet):
     permission_classes = (IsAuthenticated, ASDTIsAdminPermission,)
 
     def list(self, request):
-
+      
       try:
-        if request.user.group is None:
-          raise APIException("NOT_ALLOWED")
+        if request.user.group.parent is None:
+          queryset = User.objects.all()
+        else:
 
-        # Get groups assigned
-        groups = request.user.group.get_full_children() 
-        groups.append( request.user.group )        
+          # Get groups assigned
+          groups = request.user.group.get_full_children() 
+          groups.append( request.user.group )        
 
-        # Queryset
-        group_list = [ item.id for item in groups ]
-        queryset = User.objects.filter(group__in=group_list)
+          # Queryset
+          group_list = [ item.id for item in groups ]
+
+          queryset = User.objects.filter(group__in=group_list)
 
         # Generate response
         user_dict = []
@@ -116,6 +118,7 @@ class UserViewset(viewsets.ViewSet):
       except Exception as e:
         print(e)
         return Response({"success": False, "error": str(e)})
+      
 
     def retrieve(self, request, pk=None):
 
@@ -133,6 +136,7 @@ class UserViewset(viewsets.ViewSet):
       return Response({ 'success': True, 'data': user.as_dict() } )
 
     def create(self, request):
+      
       serializer = UserSerializer(data=request.data)
       if serializer.is_valid() == False:
         print({'message': serializer.errors})
