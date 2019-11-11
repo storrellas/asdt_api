@@ -45,8 +45,7 @@ class TestCase(helper_tests.ASDTTestCase):
     # Add groups
     response = self.client.get('/{}/groups/{}/'.format(settings.PREFIX, group.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
+
 
   def test_get_not_allowed(self):
     
@@ -57,9 +56,7 @@ class TestCase(helper_tests.ASDTTestCase):
 
     # Add groups
     response = self.client.get('/{}/groups/{}/'.format(settings.PREFIX, group.id))
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertFalse(response_json['success'])
+    self.assertTrue(response.status_code == HTTPStatus.BAD_REQUEST)
 
   def test_get_all_admin(self):
     
@@ -70,8 +67,7 @@ class TestCase(helper_tests.ASDTTestCase):
     response = self.client.get('/{}/groups/all/'.format(settings.PREFIX))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
-    self.assertEqual(len(response_json['data']), 5)
+    self.assertEqual(len(response_json), 5)
 
   def test_get_all_viewer(self):
     
@@ -82,8 +78,7 @@ class TestCase(helper_tests.ASDTTestCase):
     response = self.client.get('/{}/groups/all/'.format(settings.PREFIX))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
-    self.assertEqual(len(response_json['data']), 1)
+    self.assertEqual(len(response_json), 1)
 
   def test_create(self):
     
@@ -94,8 +89,6 @@ class TestCase(helper_tests.ASDTTestCase):
     body = { 'name': 'TEST_GROUP' }
     response = self.client.post('/{}/groups/'.format(settings.PREFIX), body)
     self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
 
     # Check created
     user = User.objects.get(email='admin@asdt.eu')
@@ -118,8 +111,6 @@ class TestCase(helper_tests.ASDTTestCase):
     body = { 'name': 'TEST_GROUP', 'groupToAdd':  group_to_add.id }
     response = self.client.post('/{}/groups/'.format(settings.PREFIX), body)
     self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
 
     # Check created
     self.assertTrue(Group.objects.filter(name='TEST_GROUP').count() > 0)
@@ -143,8 +134,6 @@ class TestCase(helper_tests.ASDTTestCase):
     body = { 'name': 'ADMIN_CHILD_ASDT_UPDATED' }
     response = self.client.put('/{}/groups/{}/'.format(settings.PREFIX, group.id), body)
     self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
     self.assertTrue(Group.objects.filter(name='ADMIN_CHILD_ASDT_UPDATED').count() > 0)
 
     # Leave it as it was
@@ -166,8 +155,6 @@ class TestCase(helper_tests.ASDTTestCase):
     body = { 'name': 'ADMIN_CHILD_ASDT_UPDATED', 'newParent': group_parent.id }
     response = self.client.put('/{}/groups/{}/'.format(settings.PREFIX, group.id), body)
     self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
     self.assertTrue(Group.objects.filter(name='ADMIN_CHILD_ASDT_UPDATED').count() > 0)
 
     # Check parent modified
@@ -208,9 +195,7 @@ class TestCase(helper_tests.ASDTTestCase):
 
     # Delete Group
     response = self.client.delete('/{}/groups/{}/'.format(settings.PREFIX, delete_group.id))
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
+    self.assertTrue(response.status_code == HTTPStatus.NO_CONTENT)
     self.assertTrue(Group.objects.filter(name='DELETE_ASDT').count() == 0)
     self.assertTrue(Group.objects.filter(name='DELETE_CHILD_ASDT').count() == 0)
     user = User.objects.get(email='delete@asdt.eu')
@@ -225,8 +210,6 @@ class TestCase(helper_tests.ASDTTestCase):
     # Request users
     response = self.client.get('/{}/groups/{}/users/'.format(settings.PREFIX, admin_group.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
 
   def test_get_group_groups(self):
     admin_group = Group.objects.get(name='ADMIN_ASDT')
@@ -237,8 +220,6 @@ class TestCase(helper_tests.ASDTTestCase):
     # Request groups
     response = self.client.get('/{}/groups/{}/groups/'.format(settings.PREFIX, admin_group.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
 
   def test_add_user(self):
     
@@ -260,8 +241,7 @@ class TestCase(helper_tests.ASDTTestCase):
     # Add user to group
     response = self.client.post('/{}/groups/{}/users/{}/'.format(settings.PREFIX, group.id, user.id), {})
     self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
+
 
     # Check groups properly configured
     group_id = user.group.id
@@ -275,10 +255,9 @@ class TestCase(helper_tests.ASDTTestCase):
 
     # Delete user from group
     response = self.client.delete('/{}/groups/{}/users/{}/'.format(settings.PREFIX, group.id, user.id), {})
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
+    self.assertTrue(response.status_code == HTTPStatus.NO_CONTENT)
 
+    # Leave it as it was
     user = User.objects.get(email='test@asdt.eu')
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')
     self.assertNotEqual( user.group, group )
@@ -295,9 +274,8 @@ class TestCase(helper_tests.ASDTTestCase):
 
     # Add groups
     response = self.client.post('/{}/groups/{}/users/{}/'.format(settings.PREFIX, group.id, user.id), {})
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertFalse(response_json['success'])
+    self.assertTrue(response.status_code == HTTPStatus.BAD_REQUEST)
+
 
 
 

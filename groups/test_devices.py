@@ -49,8 +49,6 @@ class TestCase(helper_tests.ASDTTestCase):
     # Add inhibitor to group
     response = self.client.post('/{}/groups/{}/devices/detectors/{}/'.format(settings.PREFIX, group.id, detector.id), {})
     self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
 
     # Check operation
     detector = Detector.objects.get(name='detector4')
@@ -60,9 +58,7 @@ class TestCase(helper_tests.ASDTTestCase):
 
     # Remove inhibitor from group
     response = self.client.delete('/{}/groups/{}/devices/detectors/{}/'.format(settings.PREFIX, group.id, detector.id), {})
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
+    self.assertTrue(response.status_code == HTTPStatus.NO_CONTENT)
 
     # Check operation
     detector = Detector.objects.get(name='detector4')
@@ -81,8 +77,6 @@ class TestCase(helper_tests.ASDTTestCase):
     # Add inhibitor to group
     response = self.client.post('/{}/groups/{}/devices/drones/{}/'.format(settings.PREFIX, group.id, drone.id), {})
     self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
 
     # Check operation
     drone = Drone.objects.get(sn='4')
@@ -92,9 +86,7 @@ class TestCase(helper_tests.ASDTTestCase):
 
     # Remove inhibitor from group
     response = self.client.delete('/{}/groups/{}/devices/drones/{}/'.format(settings.PREFIX, group.id, drone.id), {})
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
+    self.assertTrue(response.status_code == HTTPStatus.NO_CONTENT)
 
     # Check operation
     drone = Drone.objects.get(sn='4')
@@ -113,8 +105,6 @@ class TestCase(helper_tests.ASDTTestCase):
     # Add inhibitor to group
     response = self.client.post('/{}/groups/{}/devices/inhibitors/{}/'.format(settings.PREFIX, group.id, inhibitor.id), {})
     self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
 
     # Check operation
     inhibitor = Inhibitor.objects.get(name='inhibitor4')
@@ -124,9 +114,7 @@ class TestCase(helper_tests.ASDTTestCase):
 
     # Remove inhibitor from group
     response = self.client.delete('/{}/groups/{}/devices/inhibitors/{}/'.format(settings.PREFIX, group.id, inhibitor.id), {})
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
+    self.assertTrue(response.status_code == HTTPStatus.NO_CONTENT)
 
     # Check operation
     inhibitor = Inhibitor.objects.get(name='inhibitor4')
@@ -145,8 +133,6 @@ class TestCase(helper_tests.ASDTTestCase):
     # Add inhibitor to group
     response = self.client.post('/{}/groups/{}/devices/zones/{}/'.format(settings.PREFIX, group.id, zone.id), {})
     self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
 
     # Check operation
     zone = Zone.objects.get(name='zone4')
@@ -156,9 +142,7 @@ class TestCase(helper_tests.ASDTTestCase):
 
     # Remove inhibitor from group
     response = self.client.delete('/{}/groups/{}/devices/zones/{}/'.format(settings.PREFIX, group.id, zone.id), {})
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
+    self.assertTrue(response.status_code == HTTPStatus.NO_CONTENT)
 
     # Check operation
     zone = Zone.objects.get(name='zone4')
@@ -175,8 +159,6 @@ class TestCase(helper_tests.ASDTTestCase):
     # Request drones
     response = self.client.get('/{}/groups/{}/drones/'.format(settings.PREFIX, admin_group.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
 
   def test_get_group_detectors(self):
     admin_group = Group.objects.get(name='ADMIN_ASDT')
@@ -187,8 +169,6 @@ class TestCase(helper_tests.ASDTTestCase):
     # Request detectors
     response = self.client.get('/{}/groups/{}/devices/detectors/'.format(settings.PREFIX, admin_group.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
 
   def test_get_group_inhibitors(self):
     admin_group = Group.objects.get(name='ADMIN_ASDT')
@@ -199,8 +179,6 @@ class TestCase(helper_tests.ASDTTestCase):
     # Request inhibitors
     response = self.client.get('/{}/groups/{}/devices/inhibitors/'.format(settings.PREFIX, admin_group.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
 
   def test_get_group_zones(self):
     admin_group = Group.objects.get(name='ADMIN_ASDT')
@@ -211,8 +189,6 @@ class TestCase(helper_tests.ASDTTestCase):
     # Request zones
     response = self.client.get('/{}/groups/{}/devices/zones/'.format(settings.PREFIX, admin_group.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
 
 
 

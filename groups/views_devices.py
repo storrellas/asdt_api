@@ -47,10 +47,10 @@ class GroupDevicesView(APIView):
         group.append_device(instance)
         group.save()
 
-        return Response({"success": True, "data": str(instance.id)})
+        return Response( instance.as_dict() )
       except Exception as e:
         print(e)
-        return Response({"success": False, "error": str(e)})
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
       
 
     def delete(self, request, *args, **kwargs):
@@ -71,10 +71,10 @@ class GroupDevicesView(APIView):
         group.remove_device(instance)
         group.save()
 
-        return Response({"success": True, "data": str(instance.id)})
+        return Response(status=status.HTTP_204_NO_CONTENT)
       except Exception as e:
         print(e)
-        return Response({"success": False, "error": str(e)})
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class GroupDetectorView(GroupDevicesView):
     authentication_classes = [ASDTAuthentication]

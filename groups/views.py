@@ -71,10 +71,10 @@ class GroupViewset(viewsets.ViewSet):
         else:
           logger.info('Parent is None')
 
-        return Response({'success': True, 'data': group.as_dict()})
+        return Response(group.as_dict())
       except Exception as e:
         print(e)
-        return Response({"success": False, "error": str(e)})
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     # def list(self, request):
     #   return Response({'success': True, 'data': ''})
@@ -85,10 +85,10 @@ class GroupViewset(viewsets.ViewSet):
         if request.user.is_allowed_group(group) == False:
           raise APIException("NOT_ALLOWED")
 
-        return Response({"success": True, "data": group.as_dict()})
+        return Response(group.as_dict())
       except Exception as e:
         print(e)
-        return Response({"success": False, "error": str(e)})
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, pk=None):
       try:
@@ -126,10 +126,10 @@ class GroupViewset(viewsets.ViewSet):
         group.name = request.data['name']
         group.save()
 
-        return Response({"success": True, "data": group.as_dict()})
+        return Response(group.as_dict())
       except Exception as e:
         print(e)
-        return Response({"success": False, "error": str(e)})
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk=None):
       try:
@@ -157,10 +157,10 @@ class GroupViewset(viewsets.ViewSet):
         # Delete grouip recursively
         group.delete_recursive()
 
-        return Response({"success": True, "data": ""})
+        return Response(status=status.HTTP_204_NO_CONTENT)
       except Exception as e:
         print(e)
-        return Response({"success": False, "error": "DOES_NOT_EXIST"})
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['get'], url_path='users')
     def users(self, request, sport_id = None, pk=None):
@@ -174,10 +174,10 @@ class GroupViewset(viewsets.ViewSet):
         for user in group.users:
            data.append(user.fetch().as_dict())
 
-        return Response({"success": True, "data": data})
+        return Response(data)
       except Exception as e:
         print(str(e))
-        return Response({"success": False, "error": str(e)})
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['get'], url_path='groups')
     def groups(self, request, pk=None):
@@ -191,10 +191,10 @@ class GroupViewset(viewsets.ViewSet):
         for group in group.childs:
           data.append(group.as_dict())
 
-        return Response({"success": True, "data": data})
+        return Response(data)
       except Exception as e:
         print(e)
-        return Response({"success": False, "error": "DOES_NOT_EXIST"})
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     def get_devices(self, request, func, pk=None):
       try:
@@ -206,12 +206,13 @@ class GroupViewset(viewsets.ViewSet):
         # data = []
         # for drone in group.devices.friendDrones:
         #   data.append(drone.fetch().as_dict())
+        # TODO: No necessary to return anything just a 204
         data = func(group)
 
-        return Response({"success": True, "data": data})
+        return Response(data)
       except Exception as e:
         print(str(e))
-        return Response({"success": False, "error": str(e)})
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['get'], url_path='drones')
     def drones(self, request, pk=None):
@@ -259,7 +260,7 @@ class GroupAllView(APIView):
       data_dict = []
       for group in group_list:
         data_dict.append(group.as_dict())
-      return Response({"success": True, "data": data_dict})
+      return Response(data_dict)
 
 class GroupUserView(APIView):
     authentication_classes = [ASDTAuthentication]
@@ -305,10 +306,10 @@ class GroupUserView(APIView):
         group.save()
         
 
-        return Response({"success": True, "data": str(user.id)})
+        return Response(user.as_dict())
       except Exception as e:
         print(e)
-        return Response({"success": False, "error": str(e)})
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
     def delete(self, request, *args, **kwargs):
@@ -344,7 +345,7 @@ class GroupUserView(APIView):
         user.group = None
         user.save()
 
-        return Response({"success": True, "data": str(user.id)})
+        return Response(status=status.HTTP_204_NO_CONTENT)
       except Exception as e:
         print(e)
-        return Response({"success": False, "error": str(e)})
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
