@@ -99,10 +99,10 @@ class LogViewSet(viewsets.ViewSet):
         data = []
         for item in queryset:
             data.append( item.as_dict() )            
-        return Response({ 'success': True, 'data': data })
+        return Response(data)
       except Exception as e:
         print(e)
-        return Response({"success": False, "error": str(e)})
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
  
 
@@ -134,10 +134,10 @@ class LogViewSet(viewsets.ViewSet):
                 'time': route.time.isoformat()
             })
         data['route'] = route_list
-        return Response({ 'success': True, 'data': data })
+        return Response(data)
       except Exception as e:
         print(e)
-        return Response({"success": False, "error": str(e)})
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 

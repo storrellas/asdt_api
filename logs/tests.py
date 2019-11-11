@@ -61,9 +61,8 @@ class TestCase(helper_tests.ASDTTestCase):
     # Get Logs
     response = self.client.get('/{}/logs/'.format(settings.PREFIX))
     self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertEqual(response_json['success'], True)    
-    self.assertEqual(len(response_json['data']), 1)
+    response_json = json.loads(response.content.decode()) 
+    self.assertEqual(len(response_json), 1)
 
   def test_logs_bydate(self):
     # Get token
@@ -77,8 +76,7 @@ class TestCase(helper_tests.ASDTTestCase):
     response = self.client.get('/{}/logs/'.format(settings.PREFIX), url_params)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
-    self.assertEqual(response_json['success'], True)
-    self.assertEqual(len(response_json['data']), 3)
+    self.assertEqual(len(response_json), 3)
 
     # Get Logs
     url_params = {
@@ -88,8 +86,7 @@ class TestCase(helper_tests.ASDTTestCase):
     response = self.client.get('/{}/logs/'.format(settings.PREFIX), url_params)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
-    self.assertEqual(response_json['success'], True)
-    self.assertEqual(len(response_json['data']), 2)
+    self.assertEqual(len(response_json), 2)
 
   def test_logs_bypage(self):
     # Get token
@@ -104,9 +101,8 @@ class TestCase(helper_tests.ASDTTestCase):
     response = self.client.get('/{}/logs/'.format(settings.PREFIX), url_params)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
-    self.assertEqual(response_json['success'], True)
-    self.assertEqual(len(response_json['data']), 3)
-    log_id = response_json['data'][0]['id']
+    self.assertEqual(len(response_json), 3)
+    log_id = response_json[0]['id']
     
 
     # Get Logs
@@ -118,8 +114,7 @@ class TestCase(helper_tests.ASDTTestCase):
     response = self.client.get('/{}/logs/'.format(settings.PREFIX), url_params)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
-    self.assertEqual(response_json['success'], True)
-    self.assertEqual(len(response_json['data']), 0)
+    self.assertEqual(len(response_json), 0)
 
     # Get by ID
     response = self.client.get('/{}/logs/{}/'.format(settings.PREFIX, log_id))
@@ -143,8 +138,7 @@ class TestCase(helper_tests.ASDTTestCase):
     response = self.client.get('/{}/logs/'.format(settings.PREFIX), url_params)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
-    self.assertEqual(response_json['success'], True)
-    self.assertEqual(len(response_json['data']), 1)
+    self.assertEqual(len(response_json), 1)
 
     # Get Logs
     url_params = {
@@ -155,8 +149,7 @@ class TestCase(helper_tests.ASDTTestCase):
     response = self.client.get('/{}/logs/'.format(settings.PREFIX), url_params)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
-    self.assertEqual(response_json['success'], True)
-    self.assertEqual(len(response_json['data']), 0)
+    self.assertEqual(len(response_json), 0)
 
 
   def test_logs_not_allowed(self):
@@ -171,7 +164,6 @@ class TestCase(helper_tests.ASDTTestCase):
     response = self.client.get('/{}/logs/'.format(settings.PREFIX), url_params)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
-    self.assertEqual(response_json['success'], True)
-    self.assertEqual(len(response_json['data']), 0)
+    self.assertEqual(len(response_json), 0)
 
 
