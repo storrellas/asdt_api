@@ -75,8 +75,6 @@ class DeviceTestCase(ASDTTestCase):
     # Get All
     response = self.client.get(self.base_url)
     self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
 
   def test_retrieve(self, id):
     
@@ -86,5 +84,3 @@ class DeviceTestCase(ASDTTestCase):
     # Get single
     response = self.client.get('{}/{}/'.format(self.base_url_trimmed, id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])

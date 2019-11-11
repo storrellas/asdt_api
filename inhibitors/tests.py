@@ -62,15 +62,12 @@ class TestCase(helper_tests.DeviceTestCase):
     }
     response = self.client.post('/{}/inhibitors/'.format(settings.PREFIX), body, format='json')
     self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
 
     # Check properly created
     inhibitor = Inhibitor.objects.get( name='myname' )
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')
     self.assertTrue( inhibitor in group.devices.inhibitors )
     self.assertTrue( group in inhibitor.groups )
-
 
     # Update
     body = {
@@ -82,8 +79,6 @@ class TestCase(helper_tests.DeviceTestCase):
     }
     response = self.client.put('/{}/inhibitors/{}/'.format(settings.PREFIX, inhibitor.id), body, format='json')
     self.assertTrue(response.status_code == HTTPStatus.OK)    
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
 
     # Check properly created
     inhibitor = Inhibitor.objects.get( name='mynameupdated' )
@@ -95,9 +90,7 @@ class TestCase(helper_tests.DeviceTestCase):
 
     # Delete
     response = self.client.delete('/{}/inhibitors/{}/'.format(settings.PREFIX, inhibitor.id), body, format='json')
-    self.assertTrue(response.status_code == HTTPStatus.OK)    
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
+    self.assertTrue(response.status_code == HTTPStatus.NO_CONTENT)    
 
     # Check properly created    
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')

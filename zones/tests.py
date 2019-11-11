@@ -68,8 +68,6 @@ class TestCase(helper_tests.DeviceTestCase):
     }
     response = self.client.post('/{}/zones/'.format(settings.PREFIX), body, format='json')
     self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
 
     # Check properly created
     zone = Zone.objects.get( name='myname' )
@@ -92,8 +90,6 @@ class TestCase(helper_tests.DeviceTestCase):
     }
     response = self.client.put('/{}/zones/{}/'.format(settings.PREFIX, zone.id), body, format='json')
     self.assertTrue(response.status_code == HTTPStatus.OK)    
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
 
     # Check properly created
     zone = Zone.objects.get( name='mynameupdated' )
@@ -105,9 +101,7 @@ class TestCase(helper_tests.DeviceTestCase):
 
     # Delete
     response = self.client.delete('/{}/zones/{}/'.format(settings.PREFIX, zone.id), body, format='json')
-    self.assertTrue(response.status_code == HTTPStatus.OK)    
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
+    self.assertTrue(response.status_code == HTTPStatus.NO_CONTENT)    
 
     # Check properly created    
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')

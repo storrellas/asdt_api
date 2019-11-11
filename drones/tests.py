@@ -68,8 +68,6 @@ class TestCase(helper_tests.DeviceTestCase):
     }
     response = self.client.post('/{}/drones/'.format(settings.PREFIX), body, format='json')
     self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
 
     # Check properly created
     drone = Drone.objects.get(sn='mysn')
@@ -87,8 +85,6 @@ class TestCase(helper_tests.DeviceTestCase):
     }
     response = self.client.put('/{}/drones/{}/'.format(settings.PREFIX, drone.id), body, format='json')
     self.assertTrue(response.status_code == HTTPStatus.OK)    
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
 
     # Check properly created
     drone = Drone.objects.get( sn='mysnupdated' )
@@ -100,9 +96,7 @@ class TestCase(helper_tests.DeviceTestCase):
 
     # Delete
     response = self.client.delete('/{}/drones/{}/'.format(settings.PREFIX, drone.id), body, format='json')
-    self.assertTrue(response.status_code == HTTPStatus.OK)    
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
+    self.assertTrue(response.status_code == HTTPStatus.NO_CONTENT) 
 
     # Check properly created    
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')
