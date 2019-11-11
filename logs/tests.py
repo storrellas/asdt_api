@@ -11,6 +11,7 @@ from unittest.mock import patch
 
 # Project imports
 from asdt_api import utils
+from asdt_api import tests
 from mongo_dummy import MongoDummy
 from user.models import User
 from groups.models import Group
@@ -19,8 +20,7 @@ from asdt_api.models import Location
 
 logger = utils.get_logger()
 
-class LogsTestCase(APITestCase):
-
+class LogsTestCase(tests.ASDTTestCase):
 
   @classmethod
   def setUpClass(cls):
@@ -28,15 +28,9 @@ class LogsTestCase(APITestCase):
     Called once in every suite
     """
     super().setUpClass()
-    logger.info("----------------------------")
-    logger.info("--- Generating scenario  ---")
-    logger.info("----------------------------")    
-    settings.MONGO_DB = 'asdt_test'
-    logger.info("DB Generated: {}".format(settings.MONGO_DB))
 
     mongo_dummy = MongoDummy()
     mongo_dummy.setup(settings.MONGO_DB, settings.MONGO_HOST, int(settings.MONGO_PORT))
-    mongo_dummy.generate_scenario()
 
     # Add logs for user with today date
     logger.info("Creating logs for today")
@@ -51,21 +45,13 @@ class LogsTestCase(APITestCase):
                         centerPoint=LogCenterPoint(lat=1.0, lon=2.0, aHeight=1.2, fHeight=2.3),
                         boundingBox=LogBoundingBox(maxLat=1.0, maxLon=2.0, minLat=1.2, minLon=2.3), route=route)
 
-
   def setUp(self):
     """
     Called before every test
     """
     pass
 
-  def authenticate(self, user, password):
-    # Get token
-    response = self.client.post('/{}/user/authenticate/'.format(settings.PREFIX), 
-                            { "email": user, "password": password })
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    access_token = response_json['data']['token']
-    self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
+
 
   def test_logs(self):
 

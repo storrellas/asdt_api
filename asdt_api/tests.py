@@ -18,6 +18,7 @@ logger = utils.get_logger()
 
 class ASDTTestCase(APITestCase):
 
+
   @classmethod
   def setUpClass(cls):
     """
