@@ -106,16 +106,16 @@ class TestCase(helper_tests.ASDTTestCase):
     # Get Token
     self.authenticate("admin@asdt.eu", "asdt2019")
 
-    # Add user to group
-    group_to_add = Group.objects.get(name='ADMIN_CHILD_ASDT')
-    body = { 'name': 'TEST_GROUP', 'groupToAdd':  group_to_add.id }
+    # Add group to group
+    parent = Group.objects.get(name='ADMIN_CHILD_ASDT')
+    body = { 'name': 'TEST_GROUP', 'parent':  parent.id }
     response = self.client.post('/{}/groups/'.format(settings.PREFIX), body)
     self.assertTrue(response.status_code == HTTPStatus.OK)
 
     # Check created
     self.assertTrue(Group.objects.filter(name='TEST_GROUP').count() > 0)
     group = Group.objects.get(name='TEST_GROUP')
-    self.assertEqual(group_to_add, group.parent)
+    self.assertEqual(parent, group.parent)
 
     # Remove resources
     group_to_add = Group.objects.get(name='ADMIN_CHILD_ASDT')

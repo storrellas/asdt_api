@@ -20,14 +20,12 @@ from asdt_api.authentication import *
 from asdt_api.models import Location
 
 from .models import *
-#from .serializers import *
 
 logger = get_logger()
 
 class GroupSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=200, required=False)
-    groupToAdd = serializers.CharField(max_length=200, required=False)
-
+    parent = serializers.CharField(max_length=200, required=False)
 
 class GroupViewset(viewsets.ViewSet):
     authentication_classes = [ASDTAuthentication]
@@ -50,10 +48,9 @@ class GroupViewset(viewsets.ViewSet):
         group = Group.objects.create(name=data['name'])
         
         # Determine relations
-        # NOTE: I would rename this parameter by parent
-        if 'groupToAdd' in data:
-          logger.info('Parent is specificed ' + data['groupToAdd'])
-          parent_group = Group.objects.get(id=data['groupToAdd'])
+        if 'parent' in data:
+          logger.info('Parent is specificed ' + data['parent'])
+          parent_group = Group.objects.get(id=data['parent'])
           if request.user.is_allowed_group(parent_group) == False:
             raise APIException("NOT_ALLOWED")
 
