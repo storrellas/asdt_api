@@ -104,8 +104,8 @@ class GroupViewset(viewsets.ViewSet):
 
         # Update parent
         # NOTE: I would rename this parameter by parent
-        if 'newParent' in request.data:
-          parent_group = Group.objects.get(id=request.data['newParent'])
+        if 'parent' in request.data:
+          parent_group = Group.objects.get(id=request.data['parent'])
           if request.user.group == group or request.user.group.is_parent_of(group):
             pass
           else:

@@ -152,7 +152,7 @@ class TestCase(helper_tests.ASDTTestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Update group
-    body = { 'name': 'ADMIN_CHILD_ASDT_UPDATED', 'newParent': group_parent.id }
+    body = { 'name': 'ADMIN_CHILD_ASDT_UPDATED', 'parent': group_parent.id }
     response = self.client.put('/{}/groups/{}/'.format(settings.PREFIX, group.id), body)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     self.assertTrue(Group.objects.filter(name='ADMIN_CHILD_ASDT_UPDATED').count() > 0)
