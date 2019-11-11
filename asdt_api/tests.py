@@ -18,7 +18,6 @@ logger = utils.get_logger()
 
 class ASDTTestCase(APITestCase):
 
-
   @classmethod
   def setUpClass(cls):
     """
@@ -39,7 +38,7 @@ class ASDTTestCase(APITestCase):
     """
     Called before every test
     """
-    pass
+    super().setUp()
 
   def authenticate(self, user, password):
     # Get token
@@ -50,3 +49,41 @@ class ASDTTestCase(APITestCase):
     access_token = response_json['data']['token']
     self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
 
+class DeviceTestCase(ASDTTestCase):
+
+  base_url = None
+  base_url_trimmed = None
+
+
+  def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+    # Remove last trailing slash
+    self.base_url_trimmed = self.base_url[:-1] if self.base_url[-1] == '/' else self.base_url
+
+  def setUp(self):
+    """
+    Called before every test
+    """
+    super().setUp()
+
+  def test_list(self):
+    
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
+
+    # Get All
+    response = self.client.get(self.base_url)
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])
+
+  def test_retrieve(self, id):
+    
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
+
+    # Get single
+    response = self.client.get('{}/{}/'.format(self.base_url_trimmed, id))
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['success'])

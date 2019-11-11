@@ -16,7 +16,9 @@ from .models import *
 
 logger = utils.get_logger()
 
-class TestCase(tests.ASDTTestCase):
+class TestCase(tests.DeviceTestCase):
+
+  base_url = '/{}/drones/'.format(settings.PREFIX)
 
   @classmethod
   def setUpClass(cls):
@@ -29,7 +31,15 @@ class TestCase(tests.ASDTTestCase):
     """
     Called before every test
     """
-    pass
+    super().setUp()
+
+  def test_list(self):
+    super().test_list()
+
+  def test_retrieve(self):    
+    # Retrieve detector
+    instance = Drone.objects.get(sn='1')
+    super().test_retrieve(instance.id)
 
   def test_get_model(self):
     # Get token
@@ -40,31 +50,6 @@ class TestCase(tests.ASDTTestCase):
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(len(response_json['data']) > 0)
-
-  def test_list(self):
-    
-    # Get Token
-    self.authenticate("admin@asdt.eu", "asdt2019")
-
-    # Get All
-    response = self.client.get('/{}/drones/'.format(settings.PREFIX))
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
-
-  def test_retrieve(self):
-    
-    # Get Token
-    self.authenticate("admin@asdt.eu", "asdt2019")
-
-    # Retrieve detector
-    drone = Drone.objects.get(sn='1')
-
-    # Get single
-    response = self.client.get('/{}/drones/{}/'.format(settings.PREFIX, drone.id))
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
 
   def test_create_update_delete(self):
     

@@ -19,7 +19,10 @@ from user.models import User
 
 logger = utils.get_logger()
 
-class TestCase(tests.ASDTTestCase):
+
+class TestCase(tests.DeviceTestCase):
+
+  base_url = '/{}/zones/'.format(settings.PREFIX)
 
   @classmethod
   def setUpClass(cls):
@@ -32,32 +35,16 @@ class TestCase(tests.ASDTTestCase):
     """
     Called before every test
     """
-    pass
+    super().setUp()
 
   def test_list(self):
-    
-    # Get Token
-    self.authenticate("admin@asdt.eu", "asdt2019")
+    super().test_list()
 
-    # Get All
-    response = self.client.get('/{}/zones/'.format(settings.PREFIX))
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
-
-  def test_retrieve(self):
-    
-    # Get Token
-    self.authenticate("admin@asdt.eu", "asdt2019")
-
+  def test_retrieve(self):    
     # Retrieve detector
-    zone = Zone.objects.get(name='zone1')
+    instance = Zone.objects.get(name='zone1')
+    super().test_retrieve(instance.id)
 
-    # Get single
-    response = self.client.get('/{}/zones/{}/'.format(settings.PREFIX, zone.id))
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
 
   def test_create_update_delete(self):
     

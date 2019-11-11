@@ -19,7 +19,9 @@ from user.models import User
 
 logger = utils.get_logger()
 
-class TestCase(tests.ASDTTestCase):
+class TestCase(tests.DeviceTestCase):
+
+  base_url = '/{}/inhibitors/'.format(settings.PREFIX)
 
   @classmethod
   def setUpClass(cls):
@@ -32,32 +34,15 @@ class TestCase(tests.ASDTTestCase):
     """
     Called before every test
     """
-    pass
+    super().setUp()
 
   def test_list(self):
-    
-    # Get Token
-    self.authenticate("admin@asdt.eu", "asdt2019")
+    super().test_list()
 
-    # Get All
-    response = self.client.get('/{}/inhibitors/'.format(settings.PREFIX))
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
-
-  def test_retrieve(self):
-    
-    # Get Token
-    self.authenticate("admin@asdt.eu", "asdt2019")
-
-    # Retrieve detector
-    inhibitor = Inhibitor.objects.get(name='inhibitor1')
-
-    # Get All
-    response = self.client.get('/{}/inhibitors/{}/'.format(settings.PREFIX, inhibitor.id))
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
+  def test_retrieve(self):    
+    # Retrieve inhibitor
+    instance = Inhibitor.objects.get(name='inhibitor1')
+    super().test_retrieve(instance.id)
 
   def test_create_update_delete(self):
     
