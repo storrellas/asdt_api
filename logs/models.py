@@ -56,7 +56,8 @@ class Log(ASDTDocument):
   driverLocation = EmbeddedDocumentField(Location)
   homeLocation = EmbeddedDocumentField(Location)
   maxHeight = FloatField(default=0.0)
-  distanceTravelled = FloatField(default=0.0)
+  # NOTE: This is bad spelled
+  distanceTraveled = FloatField(default=0.0)
   distanceToDetector = FloatField(default=0.0)
   centerPoint = EmbeddedDocumentField(LogCenterPoint, default=LogCenterPoint())
   boundingBox = EmbeddedDocumentField(LogBoundingBox, default=LogBoundingBox())
@@ -71,7 +72,7 @@ class Log(ASDTDocument):
     item['sn'] = self.sn
     item['model'] = self.model
     item['maxHeight'] = self.maxHeight
-    item['distanceTravelled'] = self.distanceTravelled
+    item['distanceTraveled'] = self.distanceTraveled
     item['distanceToDetector'] = self.distanceToDetector
     item['driverLocation'] = {'lat': self.driverLocation.lat, 'lon': self.driverLocation.lon }
     item['homeLocation'] = {'lat': self.homeLocation.lat, 'lon': self.homeLocation.lon }

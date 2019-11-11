@@ -41,7 +41,7 @@ class LogsTestCase(tests.ASDTTestCase):
                         model='ABC', sn='1', productId=1234,
                         detectors=user.group.devices.detectors,
                         driverLocation=Location(lat=1.2,lon=3.4), homeLocation=Location(lat=1.2,lon=3.4),
-                        maxHeight=12, distanceTravelled=12, distanceToDetector=12,
+                        maxHeight=12, distanceTraveled=12, distanceToDetector=12,
                         centerPoint=LogCenterPoint(lat=1.0, lon=2.0, aHeight=1.2, fHeight=2.3),
                         boundingBox=LogBoundingBox(maxLat=1.0, maxLon=2.0, minLat=1.2, minLon=2.3), route=route)
 

@@ -9,7 +9,7 @@ from asdt_api import utils
 
 # Configure hosts
 machine_stag = {}
-machine_stag['host'] = 'sec2sky@148.56.238.102'
+machine_stag['host'] = 'sec2sky@asdtdev.mooo.com'
 machine_stag['connect_kwargs'] = {"key_filename": os.path.expanduser("~") +  "/.ssh/id_rsa"}
 
 # machine_pro = {}

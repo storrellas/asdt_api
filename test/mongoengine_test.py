@@ -97,7 +97,7 @@ class Log(ASDTDocument):
   driverLocation = EmbeddedDocumentField(Location)
   homeLocation = EmbeddedDocumentField(Location)
   maxHeight = FloatField(default=0.0)
-  distanceTravelled = FloatField(default=0.0)
+  distanceTraveled = FloatField(default=0.0)
   distanceToDetector = FloatField(default=0.0)
   centerPoint = EmbeddedDocumentField(LogCenterPoint, default=LogCenterPoint())
   boundingBox = EmbeddedDocumentField(LogBoundingBox, default=LogCenterPoint())
