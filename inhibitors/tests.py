@@ -21,6 +21,18 @@ logger = utils.get_logger()
 
 class TestCase(tests.ASDTTestCase):
 
+  @classmethod
+  def setUpClass(cls):
+    """
+    Called once in every suite
+    """
+    super().setUpClass()
+
+  def setUp(self):
+    """
+    Called before every test
+    """
+    pass
 
   def test_list(self):
     
