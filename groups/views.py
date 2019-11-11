@@ -34,17 +34,18 @@ class GroupViewset(viewsets.ViewSet):
     permission_classes = (IsAuthenticated,)
 
     def create(self, request):
-      if request.user.role != 'ADMIN':
-        return Response({"success": False, "data": "NOT_ALLOWED"})
-
-      # Group serializer
-      serializer = GroupSerializer(data=request.data)
-      if serializer.is_valid() == False:
-        print({'message': serializer.errors})
-        return Response({'success': False, 'data': 'DATABASE_ERRORS'})
-      data = serializer.validated_data
 
       try:
+        if request.user.role != 'ADMIN':
+          raise APIException('NOT_ALLOWED')
+
+        # Group serializer
+        serializer = GroupSerializer(data=request.data)
+        if serializer.is_valid() == False:
+          print({'message': serializer.errors})
+          raise APIException(str(serialiezer.errors))
+        data = serializer.validated_data
+
         # Create group
         group = Group.objects.create(name=data['name'])
         

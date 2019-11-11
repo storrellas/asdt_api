@@ -20,7 +20,7 @@ from asdt_api.models import Location
 
 logger = utils.get_logger()
 
-class LogsTestCase(helper_tests.ASDTTestCase):
+class TestCase(helper_tests.ASDTTestCase):
 
   @classmethod
   def setUpClass(cls):
@@ -107,6 +107,7 @@ class LogsTestCase(helper_tests.ASDTTestCase):
     self.assertEqual(response_json['success'], True)
     self.assertEqual(len(response_json['data']), 3)
     log_id = response_json['data'][0]['id']
+    
 
     # Get Logs
     url_params = {
@@ -123,7 +124,6 @@ class LogsTestCase(helper_tests.ASDTTestCase):
     # Get by ID
     response = self.client.get('/{}/logs/{}/'.format(settings.PREFIX, log_id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
-
 
     # Get KML
     response = self.client.get('/{}/logs/{}/kml/'.format(settings.PREFIX, log_id))
@@ -171,6 +171,7 @@ class LogsTestCase(helper_tests.ASDTTestCase):
     response = self.client.get('/{}/logs/'.format(settings.PREFIX), url_params)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
-    self.assertEqual(response_json['success'], False)
+    self.assertEqual(response_json['success'], True)
+    self.assertEqual(len(response_json['data']), 0)
 
 
