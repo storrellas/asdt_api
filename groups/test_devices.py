@@ -12,7 +12,7 @@ from unittest.mock import patch
 
 # Projet imports
 from asdt_api import utils
-from asdt_api import tests
+from asdt_api import helper_tests
 from mongo_dummy import MongoDummy
 from .models import *
 from user.models import User
@@ -23,7 +23,7 @@ from zones.models import Zone
 
 logger = utils.get_logger()
 
-class TestCase(tests.ASDTTestCase):
+class TestCase(helper_tests.ASDTTestCase):
 
   @classmethod
   def setUpClass(cls):

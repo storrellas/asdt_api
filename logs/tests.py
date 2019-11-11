@@ -11,7 +11,7 @@ from unittest.mock import patch
 
 # Project imports
 from asdt_api import utils
-from asdt_api import tests
+from asdt_api import helper_tests
 from mongo_dummy import MongoDummy
 from user.models import User
 from groups.models import Group
@@ -20,7 +20,7 @@ from asdt_api.models import Location
 
 logger = utils.get_logger()
 
-class LogsTestCase(tests.ASDTTestCase):
+class LogsTestCase(helper_tests.ASDTTestCase):
 
   @classmethod
   def setUpClass(cls):

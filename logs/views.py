@@ -33,6 +33,9 @@ class LogViewSet(viewsets.ViewSet):
     page_size = 200
 
     def get_allowed(self, user, queryset):
+        """
+        Returns the id's of the logs allowed for the user
+        """
 
         # Check existance of group
         if user.group is None:

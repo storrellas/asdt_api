@@ -58,7 +58,8 @@ class DeviceTestCase(ASDTTestCase):
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
     # Remove last trailing slash
-    self.base_url_trimmed = self.base_url[:-1] if self.base_url[-1] == '/' else self.base_url
+    if self.base_url is not None:
+      self.base_url_trimmed = self.base_url[:-1] if self.base_url[-1] == '/' else self.base_url
 
   def setUp(self):
     """

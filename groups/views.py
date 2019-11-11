@@ -54,7 +54,7 @@ class GroupViewset(viewsets.ViewSet):
           logger.info('Parent is specificed ' + data['groupToAdd'])
           parent_group = Group.objects.get(id=data['groupToAdd'])
           if request.user.is_allowed_group(parent_group) == False:
-            return Response({"success": False, "error": "NOT_ALLOWED"})
+            raise APIException("NOT_ALLOWED")
 
 
           parent_group.childs.append(group)
@@ -82,23 +82,23 @@ class GroupViewset(viewsets.ViewSet):
       try:
         group = Group.objects.get(id=pk)
         if request.user.is_allowed_group(group) == False:
-          return Response({"success": False, "error": "NOT_ALLOWED"})
+          raise APIException("NOT_ALLOWED")
 
         return Response({"success": True, "data": group.as_dict()})
       except Exception as e:
         print(e)
-        return Response({"success": False, "error": "DOES_NOT_EXIST"})
+        return Response({"success": False, "error": str(e)})
 
     def update(self, request, pk=None):
-      # Check role
-      if request.user.role != 'ADMIN':
-        return Response({"success": False, "data": "NOT_ALLOWED"})
-
-
       try:
+        # Check role
+        if request.user.role != 'ADMIN':
+          raise APIException("NOT_ALLOWED")
+        
+        # Check allowed group
         group = Group.objects.get(id=pk)
         if request.user.is_allowed_group(group) == False:
-          return Response({"success": False, "error": "NOT_ALLOWED"})
+          raise APIException("NOT_ALLOWED")
 
 
         # Update parent
@@ -108,7 +108,7 @@ class GroupViewset(viewsets.ViewSet):
           if request.user.group == group or request.user.group.is_parent_of(group):
             pass
           else:
-            return Response({"success": False, "error": "NOT_ALLOWED"})
+            raise APIException("NOT_ALLOWED")
 
           # Remove group from old parent
           group.parent.childs.remove(group)
@@ -128,21 +128,22 @@ class GroupViewset(viewsets.ViewSet):
         return Response({"success": True, "data": group.as_dict()})
       except Exception as e:
         print(e)
-        return Response({"success": False, "error": "DOES_NOT_EXIST"})
+        return Response({"success": False, "error": str(e)})
 
     def delete(self, request, pk=None):
-      # Check role
-      if request.user.role != 'ADMIN':
-        return Response({"success": False, "data": "NOT_ALLOWED"})
-
       try:
+        # Check role
+        if request.user.role != 'ADMIN':
+          raise APIException("NOT_ALLOWED")
+
+        # Check allowed group
         group = Group.objects.get(id=pk)
         if request.user.is_allowed_group(group) == False:
-          return Response({"success": False, "error": "NOT_ALLOWED"})
+          raise APIException("NOT_ALLOWED")
 
         # Do not remove if root group
         if 'hasGroup' in group and group.hasGroup == True and group.parent is None:
-          return Response({"success": False, "data": "CANNOT_REMOVE_ROOT_GROUP"})
+          raise APIException("CANNOT_REMOVE_ROOT_GROUP")
 
         # Delete operation
         # if 'recursive' in request.query_params:
@@ -165,7 +166,7 @@ class GroupViewset(viewsets.ViewSet):
       try:
         group = Group.objects.get(id=pk)
         if request.user.is_allowed_group(group) == False:
-          return Response({"success": False, "error": "NOT_ALLOWED"})
+          raise APIException("NOT_ALLOWED")
 
         # Generate data
         data = []
@@ -175,14 +176,14 @@ class GroupViewset(viewsets.ViewSet):
         return Response({"success": True, "data": data})
       except Exception as e:
         print(str(e))
-        return Response({"success": False, "error": "DOES_NOT_EXIST"})
+        return Response({"success": False, "error": str(e)})
 
     @action(detail=True, methods=['get'], url_path='groups')
     def groups(self, request, pk=None):
       try:
         group = Group.objects.get(id=pk)
         if request.user.is_allowed_group(group) == False:
-          return Response({"success": False, "error": "NOT_ALLOWED"})
+          raise APIException("NOT_ALLOWED")
 
         # Generate data
         data = []
@@ -198,7 +199,7 @@ class GroupViewset(viewsets.ViewSet):
       try:
         group = Group.objects.get(id=pk)
         if request.user.is_allowed_group(group) == False:
-          return Response({"success": False, "error": "NOT_ALLOWED"})
+          raise APIException("NOT_ALLOWED")
         
         # Generate data - Old version
         # data = []
@@ -209,7 +210,7 @@ class GroupViewset(viewsets.ViewSet):
         return Response({"success": True, "data": data})
       except Exception as e:
         print(str(e))
-        return Response({"success": False, "error": "DOES_NOT_EXIST"})
+        return Response({"success": False, "error": str(e)})
 
     @action(detail=True, methods=['get'], url_path='drones')
     def drones(self, request, pk=None):
