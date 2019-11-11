@@ -175,7 +175,8 @@ class UserViewset(viewsets.ViewSet):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
           data = serializer.validated_data
-          user.update(**data)
+          if len(data) > 0:
+            user.update(**data)
           if 'password' in data:
             user.set_password(data['password'])
           if group is not None:    
@@ -196,7 +197,6 @@ class UserViewset(viewsets.ViewSet):
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk=None):
-
       try:
        
         # Get user instance

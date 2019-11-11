@@ -248,6 +248,38 @@ class TestCase(helper_tests.ASDTTestCase):
     group.save()
     user.delete()
 
+  def test_update_only_group(self):
+    
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
+
+
+    # Create custom user    
+    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
+    user = User.objects.create(email='sergi@asdt.eu', name='Sergi')
+    user.set_password('asdt2019')
+    
+    # Update user
+    body = {
+      "group": str(group.id)
+    }
+    response = self.client.put('/{}/user/{}/'.format(settings.PREFIX, user.id), body)
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
+    self.assertTrue(response_json['email'] == 'sergi@asdt.eu')
+
+    # Check properly created
+    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
+    user = User.objects.get(email='sergi@asdt.eu')
+    self.assertTrue(user in group.users)
+    self.assertTrue(user.group == group)
+
+    # Leave it as it was
+    group.users.remove(user)
+    group.save()
+    user.delete()
+
+
   def test_delete(self):
     
     # Get Token
