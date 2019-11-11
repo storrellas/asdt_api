@@ -135,8 +135,11 @@ class DeviceViewset(viewsets.ViewSet):
 
         # Update object        
         data = serializer.validated_data
+
+        # Check if parameter to update
         instance = self.model.objects.get(id=pk)
-        instance.update(**data)
+        if len(data) > 0:
+          instance.update(**data)
         
         # Check whether groups exist and apply them to model        
         if 'groups' in request.data:
