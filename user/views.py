@@ -49,31 +49,24 @@ class UserAuthenticateView(APIView):
       # Check whether user exists
       try:
         user = User.objects.get(email=email)
-        if bcrypt.checkpw(password.encode(), user.password.encode()):
+        if bcrypt.checkpw(password.encode(), user.password.encode()) == False:
+          raise APIException("WRONG_PASSWORD")
 
-          # Generate payload
-          iat = int(time.time()) 
-          exp = int(time.time()) + 6 * 3600        
-          payload = {
-            'type': 'user',
-            'id': str(user.id),
-            'iss': 'ASDT', 
-            'iat': iat,
-            'exp': exp
-          }
-          encoded = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
-          data = {
-            'success': True,
-            'data':{
-              'token': encoded
-            }
-          }
-          return Response(data)
-        else:
-          return Response({"success": False, "error": "WRONG_PASSWORD"})
+        # Generate payload
+        iat = int(time.time()) 
+        exp = int(time.time()) + 6 * 3600        
+        payload = {
+          'type': 'user',
+          'id': str(user.id),
+          'iss': 'ASDT', 
+          'iat': iat,
+          'exp': exp
+        }
+        encoded = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
+        return Response({ 'token': encoded })
       except Exception as e:
         print(e)
-        return Response({"success": False, "error": "DOES_NOT_EXIST"})
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserSerializer(serializers.Serializer):
@@ -110,28 +103,26 @@ class UserViewset(viewsets.ViewSet):
           # Remove non-necessary
           del user['displayOptions']
           user_dict.append( user )
-
-        return Response({ 'success': True, 'data': user_dict } )
-
+        return Response( user_dict )
       except Exception as e:
         print(e)
-        return Response({"success": False, "error": str(e)})
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
       
 
     def retrieve(self, request, pk=None):
 
-      # Get user
-      queryset = User.objects.filter(id=pk)
-      if len(queryset) != 1:
-        logger.info("Retreived: " + str(len(queryset)))
-        return Response({"success": False, "error": "NOT_FOUND"})
-      
-      # Get user instance
-      user = queryset.first()
-      if request.user.has_power_over(user) == False:
-        return Response({"success": False, "error": "NOT_ALLOWED"})
+      try:
+        # Get user
+        user = User.objects.get(id=pk)
+        
+        # Get user instance
+        if request.user.has_power_over(user) == False:
+          return Response({"error": "NOT_ALLOWED"}, status=status.HTTP_400_BAD_REQUEST)
 
-      return Response({ 'success': True, 'data': user.as_dict() } )
+        return Response( user.as_dict() )
+      except Exception as e:
+        print(e)
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     def create(self, request):
       
@@ -160,12 +151,10 @@ class UserViewset(viewsets.ViewSet):
 
           user.save()   
 
-        # Generate response
-        return Response({'success': True, 'data': user.as_dict() } )
-
+        return Response( user.as_dict() )
       except Exception as e:
         print(str(e))
-        return Response({'success': False, 'data': str(e)})
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, pk=None):
 
@@ -201,11 +190,10 @@ class UserViewset(viewsets.ViewSet):
 
         # Generate response
         user = User.objects.get(id=pk)
-        return Response({'success': True, 'data': user.as_dict() } )
-
+        return Response( user.as_dict() )
       except Exception as e:
         print(str(e))
-        return Response({'success': False, 'data': str(e)})
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk=None):
 
@@ -223,8 +211,7 @@ class UserViewset(viewsets.ViewSet):
         # Delete user
         user.delete()
 
-        return Response({ 'success': True } )
-
+        return Response(status=status.HTTP_204_NO_CONTENT)
       except Exception as e:
         print(str(e))
         return Response({'sucess': False, 'data': str(e)})
@@ -234,7 +221,7 @@ class UserMeView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):     
-        return Response({'success': True, 'data': request.user.as_dict()})
+        return Response(request.user.as_dict())
 
 class UserToolsView(APIView):
 
@@ -260,7 +247,7 @@ class UserToolsView(APIView):
     }
 
     def get(self, request):
-      return Response({'success': True, 'data': self.allowed_tools[ request.user.role ]})
+      return Response( self.allowed_tools[ request.user.role ])
 
 # class DisplayOptions(APIView):
 

@@ -47,13 +47,13 @@ class TestCase(helper_tests.ASDTTestCase):
     response = self.client.get('/{}/user/me/'.format(settings.PREFIX))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
-    self.assertEqual(response_json['data']['email'], 'admin@asdt.eu')
+    self.assertEqual(response_json['email'], 'admin@asdt.eu')
 
     # Check tools
     response = self.client.get('/{}/user/me/tools/'.format(settings.PREFIX))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
-    self.assertEqual(response_json['data']['SETTING'], True)
+    self.assertEqual(response_json['SETTING'], True)
 
 
   def test_get_token_viewer(self):
@@ -69,15 +69,13 @@ class TestCase(helper_tests.ASDTTestCase):
     response = self.client.get('/{}/user/me/'.format(settings.PREFIX))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
-    self.assertEqual(response_json['data']['email'], 'viewer@asdt.eu')
-    self.assertTrue(response_json['success'])
+    self.assertEqual(response_json['email'], 'viewer@asdt.eu')
 
     # Check tools
     response = self.client.get('/{}/user/me/tools/'.format(settings.PREFIX))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
-    self.assertEqual(response_json['data']['SETTING'], False)
-    self.assertTrue(response_json['success'])
+    self.assertEqual(response_json['SETTING'], False)
 
   def test_create_user(self):
     
@@ -94,15 +92,12 @@ class TestCase(helper_tests.ASDTTestCase):
     }
     response = self.client.post('/{}/user/'.format(settings.PREFIX), body)
     response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
 
     # Get token
     self.client.credentials(HTTP_AUTHORIZATION='')
     response = self.client.post('/{}/user/authenticate/'.format(settings.PREFIX), 
                                 { "email": "user@test.eu", "password": "asdt2019" })
     self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
 
     # Delete created user
     User.objects.filter(email='user@test.eu').delete()
@@ -127,16 +122,13 @@ class TestCase(helper_tests.ASDTTestCase):
     response = self.client.post('/{}/user/'.format(settings.PREFIX), body)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
-    self.assertTrue(response_json['data']['group'] == str(group.id))
+    self.assertTrue(response_json['group'] == str(group.id))
 
     # Get token
     self.client.credentials(HTTP_AUTHORIZATION='')
     response = self.client.post('/{}/user/authenticate/'.format(settings.PREFIX), 
                                 { "email": "user2@test.eu", "password": "asdt2019" })
     self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
 
     # Delete user
     user = User.objects.get(email='user2@test.eu')
@@ -182,10 +174,7 @@ class TestCase(helper_tests.ASDTTestCase):
       "group": group.id
     }
     response = self.client.post('/{}/user/'.format(settings.PREFIX), body)
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertFalse(response_json['success'])
-
+    self.assertTrue(response.status_code == HTTPStatus.BAD_REQUEST)
 
   def test_list_admin(self):
     
@@ -196,8 +185,7 @@ class TestCase(helper_tests.ASDTTestCase):
     response = self.client.get('/{}/user/'.format(settings.PREFIX))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
-    self.assertEqual(len(response_json['data']), 7)
+    self.assertEqual(len(response_json), 7)
 
   def test_list_admin_child(self):
     
@@ -208,8 +196,7 @@ class TestCase(helper_tests.ASDTTestCase):
     response = self.client.get('/{}/user/'.format(settings.PREFIX))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
-    self.assertEqual(len(response_json['data']), 2)
+    self.assertEqual(len(response_json), 2)
 
   def test_retreive(self):
     
@@ -221,8 +208,6 @@ class TestCase(helper_tests.ASDTTestCase):
     # Get list of users
     response = self.client.get('/{}/user/{}/'.format(settings.PREFIX, user.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
 
   def test_update(self):
     
@@ -244,16 +229,13 @@ class TestCase(helper_tests.ASDTTestCase):
     response = self.client.put('/{}/user/{}/'.format(settings.PREFIX, user.id), body)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
-    self.assertTrue(response_json['data']['email'] == 'albert@asdt.eu')
+    self.assertTrue(response_json['email'] == 'albert@asdt.eu')
 
     # Get token
     self.client.credentials(HTTP_AUTHORIZATION='')
     response = self.client.post('/{}/user/authenticate/'.format(settings.PREFIX), 
                                 { "email": "albert@asdt.eu", "password": "asdt2018" })
     self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
 
     # Check properly created
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')
@@ -281,9 +263,7 @@ class TestCase(helper_tests.ASDTTestCase):
 
     # Delete user
     response = self.client.delete('/{}/user/{}/'.format(settings.PREFIX, user.id))
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-    response_json = json.loads(response.content.decode())
-    self.assertTrue(response_json['success'])
+    self.assertTrue(response.status_code == HTTPStatus.NO_CONTENT)
     self.assertTrue( User.objects.filter(email='test_delete@asdt.eu').count() == 0 )
 
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')

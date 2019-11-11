@@ -46,7 +46,7 @@ class ASDTTestCase(APITestCase):
                             { "email": user, "password": password })
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
-    access_token = response_json['data']['token']
+    access_token = response_json['token']
     self.client.credentials(HTTP_AUTHORIZATION='Basic ' + access_token)
 
 class DeviceTestCase(ASDTTestCase):
