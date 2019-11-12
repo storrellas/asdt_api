@@ -15,7 +15,7 @@ router.register(r'', GroupViewset, basename='user')
 
 urlpatterns = [
     path('all/', GroupAllView.as_view()),
-    path('<str:group_id>/users/<str:user_id>/', GroupUserView.as_view()),
+    # path('<str:group_id>/users/<str:user_id>/', GroupUserView.as_view()),
     # path('<str:group_id>/devices/detectors/<str:instance_id>/', GroupDetectorView.as_view()),
     # path('<str:group_id>/devices/drones/<str:instance_id>/', GroupDroneView.as_view()),
     # path('<str:group_id>/devices/inhibitors/<str:instance_id>/', GroupInhibitorView.as_view()),
