@@ -7,9 +7,7 @@ LOG_DATE_FORMAT = '%d/%m/%Y %H:%M:%S'
 
 def get_logger(appName='Console', logLevel=logging.INFO):
     logger = logging.getLogger(appName)
-
     logger.setLevel(logLevel)
-
     if not any([isinstance(handler, logging.StreamHandler) for handler in logger.handlers]):
         logger.addHandler(get_console_handler())
 
