@@ -18,7 +18,7 @@
 version: "3"
 services:
   asdt_api_2_0:
-    image: asdt_api:3.0
+    image: asdt_api:2.0
     restart: always
     tty: true
     build:
