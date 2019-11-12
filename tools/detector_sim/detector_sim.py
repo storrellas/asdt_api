@@ -113,7 +113,7 @@ class Client(object):
     }
     logger.info ("Lat:{}/Lon:{}".format(self.aLatAnt, self.aLonAnt))
 
-
+toDegrees = 174533.0
 def encode109():
   lonAnt = 1.8
   latAnt = 41.7
@@ -138,16 +138,60 @@ def encode109():
 
   # 25 -> + 14 bytes [serial number] (string)
   sn_ba = bytearray(info['sn'], 'utf-8')
-  print(type(sn_ba))
-  #print(len(sn_ba))
-  ini = 25
-  fin = 25 + 14
-  frame[ini:fin] = sn_ba
+  #sn_ba = bytearray()
+  #sn_ba.extend(map(ord, info['sn']))
+  frame[25:25+len(sn_ba)] = sn_ba
 
+  # 41 -> + 4 bytes [long drone]    
+  lon = int(info['droneLocation']['lon'] * toDegrees).to_bytes(4, 'little', signed=True)
+  frame[41:41+4] = lon
+  # 45 -> + 4 byes [lat drone]
+  lat = int(info['droneLocation']['lat'] * toDegrees).to_bytes(4, 'little', signed=True)
+  frame[45:45+4] = lat
+
+  # 49 -> + 2 bytes [absolute height] - NOTE: aHeight does not exist
+  # aHeight = int(info['droneLocation']['aHeight'] * toDegrees).to_bytes(2, 'little', signed=True)
+  # frame[49:49+2] = aHeight
+  # 51 -> + 2 bytes [floor height]
+  fHeight = int(info['droneLocation']['fHeight'] * 10).to_bytes(2, 'little', signed=True)
+  frame[51:51+2] = fHeight
+
+  # NOTE: WATCH OUT THIS ONE IS LAT first, LON second
+  # 69 -> + 4 bytes [lat driver] 
+  lat = int(info['driverLocation']['lat'] * toDegrees).to_bytes(4, 'little', signed=True)
+  frame[69:69+4] = lat
+  # 73 -> + 4 bytes [lon driver]
+  lon = int(info['driverLocation']['lon'] * toDegrees).to_bytes(4, 'little', signed=True)
+  frame[73:73+4] = lon
+
+  # 77 -> + 4 bytes [lon home]
+  lon = int(info['homeLocation']['lon'] * toDegrees).to_bytes(4, 'little', signed=True)
+  frame[77:77+4] = lon
+  # 81 -> + 4 bytes [lat home]
+  lat = int(info['homeLocation']['lat'] * toDegrees).to_bytes(4, 'little', signed=True)
+  frame[81:81+4] = lat
+
+  # 85 -> + 1 byte [product type]
+  productId = int(info['productId']).to_bytes(1, 'little', signed=False)
+  frame[85:85] = productId
+
+
+
+  print(type(sn_ba))
+  print(type(frame))
 
   #
   #frame[3] = 0xA2
+  print(sn_ba)
   print(frame)
+  print("-- After --")
+  print(lon)
+  print(frame[41:45])
+  print(lat)
+  print(frame[45:49])
+  print(frame[85])
+
+  print(len(frame))
 
 
 
