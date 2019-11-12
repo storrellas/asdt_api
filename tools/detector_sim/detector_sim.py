@@ -18,11 +18,14 @@ logger = get_logger()
 logger.propagate = False
 
 # Configuration variables
-host = 'http://asdtdev.mooo.com'
-ws_host = 'ws://asdtdev.mooo.com'
-detector = '5db1b05fedd685190719f924'
-password = 'test'
-PORT = 80
+# host = 'http://asdtdev.mooo.com'
+# ws_host = 'ws://asdtdev.mooo.com'
+# detector = '5db1b05fedd685190719f924'
+# password = 'test'
+host = 'http://localhost:8080'
+ws_host = 'ws://localhost:8080'
+detector = '5dcafabcb6da1533e91e377d'
+password = 'Asdt2019.'
 
 class Client(object):
   """
@@ -58,8 +61,8 @@ class Client(object):
     Start WS infinite loop
     """
     self.connect()
-    PeriodicCallback(self.keep_alive, 20000).start()
-    PeriodicCallback(self.send_detection, 1000).start()
+    #PeriodicCallback(self.keep_alive, 20000).start()
+    PeriodicCallback(self.send_detection, 2000).start()
     self.ioloop.start()
 
   @gen.coroutine
@@ -85,19 +88,21 @@ class Client(object):
         self.ws = None
         break
 
-  def keep_alive(self):
-    if self.ws is None:
-      self.connect()
-    else:
-      self.ws.write_message("keep alive")
+  # def keep_alive(self):
+  #   if self.ws is None:
+  #     self.connect()
+  #   else:
+  #     self.ws.write_message("keep alive")
 
+  # Class variables
   aLonAnt = 1.8
   aLatAnt = 41.7
+  toDegrees = 174533.0
   def send_detection(self):
 
     self.aLonAnt = self.aLonAnt + random.random()/100
     self.aLatAnt = self.aLatAnt + random.random()/100
-    infoA = { 
+    info = { 
       'sn': "888XIXXPXX0025", 
       'driverLocation': { 
         'lon': self.aLonAnt, 'lat': self.aLatAnt, 
@@ -112,25 +117,11 @@ class Client(object):
       'productId': 16 
     }
     logger.info ("Lat:{}/Lon:{}".format(self.aLatAnt, self.aLonAnt))
+    frame = self.encode109(info)
+    print(frame)
+    self.ws.write_message(bytes(frame))
 
-  toDegrees = 174533.0
-  def encode109(self):
-    lonAnt = 1.8
-    latAnt = 41.7
-    info = { 
-      'sn': "888XIXXPXX0025", 
-      'driverLocation': { 
-        'lon': lonAnt, 'lat': latAnt, 
-        'fHeight': random.random()*10 
-      },
-      'droneLocation': { 
-        'lon': lonAnt, 'lat': latAnt, 
-        'fHeight': random.random()*10 
-      }, 
-      'homeLocation': { 'lat': 0.0, 'lon': 0.0 }, 
-      'driverLocation': { 'lat': 0.0, 'lon': 0.0 }, 
-      'productId': 16 
-    }
+  def encode109(self, info):
 
     # Declare frame
     frame = bytearray(109)
@@ -175,7 +166,8 @@ class Client(object):
     productId = int(info['productId']).to_bytes(1, 'little', signed=False)
     frame[85:85] = productId
 
-    print(frame)
+    #print(frame)
+    return frame
 
 
 
@@ -200,14 +192,13 @@ if __name__ == "__main__":
 
   # Create websocket client
   client = Client(ws_host + "/api", 5)
-  client.encode109()  
   
-  # result = client.login(detector, password)
-  # if not result:
-  #   logger.error("Login Failed. Aborting")
-  #   sys.exit(0)
-  # # Infinite loop
-  # client.start()
+  result = client.login(detector, password)
+  if not result:
+    logger.error("Login Failed. Aborting")
+    sys.exit(0)
+  # Infinite loop
+  client.start()
   
 
 

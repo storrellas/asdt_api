@@ -239,18 +239,23 @@ class MongoDummy:
     detector1 = Detector.objects.create(name='detector1', password='asdt2019', 
                             location=DetectorLocation(lat=0, lon=0, height=0),
                             groups=[])
+    detector1.set_password('asdt2019')
     detector2 = Detector.objects.create(name='detector2', password='asdt2019', 
                             location=DetectorLocation(lat=0, lon=0, height=0),
                             groups=[admin_group])
+    detector2.set_password('asdt2019')
     detector3 = Detector.objects.create(name='detector3', password='asdt2019', 
                             location=DetectorLocation(lat=0, lon=0, height=0),
                             groups=[admin_child_group])
+    detector3.set_password('asdt2019')
     detector4 = Detector.objects.create(name='detector4', password='asdt2019', 
                             location=DetectorLocation(lat=0, lon=0, height=0),
                             groups=[admin_child_child_group])
+    detector4.set_password('asdt2019')
     detector5 = Detector.objects.create(name='detector5', password='asdt2019', 
                             location=DetectorLocation(lat=0, lon=0, height=0),
-                            groups=[viewer_group])                            
+                            groups=[viewer_group])
+    detector5.set_password('asdt2019')                            
 
     logger.info("Created {}. Done!".format(Detector.objects.all().count()) )
 

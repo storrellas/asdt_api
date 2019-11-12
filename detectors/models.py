@@ -1,5 +1,6 @@
 
 import datetime
+import bcrypt 
 
 # Django import - useless
 from django.db import models
@@ -21,10 +22,25 @@ class DetectorLocation(EmbeddedDocument):
 class Detector(ASDTDocument):
   meta = {'collection': 'detectors'}
 
+  __original_password = None
+
   name = StringField(required=True, unique=True, default='')
   password = StringField(required=True, default='')
   location = EmbeddedDocumentField(DetectorLocation)
   groups = ListField(ReferenceField(Group, reverse_delete_rule = NULLIFY))
+
+  def set_password(self, password):
+    self.password = bcrypt.hashpw(password.encode(), bcrypt.gensalt(10)).decode()
+    self.__original_password = self.password
+    return self.save()
+
+  def save(self, *args, **kwargs):
+    # Update password
+    if self.password != self.__original_password:
+      self.password = bcrypt.hashpw(self.password.encode(), bcrypt.gensalt(10)).decode()
+      self.__original_password = self.password
+    return super().save(*args, **kwargs)
+
 
   def as_dict(self):
     item = {}
