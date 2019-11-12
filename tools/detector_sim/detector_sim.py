@@ -18,14 +18,14 @@ logger = get_logger()
 logger.propagate = False
 
 # Configuration variables
-# host = 'http://asdtdev.mooo.com'
-# ws_host = 'ws://asdtdev.mooo.com'
-# detector = '5db1b05fedd685190719f924'
-# password = 'test'
-host = 'http://localhost:8080'
-ws_host = 'ws://localhost:8080'
-detector = '5dcafabcb6da1533e91e377d'
-password = 'Asdt2019.'
+host = 'http://asdtdev.mooo.com'
+ws_host = 'ws://asdtdev.mooo.com'
+detector = '5db1b05fedd685190719f924'
+password = 'test'
+# host = 'http://localhost:8080'
+# ws_host = 'ws://localhost:8080'
+# detector = '5dcafabcb6da1533e91e377d'
+# password = 'Asdt2019.'
 
 class Client(object):
   """
@@ -119,7 +119,7 @@ class Client(object):
     logger.info ("Lat:{}/Lon:{}".format(self.aLatAnt, self.aLonAnt))
     frame = self.encode109(info)
     print(frame)
-    self.ws.write_message(bytes(frame))
+    self.ws.write_message(bytes(frame), binary=True)
 
   def encode109(self, info):
 
