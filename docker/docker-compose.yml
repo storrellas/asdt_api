@@ -17,8 +17,8 @@
 
 version: "3"
 services:
-  asdt_api:
-    image: asdt_api:2.0
+  asdt_api_2_0:
+    image: asdt_api:3.0
     restart: always
     tty: true
     build:
@@ -34,7 +34,7 @@ services:
      driver: "syslog"
      options:
        tag: "asdt"
-  mongo_express:
+  mongo_express_2_0:
     image: mongo-express:0.49
     restart: always
     volumes:
