@@ -103,10 +103,12 @@ class DeviceTestCase(ASDTTestCase):
     # Create
     response = self.client.post('{}/'.format(self.base_url_trimmed), body, format='json')
     self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
 
     # Check properly created
-    instance = self.model.objects.get( name='myname' )
+    instance = self.model.objects.get( id=response_json['id'] )
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')
+    self.assertEqual( instance.name, 'myname' )
     self.assertTrue( instance in group.devices.zones )
     self.assertTrue( group.has_device(instance) )
     self.assertTrue( group in instance.groups )
@@ -116,9 +118,10 @@ class DeviceTestCase(ASDTTestCase):
     self.assertTrue(response.status_code == HTTPStatus.OK)    
 
     # Check properly created
-    instance = self.model.objects.get( name='mynameupdated' )
+    instance = self.model.objects.get( id=response_json['id'] )
     group = Group.objects.get(id=body['groups'][0])
     group_updated = Group.objects.get(id=bodyupdated['groups'][0])
+    self.assertEqual( instance.name, 'mynameupdated' )
     self.assertFalse( group.has_device(instance) )
     self.assertTrue( group_updated.has_device(instance) )
     self.assertTrue( group_updated in instance.groups )
@@ -147,24 +150,26 @@ class DeviceTestCase(ASDTTestCase):
     group_updated = Group.objects.get(id=bodyupdated['groups'][0])
 
     # Create
-    response = self.client.post('/{}/zones/'.format(settings.PREFIX), body, format='json')
+    response = self.client.post('{}/'.format(self.base_url_trimmed), body, format='json')
     self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
 
     # Check properly created
-    instance = self.model.objects.get( name='myname' )
+    instance = self.model.objects.get( id=response_json['id'] )
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')
-    self.assertTrue( zone in group.devices.zones )
-    self.assertTrue( group in zone.groups )
+    self.assertTrue( group.has_device(instance) )
+    self.assertTrue( group in instance.groups )
 
 
     # Update
-    response = self.client.put('/{}/zones/{}/'.format(settings.PREFIX, zone.id), bodyupdated, format='json')
+    response = self.client.put('{}/{}/'.format(self.base_url_trimmed, instance.id), bodyupdated, format='json')
     self.assertTrue(response.status_code == HTTPStatus.OK)    
 
-    # Check properly created
-    instance = self.model.objects.get( name='myname' )
+    # Check properly updated
+    instance = self.model.objects.get( id=response_json['id'] )
     group = Group.objects.get(id=body['groups'][0])
     group_updated = Group.objects.get(id=bodyupdated['groups'][0])
-    self.assertFalse( group.has_device(zone) )
-    self.assertTrue( group_updated.has_device(zone) )
-    self.assertTrue( group_updated in zone.groups )
+    self.assertEqual( instance.name, 'myname' )
+    self.assertFalse( group.has_device(instance) )
+    self.assertTrue( group_updated.has_device(instance) )
+    self.assertTrue( group_updated in instance.groups )
