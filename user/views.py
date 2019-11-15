@@ -220,8 +220,8 @@ class UserMeView(APIView):
     authentication_classes = [ASDTAuthentication]
     permission_classes = (IsAuthenticated,)
 
-    def get(self, request):     
-        return Response(request.user.as_dict())
+    def get(self, request): 
+      return Response(request.user.as_dict())
 
 class UserToolsView(APIView):
 

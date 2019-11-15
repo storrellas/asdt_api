@@ -193,49 +193,6 @@ class GroupViewset(viewsets.ViewSet):
         print(e)
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    def get_devices(self, request, func, pk=None):
-      try:
-        group = Group.objects.get(id=pk)
-        if request.user.is_allowed_group(group) == False:
-          raise APIException("NOT_ALLOWED")
-        
-        # Generate data - Old version
-        # data = []
-        # for drone in group.devices.friendDrones:
-        #   data.append(drone.fetch().as_dict())
-        # TODO: No necessary to return anything just a 204
-        data = func(group)
-
-        return Response(data)
-      except Exception as e:
-        print(str(e))
-        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-    @action(detail=True, methods=['get'], url_path='devices/drones')
-    def drones(self, request, pk=None):
-      return self.get_devices(request, 
-                  (lambda group: [item.fetch().as_dict() for item in group.devices.friendDrones] ), 
-                  pk )
-
-    @action(detail=True, methods=['get'], url_path='devices/detectors')
-    def detectors(self, request, pk=None):
-      return self.get_devices(request, 
-                  (lambda group: [item.fetch().as_dict() for item in group.devices.detectors] ), 
-                  pk )
-
-    @action(detail=True, methods=['get'], url_path='devices/inhibitors')
-    def inhibitors(self, request, pk=None):
-      return self.get_devices(request, 
-                  (lambda group: [item.fetch().as_dict() for item in group.devices.inhibitors] ), 
-                  pk )
-
-    @action(detail=True, methods=['get'], url_path='devices/zones')
-    def zones(self, request, pk=None):
-      return self.get_devices(request, 
-                  (lambda group: [item.fetch().as_dict() for item in group.devices.zones] ), 
-                  pk )
-
-
 class GroupAllView(APIView):
     authentication_classes = [ASDTAuthentication]
     permission_classes = (IsAuthenticated,)

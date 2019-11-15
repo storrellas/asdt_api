@@ -27,17 +27,39 @@ from drones.models import Drone
 logger = get_logger()
 
 
-class GroupDevicesView(APIView):
+class GroupDevicesViewset(viewsets.ViewSet):
 
-    def post(self, request, *args, **kwargs):
+    authentication_classes = [ASDTAuthentication]
+    permission_classes = (IsAuthenticated, )
+    model = None
+    queryset = None
+    group = None
+
+    def list(self, request, *args, **kwargs):
       try:
-        # TODO: Put all this logic into a function
-        if request.user.role != 'ADMIN':
+        self.group = Group.objects.get(id=kwargs['group_id'])
+        if request.user.is_allowed_group(self.group) == False:
           raise APIException("NOT_ALLOWED")
+        
+        # Generate data
+        data = []
+        for instance in self.get_devicelist():
+          data.append(instance.fetch().as_dict())
+        # TODO: No necessary to return anything just a 204
+        #data = func(group)
+
+        return Response(data)
+      except Exception as e:
+        print(str(e))
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+    def update(self, request, *args, **kwargs):
+      try:
 
         # Retrieve models
         group = Group.objects.get(id=kwargs['group_id'])
-        instance = self.model.objects.get(id=kwargs['instance_id'])
+        instance = self.model.objects.get(id=kwargs['pk'])
         if request.user.is_allowed_group(group) == False:
           raise APIException("NOT_ALLOWED")
 
@@ -55,13 +77,10 @@ class GroupDevicesView(APIView):
 
     def delete(self, request, *args, **kwargs):
       try:
-        # TODO: Put all this logic into a function
-        if request.user.role != 'ADMIN':
-          raise APIException("NOT_ALLOWED")
 
         # Retrieve models
         group = Group.objects.get(id=kwargs['group_id'])
-        instance = self.model.objects.get(id=kwargs['instance_id'])
+        instance = self.model.objects.get(id=kwargs['pk'])
         if request.user.is_allowed_group(group) == False:
           raise APIException("NOT_ALLOWED")
 
@@ -76,23 +95,42 @@ class GroupDevicesView(APIView):
         print(e)
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-class GroupDetectorView(GroupDevicesView):
+class GroupDetectorViewset(GroupDevicesViewset):
+
     authentication_classes = [ASDTAuthentication]
     permission_classes = (IsAuthenticated,)
     model = Detector
+    group = None
 
-class GroupDroneView(GroupDevicesView):
+    def get_devicelist(self):
+      return self.group.devices.detectors
+
+class GroupDroneViewset(GroupDevicesViewset):
+
     authentication_classes = [ASDTAuthentication]
     permission_classes = (IsAuthenticated,)
     model = Drone
+    group = None
 
-class GroupInhibitorView(GroupDevicesView):
+    def get_devicelist(self):
+      return self.group.devices.friendDrones
+
+class GroupInhibitorViewset(GroupDevicesViewset):
+
     authentication_classes = [ASDTAuthentication]
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
     model = Inhibitor
+    group = None
 
-class GroupZoneView(GroupDevicesView):
+    def get_devicelist(self):
+      return self.group.devices.inhibitors
+
+class GroupZoneViewset(GroupDevicesViewset):
+
     authentication_classes = [ASDTAuthentication]
     permission_classes = (IsAuthenticated,)
     model = Zone
+    group = None
 
+    def get_devicelist(self):
+      return self.group.devices.zones

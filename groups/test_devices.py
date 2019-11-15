@@ -47,7 +47,7 @@ class TestCase(helper_tests.ASDTTestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Add inhibitor to group
-    response = self.client.post('/{}/groups/{}/devices/detectors/{}/'.format(settings.PREFIX, group.id, detector.id), {})
+    response = self.client.put('/{}/groups/{}/devices/detectors/{}/'.format(settings.PREFIX, group.id, detector.id), {})
     self.assertTrue(response.status_code == HTTPStatus.OK)
 
     # Check operation
@@ -75,7 +75,7 @@ class TestCase(helper_tests.ASDTTestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Add inhibitor to group
-    response = self.client.post('/{}/groups/{}/devices/drones/{}/'.format(settings.PREFIX, group.id, drone.id), {})
+    response = self.client.put('/{}/groups/{}/devices/drones/{}/'.format(settings.PREFIX, group.id, drone.id), {})
     self.assertTrue(response.status_code == HTTPStatus.OK)
 
     # Check operation
@@ -103,7 +103,7 @@ class TestCase(helper_tests.ASDTTestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Add inhibitor to group
-    response = self.client.post('/{}/groups/{}/devices/inhibitors/{}/'.format(settings.PREFIX, group.id, inhibitor.id), {})
+    response = self.client.put('/{}/groups/{}/devices/inhibitors/{}/'.format(settings.PREFIX, group.id, inhibitor.id), {})
     self.assertTrue(response.status_code == HTTPStatus.OK)
 
     # Check operation
@@ -131,7 +131,7 @@ class TestCase(helper_tests.ASDTTestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Add inhibitor to group
-    response = self.client.post('/{}/groups/{}/devices/zones/{}/'.format(settings.PREFIX, group.id, zone.id), {})
+    response = self.client.put('/{}/groups/{}/devices/zones/{}/'.format(settings.PREFIX, group.id, zone.id), {})
     self.assertTrue(response.status_code == HTTPStatus.OK)
 
     # Check operation
@@ -149,46 +149,6 @@ class TestCase(helper_tests.ASDTTestCase):
     group = Group.objects.get(name='ADMIN_ASDT')
     self.assertFalse( zone in group.devices.zones )
     self.assertFalse( group in zone.groups )
-
-  def test_get_group_drones(self):
-    admin_group = Group.objects.get(name='ADMIN_ASDT')
-
-    # Get Token
-    self.authenticate("admin@asdt.eu", "asdt2019")
-
-    # Request drones
-    response = self.client.get('/{}/groups/{}/drones/'.format(settings.PREFIX, admin_group.id))
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-
-  def test_get_group_detectors(self):
-    admin_group = Group.objects.get(name='ADMIN_ASDT')
-
-    # Get Token
-    self.authenticate("admin@asdt.eu", "asdt2019")
-
-    # Request detectors
-    response = self.client.get('/{}/groups/{}/devices/detectors/'.format(settings.PREFIX, admin_group.id))
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-
-  def test_get_group_inhibitors(self):
-    admin_group = Group.objects.get(name='ADMIN_ASDT')
-
-    # Get Token
-    self.authenticate("admin@asdt.eu", "asdt2019")
-
-    # Request inhibitors
-    response = self.client.get('/{}/groups/{}/devices/inhibitors/'.format(settings.PREFIX, admin_group.id))
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-
-  def test_get_group_zones(self):
-    admin_group = Group.objects.get(name='ADMIN_ASDT')
-
-    # Get Token
-    self.authenticate("admin@asdt.eu", "asdt2019")
-
-    # Request zones
-    response = self.client.get('/{}/groups/{}/devices/zones/'.format(settings.PREFIX, admin_group.id))
-    self.assertTrue(response.status_code == HTTPStatus.OK)
 
   def get_group_devices(self, url):
     
