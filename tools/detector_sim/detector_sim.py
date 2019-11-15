@@ -27,18 +27,29 @@ password = 'test'
 # detector = '5dcafabcb6da1533e91e377d'
 # password = 'Asdt2019.'
 
-class Client(object):
+class DetectorWSClient(object):
   """
-  Client to connect to Websocket
+  Client to connect to Websocket simulating logs generated 
+  by detector localising drones
   """
   token = None
   url = None
   ioloop = None
   ws = None
 
-  def __init__(self, url, timeout):
+  # Drone status
+  sn = None
+  lat = None
+  lon = None
+  __toDegrees = 174533.0
+
+  def __init__(self, url, sn, lat_ini, lon_ini, timeout):
     self.url = url
     self.timeout = timeout
+
+    self.sn = sn
+    self.lat = lat_ini
+    self.lon = lon_ini
     self.ioloop = IOLoop.instance()
     self.ws = None
 
@@ -46,7 +57,7 @@ class Client(object):
     """
     Logs detector in and stores token
     """
-    body = { 'id': id, 'password': password}
+    body = { 'id': id, 'password': password }
     response = requests.post(host + '/detector/authenticate', data=body)
     # Get token
     if response.status_code == HTTPStatus.OK:
@@ -94,31 +105,30 @@ class Client(object):
   #   else:
   #     self.ws.write_message("keep alive")
 
-  # Class variables
-  aLonAnt = 1.8
-  aLatAnt = 41.7
-  toDegrees = 174533.0
+
   def send_detection(self):
 
-    self.aLonAnt = self.aLonAnt + random.random()/100
-    self.aLatAnt = self.aLatAnt + random.random()/100
+    self.lat = self.lat + random.random()/100
+    self.lon = self.lon + random.random()/100
+    
     info = { 
-      'sn': "888XIXXPXX0025", 
+      'sn': self.sn, 
       'driverLocation': { 
-        'lon': self.aLonAnt, 'lat': self.aLatAnt, 
+        'lat': self.lat, 'lon': self.lon,
         'fHeight': random.random()*10 
       },
       'droneLocation': { 
-        'lon': self.aLonAnt, 'lat': self.aLatAnt, 
+        'lat': self.lat, 'lon': self.lon,  
         'fHeight': random.random()*10 
       }, 
       'homeLocation': { 'lat': 0.0, 'lon': 0.0 }, 
       'driverLocation': { 'lat': 0.0, 'lon': 0.0 }, 
       'productId': 16 
     }
-    logger.info ("Lat:{}/Lon:{}".format(self.aLatAnt, self.aLonAnt))
-    frame = self.encode109(info)
-    print(frame)
+    logger.info ("Sending detection -> SN:{}/Lat:{}/Lon:{}".format(self.sn, self.lat, self.lon))
+
+    # Encode package
+    frame = self.encode109(info)    
     self.ws.write_message(bytes(frame), binary=True)
 
   def encode109(self, info):
@@ -134,14 +144,14 @@ class Client(object):
     frame[25:25+len(sn_ba)] = sn_ba
 
     # 41 -> + 4 bytes [long drone]    
-    lon = int(info['droneLocation']['lon'] * self.toDegrees).to_bytes(4, 'little', signed=True)
+    lon = int(info['droneLocation']['lon'] * self.__toDegrees).to_bytes(4, 'little', signed=True)
     frame[41:41+4] = lon
     # 45 -> + 4 byes [lat drone]
-    lat = int(info['droneLocation']['lat'] * self.toDegrees).to_bytes(4, 'little', signed=True)
+    lat = int(info['droneLocation']['lat'] * self.__toDegrees).to_bytes(4, 'little', signed=True)
     frame[45:45+4] = lat
 
     # 49 -> + 2 bytes [absolute height] - NOTE: aHeight does not exist
-    # aHeight = int(info['droneLocation']['aHeight'] * toDegrees).to_bytes(2, 'little', signed=True)
+    # aHeight = int(info['droneLocation']['aHeight'] * __toDegrees).to_bytes(2, 'little', signed=True)
     # frame[49:49+2] = aHeight
     # 51 -> + 2 bytes [floor height]
     fHeight = int(info['droneLocation']['fHeight'] * 10).to_bytes(2, 'little', signed=True)
@@ -149,17 +159,17 @@ class Client(object):
 
     # NOTE: WATCH OUT THIS ONE IS LAT first, LON second
     # 69 -> + 4 bytes [lat driver] 
-    lat = int(info['driverLocation']['lat'] * self.toDegrees).to_bytes(4, 'little', signed=True)
+    lat = int(info['driverLocation']['lat'] * self.__toDegrees).to_bytes(4, 'little', signed=True)
     frame[69:69+4] = lat
     # 73 -> + 4 bytes [lon driver]
-    lon = int(info['driverLocation']['lon'] * self.toDegrees).to_bytes(4, 'little', signed=True)
+    lon = int(info['driverLocation']['lon'] * self.__toDegrees).to_bytes(4, 'little', signed=True)
     frame[73:73+4] = lon
 
     # 77 -> + 4 bytes [lon home]
-    lon = int(info['homeLocation']['lon'] * self.toDegrees).to_bytes(4, 'little', signed=True)
+    lon = int(info['homeLocation']['lon'] * self.__toDegrees).to_bytes(4, 'little', signed=True)
     frame[77:77+4] = lon
     # 81 -> + 4 bytes [lat home]
-    lat = int(info['homeLocation']['lat'] * self.toDegrees).to_bytes(4, 'little', signed=True)
+    lat = int(info['homeLocation']['lat'] * self.__toDegrees).to_bytes(4, 'little', signed=True)
     frame[81:81+4] = lat
 
     # 85 -> + 1 byte [product type]
@@ -186,13 +196,15 @@ def signal_handler(sig, frame):
 
 if __name__ == "__main__":
 
-  
-  logger.info("Login detector with ({}/{})".format(detector, password))
+  # Configure signals
   signal.signal(signal.SIGINT, signal_handler)
 
   # Create websocket client
-  client = Client(ws_host + "/api", 5)
-  
+  lat = 41.7
+  lon = 1.8
+  sn = "888XIXXPXX0025"
+  client = DetectorWSClient(ws_host + "/api", sn, lat, lon, 5)    
+  logger.info("Login detector with ({}/{})".format(detector, password))
   result = client.login(detector, password)
   if not result:
     logger.error("Login Failed. Aborting")
