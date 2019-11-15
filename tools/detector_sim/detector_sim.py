@@ -23,16 +23,17 @@ from utils import get_logger
 logger = get_logger()
 logger.propagate = False
 
-# Configuration variables
-host = 'http://asdtdev.mooo.com'
-ws_host = 'ws://asdtdev.mooo.com'
-detector = '5db1b05fedd685190719f924'
-password = 'test'
-# host = 'http://localhost:8080'
-# ws_host = 'ws://localhost:8080'
-# detector = '5dcafabcb6da1533e91e377d'
-# password = 'Asdt2019.'
+# # Configuration variables
+# host = 'http://asdtdev.mooo.com'
+# ws_host = 'ws://asdtdev.mooo.com'
+# detector = '5db1b05fedd685190719f924'
+# password = 'test'
+# # host = 'http://localhost:8080'
+# # ws_host = 'ws://localhost:8080'
+# # detector = '5dcafabcb6da1533e91e377d'
+# # password = 'Asdt2019.'
 
+from detector_sim_config import *
 
 class DetectorWSClient(object):
   """
@@ -73,7 +74,7 @@ class DetectorWSClient(object):
     Logs detector in and stores token
     """
     body = { 'id': id, 'password': password }
-    response = requests.post(host + '/detector/authenticate', data=body)
+    response = requests.post(HOST + '/detector/authenticate', data=body)
     # Get token
     if response.status_code == HTTPStatus.OK:
       response_json = json.loads(response.content.decode()) 
@@ -264,9 +265,9 @@ if __name__ == "__main__":
   lat = 41.7
   lon = 1.8
   sn = "888XIXXPXX0025"
-  client = DetectorWSClient(ws_host + "/api", sn, lat, lon, 5)    
-  logger.info("Login detector with ({}/{})".format(detector, password))
-  result = client.login(detector, password)
+  client = DetectorWSClient(WS_HOST + "/api", sn, lat, lon, 5)    
+  logger.info("Login detector with ({}/{})".format(DETECTOR, PASSWORD))
+  result = client.login(DETECTOR, PASSWORD)
   if not result:
     logger.error("Login Failed. Aborting")
     sys.exit(0)
