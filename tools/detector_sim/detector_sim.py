@@ -86,15 +86,19 @@ class DetectorWSClient(object):
     """
     Start WS infinite loop
     """
-    print("Starting ...")
-    #self.connect()
     #PeriodicCallback(self.keep_alive, 20000).start()
     PeriodicCallback(self.send_detection, 2000).start()
     
     # Create IOLoop
     self.ioloop = IOLoop.instance()
-    #self.ioloop.start()
-    self.ioloop.run_sync(self.connect)
+    
+    self.ioloop.spawn_callback(self.connect)
+
+    # # Runs single task
+    # self.ioloop.run_sync(self.connect)
+
+    print("Starting IOLoop")
+    self.ioloop.start()
 
   # NOTE: This is kept here for reference
   # @gen.coroutine
