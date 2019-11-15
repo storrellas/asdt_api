@@ -24,16 +24,7 @@ from utils import get_logger
 logger = get_logger()
 logger.propagate = False
 
-# # Configuration variables
-# host = 'http://asdtdev.mooo.com'
-# ws_host = 'ws://asdtdev.mooo.com'
-# detector = '5db1b05fedd685190719f924'
-# password = 'test'
-# # host = 'http://localhost:8080'
-# # ws_host = 'ws://localhost:8080'
-# # detector = '5dcafabcb6da1533e91e377d'
-# # password = 'Asdt2019.'
-
+# Loads configuration
 from detector_sim_config import *
 
 class DetectorWSClient(object):
@@ -53,9 +44,10 @@ class DetectorWSClient(object):
   __toDegrees = 174533.0
 
   # GPX output
-  gpx = None
+  output_gpx = None
+  input_gpx = None
 
-  def __init__(self, url, sn, lat_ini, lon_ini, timeout):
+  def __init__(self, url, sn, lat_ini, lon_ini, timeout, gpx_file):
     self.url = url
     self.timeout = timeout
 
@@ -65,9 +57,15 @@ class DetectorWSClient(object):
     self.lon = lon_ini
 
     # Generate output for GPX
-    gpx_track_segment = GPXTrackSegment()    
-    gpx_track = GPXTrack(name=self.sn, segments=[gpx_track_segment])
-    self.gpx = gpx_parser.GPX(version="1.0", creator="detector_sim", tracks=[gpx_track])
+    gpx_track = GPXTrack(name=self.sn)
+    self.output_gpx = gpx_parser.GPX(version="1.0", creator="detector_sim", tracks=[gpx_track])
+
+    # Load gpx if any
+    if gpx_file is not None:
+      with open(gpx_file, 'r') as gpx_fd:
+        self.input_gpx = gpx_parser.parse(gpx_fd)
+        logger.info("{} tracks loaded".format(len(self.input_gpx)))
+
 
     
   def login(self, id, password):
@@ -153,15 +151,31 @@ class DetectorWSClient(object):
   #   else:
   #     self.ws.write_message("keep alive")
 
+  current_segment = 0
 
   def send_detection(self):
     """
     Generates the package sent by the detector via WS
     """
     
-    # Calculate new position
-    self.lat = self.lat + random.random()/100
-    self.lon = self.lon + random.random()/100
+    if self.input_gpx is None:
+      # Calculate new position
+      self.lat = self.lat + random.random()/100
+      self.lon = self.lon + random.random()/100
+    else:
+      #logger.info("Loading new position from from GPX File")
+      gpx_track_segment = self.input_gpx[0].segments[self.current_segment]
+      gps_track_point = gpx_track_segment[0]
+      # print(gps_track_point)
+      # print(gps_track_point.lat)
+      self.lat = gps_track_point.latitude
+      self.lon = gps_track_point.longitude
+      # Check for next segment
+      self.current_segment = self.current_segment + 1
+      if self.current_segment >= len(self.input_gpx[0].segments):
+        self.current_segment = 0
+
+    print(self.lat, self.lon)
 
     # Generate package
     info = { 
@@ -188,10 +202,19 @@ class DetectorWSClient(object):
     self.ws.write_message(bytes(frame), binary=True)
 
   def _gpx_output(self, lat, lon):
-    self.gpx.tracks[0].segments[0].append( GPXTrackPoint(lat=str(lat),lon=str(lon)) )
+    # A Track Segment holds a list of Track Points which are logically connected in order. 
+    # To represent a single GPS track where GPS reception was lost, or the GPS receiver was turned off, 
+    # start a new Track Segment for each continuous span of track data.
+    # See: http://www.topografix.com/GPX/1/1/#type_trksegType
+    
+    # Append point
+    gpx_track_segment = GPXTrackSegment(points=[GPXTrackPoint(lat=str(lat),lon=str(lon))] )
+    self.output_gpx.tracks[0].segments.append(gpx_track_segment)
+
+    # Output to file
     filename = self.sn + '.gpx'
     with open(OUTPUT_PATH + '/' + filename, 'w') as output_file:
-      output_file.write(self.gpx.to_xml())
+      output_file.write(self.output_gpx.to_xml())
 
   def _encode109(self, info):
 
@@ -267,7 +290,7 @@ if __name__ == "__main__":
   for detector in DETECTOR_LIST:
     logger.info("Launching detector {} with timeout {}".format(detector['sn'], detector['timeout']))
     client = DetectorWSClient(WS_HOST, detector['sn'], 
-                              detector['lat'], detector['lon'], detector['timeout'])    
+                              detector['lat'], detector['lon'], detector['timeout'], detector['gpx'])    
     # Login detector
     #logger.info("Login detector with ({}/{})".format(DETECTOR, PASSWORD))
     result = client.login(DETECTOR, PASSWORD)
@@ -280,7 +303,7 @@ if __name__ == "__main__":
 
   # Create IOLoop
   ioloop = IOLoop.instance()
-  print("Starting IOLoop")
+  logger.info("Starting IOLoop")
   ioloop.start()
 
 
