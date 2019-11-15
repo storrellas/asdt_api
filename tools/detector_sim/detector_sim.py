@@ -74,7 +74,7 @@ class DetectorWSClient(object):
     Logs detector in and stores token
     """
     body = { 'id': id, 'password': password }
-    response = requests.post(HOST + '/detector/authenticate', data=body)
+    response = requests.post(API_AUTH, data=body)
     # Get token
     if response.status_code == HTTPStatus.OK:
       response_json = json.loads(response.content.decode()) 
@@ -177,7 +177,7 @@ class DetectorWSClient(object):
       'driverLocation': { 'lat': 0.0, 'lon': 0.0 }, 
       'productId': 16 
     }
-    logger.info ("Sending detection -> SN:{}/Lat:{}/Lon:{}".format(self.sn, self.lat, self.lon))
+    logger.info ("SimulatingDetection - SN:{}/Lat:{}/Lon:{}".format(self.sn, self.lat, self.lon))
 
     # Output GPX file
     self._gpx_output(self.lat, self.lon)
@@ -265,7 +265,7 @@ if __name__ == "__main__":
   lat = 41.7
   lon = 1.8
   sn = "888XIXXPXX0025"
-  client = DetectorWSClient(WS_HOST + "/api", sn, lat, lon, 5)    
+  client = DetectorWSClient(WS_HOST, sn, lat, lon, 5)    
   logger.info("Login detector with ({}/{})".format(DETECTOR, PASSWORD))
   result = client.login(DETECTOR, PASSWORD)
   if not result:
