@@ -159,7 +159,8 @@ class DetectorWSClient(object):
 
   def _gpx_output(self, lat, lon):
     self.gpx.tracks[0].segments[0].append( GPXTrackPoint(lat=str(lat),lon=str(lon)) )
-    with open('output.gpx', 'w') as output_file:
+    filename = self.sn + '.gpx'
+    with open(filename, 'w') as output_file:
       output_file.write(self.gpx.to_xml())
 
   def _encode109(self, info):
