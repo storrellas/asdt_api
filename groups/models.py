@@ -143,6 +143,24 @@ class Group(ASDTDocument):
       self.devices.friendDrones.remove(instance)
     self.save()
 
+  def has_device(self, instance):
+    """
+    Check whether device is in list
+    """
+
+    if isinstance(instance, inhibitors.models.Inhibitor):
+      return True if instance in self.devices.inhibitors else False
+
+    if isinstance(instance, detectors.models.Detector):
+      return True if instance in self.devices.detectors else False
+    
+    if isinstance(instance, zones.models.Zone):
+      return True if instance in self.devices.zones else False
+
+    if isinstance(instance, drones.models.Drone):
+      return True if instance in self.devices.friendDrones else False
+
+
   def as_dict(self):
     item = {}
     item['id'] = str(self.id)

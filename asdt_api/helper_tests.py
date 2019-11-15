@@ -13,6 +13,7 @@ from rest_framework.test import APITestCase
 # Projet imports
 from asdt_api import utils
 from mongo_dummy import MongoDummy
+from groups.models import Group
 
 logger = utils.get_logger()
 
@@ -84,3 +85,86 @@ class DeviceTestCase(ASDTTestCase):
     # Get single
     response = self.client.get('{}/{}/'.format(self.base_url_trimmed, id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
+
+  
+  def test_create_update_delete(self, body, bodyupdated):
+    """
+    Checks:
+    - item created properly with body 
+    - item updated properly with bodyupdated
+    """
+
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
+
+    group = Group.objects.get(id=body['groups'][0])
+    group_updated = Group.objects.get(id=bodyupdated['groups'][0])
+
+    # Create
+    response = self.client.post('{}/'.format(self.base_url_trimmed), body, format='json')
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+
+    # Check properly created
+    instance = self.model.objects.get( name='myname' )
+    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
+    self.assertTrue( instance in group.devices.zones )
+    self.assertTrue( group.has_device(instance) )
+    self.assertTrue( group in instance.groups )
+
+    # Update
+    response = self.client.put('{}/{}/'.format(self.base_url_trimmed, instance.id), bodyupdated, format='json')
+    self.assertTrue(response.status_code == HTTPStatus.OK)    
+
+    # Check properly created
+    instance = self.model.objects.get( name='mynameupdated' )
+    group = Group.objects.get(id=body['groups'][0])
+    group_updated = Group.objects.get(id=bodyupdated['groups'][0])
+    self.assertFalse( group.has_device(instance) )
+    self.assertTrue( group_updated.has_device(instance) )
+    self.assertTrue( group_updated in instance.groups )
+
+    # Delete
+    response = self.client.delete('{}/{}/'.format(self.base_url_trimmed, instance.id), format='json')
+    self.assertTrue(response.status_code == HTTPStatus.NO_CONTENT)    
+
+    # Check properly created    
+    group = Group.objects.get(id=body['groups'][0])
+    group_updated = Group.objects.get(id=bodyupdated['groups'][0])
+    self.assertTrue( self.model.objects.filter( name='mynameupdated' ).count() == 0 )
+
+
+  def test_update_only_group(self, body, bodyupdated):
+    """
+    Checks:
+    - item created properly with body 
+    - item updated properly with bodyupdated
+    """
+
+    # Get Token
+    self.authenticate("admin@asdt.eu", "asdt2019")
+
+    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
+    group_2 = Group.objects.get(name='ADMIN_CHILD2_ASDT')
+
+    # Create
+    response = self.client.post('/{}/zones/'.format(settings.PREFIX), body, format='json')
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+
+    # Check properly created
+    zone = Zone.objects.get( name='myname' )
+    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
+    self.assertTrue( zone in group.devices.zones )
+    self.assertTrue( group in zone.groups )
+
+
+    # Update
+    response = self.client.put('/{}/zones/{}/'.format(settings.PREFIX, zone.id), bodyupdated, format='json')
+    self.assertTrue(response.status_code == HTTPStatus.OK)    
+
+    # Check properly created
+    zone = Zone.objects.get( name='myname' )
+    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
+    group2 = Group.objects.get(name='ADMIN_CHILD2_ASDT')
+    self.assertFalse( group.has_device(zone) )
+    self.assertTrue( group2.has_device(zone) )
+    self.assertTrue( group2 in zone.groups )

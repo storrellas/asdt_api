@@ -23,6 +23,7 @@ logger = utils.get_logger()
 class TestCase(helper_tests.DeviceTestCase):
 
   base_url = '/{}/zones/'.format(settings.PREFIX)
+  model = Zone
 
   @classmethod
   def setUpClass(cls):
@@ -47,13 +48,11 @@ class TestCase(helper_tests.DeviceTestCase):
 
   def test_create_update_delete(self):
     
-    # Get Token
-    self.authenticate("admin@asdt.eu", "asdt2019")
-
+    # Two groups for checking
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')
-    group_2 = Group.objects.get(name='ADMIN_CHILD2_ASDT')
+    group_updated = Group.objects.get(name='ADMIN_CHILD2_ASDT')
 
-    # Create
+    # Body when creating
     body = {
       'name' : 'myname',
       'center' : {'lat': 12.3, 'lon': 3.2 },
@@ -65,18 +64,9 @@ class TestCase(helper_tests.DeviceTestCase):
       'minLon' : 2,
       'groups': [ str(group.id) ]
     }
-    response = self.client.post('/{}/zones/'.format(settings.PREFIX), body, format='json')
-    self.assertTrue(response.status_code == HTTPStatus.OK)
 
-    # Check properly created
-    zone = Zone.objects.get( name='myname' )
-    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
-    self.assertTrue( zone in group.devices.zones )
-    self.assertTrue( group in zone.groups )
-
-
-    # Update
-    body = {
+    # Body when calling updated
+    bodyupdated = {
       'name' : 'mynameupdated',
       'center' : {'lat': 12.3, 'lon': 3.2 },
       'radius' : 2,
@@ -85,27 +75,10 @@ class TestCase(helper_tests.DeviceTestCase):
       'maxLon' : 2,
       'minLat' : 2,
       'minLon' : 2,
-      'groups': [ str(group_2.id) ]
+      'groups': [ str(group_updated.id) ]
     }
-    response = self.client.put('/{}/zones/{}/'.format(settings.PREFIX, zone.id), body, format='json')
-    self.assertTrue(response.status_code == HTTPStatus.OK)    
+    super().test_create_update_delete(body, bodyupdated)
 
-    # Check properly created
-    zone = Zone.objects.get( name='mynameupdated' )
-    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
-    group2 = Group.objects.get(name='ADMIN_CHILD2_ASDT')
-    self.assertFalse( zone in group.devices.zones )
-    self.assertTrue( zone in group2.devices.zones )
-    self.assertTrue( group2 in zone.groups )
-
-    # Delete
-    response = self.client.delete('/{}/zones/{}/'.format(settings.PREFIX, zone.id), body, format='json')
-    self.assertTrue(response.status_code == HTTPStatus.NO_CONTENT)    
-
-    # Check properly created    
-    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
-    group2 = Group.objects.get(name='ADMIN_CHILD2_ASDT')
-    self.assertTrue( Zone.objects.filter( name='mynameupdated' ).count() == 0 )
 
 
   def test_update_only_group(self):
@@ -149,8 +122,8 @@ class TestCase(helper_tests.DeviceTestCase):
     zone = Zone.objects.get( name='myname' )
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')
     group2 = Group.objects.get(name='ADMIN_CHILD2_ASDT')
-    self.assertFalse( zone in group.devices.zones )
-    self.assertTrue( zone in group2.devices.zones )
+    self.assertFalse( group.has_device(zone) )
+    self.assertTrue( group2.has_device(zone) )
     self.assertTrue( group2 in zone.groups )
 
 
