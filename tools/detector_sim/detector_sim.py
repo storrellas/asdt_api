@@ -3,6 +3,7 @@ import json
 import sys
 import random
 import signal
+import os
 from http import HTTPStatus
 
 # Tornado imports
@@ -189,7 +190,7 @@ class DetectorWSClient(object):
   def _gpx_output(self, lat, lon):
     self.gpx.tracks[0].segments[0].append( GPXTrackPoint(lat=str(lat),lon=str(lon)) )
     filename = self.sn + '.gpx'
-    with open(filename, 'w') as output_file:
+    with open(OUTPUT_PATH + '/' + filename, 'w') as output_file:
       output_file.write(self.gpx.to_xml())
 
   def _encode109(self, info):
@@ -241,9 +242,6 @@ class DetectorWSClient(object):
     return frame
 
 
-
-
-
 ###########################
 ## Signal handling to avoid exception when closing
 ###########################
@@ -260,6 +258,10 @@ if __name__ == "__main__":
 
   # Configure signals
   signal.signal(signal.SIGINT, signal_handler)
+
+
+  if not os.path.exists(OUTPUT_PATH):
+      os.makedirs(OUTPUT_PATH)
 
   # Looping to create multiple detectors
   for detector in DETECTOR_LIST:

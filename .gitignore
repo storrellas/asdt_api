@@ -17,3 +17,4 @@ deploy/rsa/*
 */media/picture/
 *.gpx
 *detector_sim_config.py
+tools/detector_sim/*
