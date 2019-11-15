@@ -22,6 +22,7 @@ logger = utils.get_logger()
 class TestCase(helper_tests.DeviceTestCase):
 
   base_url = '/{}/inhibitors/'.format(settings.PREFIX)
+  model = Inhibitor
 
   @classmethod
   def setUpClass(cls):
@@ -46,11 +47,8 @@ class TestCase(helper_tests.DeviceTestCase):
 
   def test_create_update_delete(self):
     
-    # Get Token
-    self.authenticate("admin@asdt.eu", "asdt2019")
-
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')
-    group_2 = Group.objects.get(name='ADMIN_CHILD2_ASDT')
+    group_updated = Group.objects.get(name='ADMIN_CHILD2_ASDT')
 
     # Create
     body = {
@@ -60,42 +58,37 @@ class TestCase(helper_tests.DeviceTestCase):
       'frequencies' : ['abc', 'cde'],
       'groups': [ str(group.id) ]
     }
-    response = self.client.post('/{}/inhibitors/'.format(settings.PREFIX), body, format='json')
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-
-    # Check properly created
-    inhibitor = Inhibitor.objects.get( name='myname' )
-    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
-    self.assertTrue( inhibitor in group.devices.inhibitors )
-    self.assertTrue( group in inhibitor.groups )
 
     # Update
-    body = {
+    bodyupdated = {
       'name' : 'mynameupdated',
       'password': 'mypassword',
       'location' : {'lat': 12.3, 'lon': 3.2 },
       'frequencies' : ['abc', 'cde'],
-      'groups': [ str(group_2.id) ]
+      'groups': [ str(group_updated.id) ]
     }
-    response = self.client.put('/{}/inhibitors/{}/'.format(settings.PREFIX, inhibitor.id), body, format='json')
-    self.assertTrue(response.status_code == HTTPStatus.OK)    
+    super().test_create_update_delete(body, bodyupdated)
 
-    # Check properly created
-    inhibitor = Inhibitor.objects.get( name='mynameupdated' )
+  def test_update_only_group(self):
+    
+    # Two groups for checking
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')
-    group2 = Group.objects.get(name='ADMIN_CHILD2_ASDT')
-    self.assertFalse( inhibitor in group.devices.inhibitors )
-    self.assertTrue( inhibitor in group2.devices.inhibitors )
-    self.assertTrue( group2 in inhibitor.groups )
+    group_updated = Group.objects.get(name='ADMIN_CHILD2_ASDT')
 
-    # Delete
-    response = self.client.delete('/{}/inhibitors/{}/'.format(settings.PREFIX, inhibitor.id), body, format='json')
-    self.assertTrue(response.status_code == HTTPStatus.NO_CONTENT)    
+    # Create
+    body = {
+      'name' : 'myname',
+      'password': 'mypassword',
+      'location' : {'lat': 12.3, 'lon': 3.2 },
+      'frequencies' : ['abc', 'cde'],
+      'groups': [ str(group.id) ]
+    }
 
-    # Check properly created    
-    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
-    group2 = Group.objects.get(name='ADMIN_CHILD2_ASDT')
-    self.assertTrue( Inhibitor.objects.filter( name='mynameupdated' ).count() == 0 )
+    # Update
+    bodyupdated = {
+      'groups': [ str(group_updated.id) ]
+    }
+    super().test_update_only_group(body, bodyupdated)
 
 
 

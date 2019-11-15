@@ -108,8 +108,7 @@ class DeviceTestCase(ASDTTestCase):
     # Check properly created
     instance = self.model.objects.get( id=response_json['id'] )
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')
-    self.assertEqual( instance.name, 'myname' )
-    self.assertTrue( instance in group.devices.zones )
+    self.assertEqual( instance.name, body['name'] )
     self.assertTrue( group.has_device(instance) )
     self.assertTrue( group in instance.groups )
 
@@ -121,7 +120,7 @@ class DeviceTestCase(ASDTTestCase):
     instance = self.model.objects.get( id=response_json['id'] )
     group = Group.objects.get(id=body['groups'][0])
     group_updated = Group.objects.get(id=bodyupdated['groups'][0])
-    self.assertEqual( instance.name, 'mynameupdated' )
+    self.assertEqual( instance.name, bodyupdated['name'] )
     self.assertFalse( group.has_device(instance) )
     self.assertTrue( group_updated.has_device(instance) )
     self.assertTrue( group_updated in instance.groups )
@@ -157,6 +156,7 @@ class DeviceTestCase(ASDTTestCase):
     # Check properly created
     instance = self.model.objects.get( id=response_json['id'] )
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')
+    self.assertEqual( instance.name, body['name'] )
     self.assertTrue( group.has_device(instance) )
     self.assertTrue( group in instance.groups )
 
@@ -169,7 +169,7 @@ class DeviceTestCase(ASDTTestCase):
     instance = self.model.objects.get( id=response_json['id'] )
     group = Group.objects.get(id=body['groups'][0])
     group_updated = Group.objects.get(id=bodyupdated['groups'][0])
-    self.assertEqual( instance.name, 'myname' )
+    self.assertEqual( instance.name, body['name'] )
     self.assertFalse( group.has_device(instance) )
     self.assertTrue( group_updated.has_device(instance) )
     self.assertTrue( group_updated in instance.groups )
