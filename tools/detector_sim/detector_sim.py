@@ -86,31 +86,55 @@ class DetectorWSClient(object):
     """
     Start WS infinite loop
     """
-    self.connect()
+    print("Starting ...")
+    #self.connect()
     #PeriodicCallback(self.keep_alive, 20000).start()
     PeriodicCallback(self.send_detection, 2000).start()
     
     # Create IOLoop
     self.ioloop = IOLoop.instance()
-    self.ioloop.start()
+    #self.ioloop.start()
+    self.ioloop.run_sync(self.connect)
 
-  @gen.coroutine
-  def connect(self):    
+  # NOTE: This is kept here for reference
+  # @gen.coroutine
+  # def connect(self):    
+  #   logger.info("Attempting to connect")
+  #   try:
+  #     self.ws = yield websocket_connect(self.url)
+  #     # After connection first thing is sending token
+  #     self.ws.write_message( self.token )
+  #   except Exception as e:
+  #     logger.error("connection error")
+  #   else:
+  #     logger.info("connected")
+  #     self.run()
+
+  # @gen.coroutine
+  # def run(self):
+  #   while True:
+  #     msg = yield self.ws.read_message()
+  #     logger.info("message received:{}".format(msg))
+  #     if msg is None:
+  #       logger.info("connection closed")
+  #       self.ws = None
+  #       break
+
+  async def connect(self):    
     logger.info("Attempting to connect")
     try:
-      self.ws = yield websocket_connect(self.url)
+      self.ws = await websocket_connect(self.url)
       # After connection first thing is sending token
       self.ws.write_message( self.token )
     except Exception as e:
       logger.error("connection error")
     else:
       logger.info("connected")
-      self.run()
+      await self.run()
 
-  @gen.coroutine
-  def run(self):
+  async def run(self):
     while True:
-      msg = yield self.ws.read_message()
+      msg = await self.ws.read_message()
       logger.info("message received:{}".format(msg))
       if msg is None:
         logger.info("connection closed")
