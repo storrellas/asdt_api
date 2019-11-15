@@ -10,6 +10,12 @@ from tornado.ioloop import IOLoop, PeriodicCallback
 from tornado import gen
 from tornado.websocket import websocket_connect
 
+# GPX Export
+import gpx_parser
+from gpx_parser.GPXTrackSegment import GPXTrackSegment
+from gpx_parser.GPXTrackPoint import GPXTrackPoint
+from gpx_parser.GPXTrack import GPXTrack
+
 # Project imports
 from utils import get_logger
 
@@ -27,6 +33,7 @@ password = 'test'
 # detector = '5dcafabcb6da1533e91e377d'
 # password = 'Asdt2019.'
 
+
 class DetectorWSClient(object):
   """
   Client to connect to Websocket simulating logs generated 
@@ -43,16 +50,24 @@ class DetectorWSClient(object):
   lon = None
   __toDegrees = 174533.0
 
+  # GPX output
+  gpx = None
+
   def __init__(self, url, sn, lat_ini, lon_ini, timeout):
     self.url = url
     self.timeout = timeout
 
+    # Drone detected configuration
     self.sn = sn
     self.lat = lat_ini
     self.lon = lon_ini
-    self.ioloop = IOLoop.instance()
-    self.ws = None
 
+    # Generate output for GPX
+    gpx_track_segment = GPXTrackSegment()    
+    gpx_track = GPXTrack(name=self.sn, segments=[gpx_track_segment])
+    self.gpx = gpx_parser.GPX(version="1.0", creator="detector_sim", tracks=[gpx_track])
+
+    
   def login(self, id, password):
     """
     Logs detector in and stores token
@@ -74,6 +89,9 @@ class DetectorWSClient(object):
     self.connect()
     #PeriodicCallback(self.keep_alive, 20000).start()
     PeriodicCallback(self.send_detection, 2000).start()
+    
+    # Create IOLoop
+    self.ioloop = IOLoop.instance()
     self.ioloop.start()
 
   @gen.coroutine
@@ -107,10 +125,15 @@ class DetectorWSClient(object):
 
 
   def send_detection(self):
-
+    """
+    Generates the package sent by the detector via WS
+    """
+    
+    # Calculate new position
     self.lat = self.lat + random.random()/100
     self.lon = self.lon + random.random()/100
-    
+
+    # Generate package
     info = { 
       'sn': self.sn, 
       'driverLocation': { 
@@ -127,11 +150,19 @@ class DetectorWSClient(object):
     }
     logger.info ("Sending detection -> SN:{}/Lat:{}/Lon:{}".format(self.sn, self.lat, self.lon))
 
+    # Output GPX file
+    self._gpx_output(self.lat, self.lon)
+
     # Encode package
-    frame = self.encode109(info)    
+    frame = self._encode109(info)    
     self.ws.write_message(bytes(frame), binary=True)
 
-  def encode109(self, info):
+  def _gpx_output(self, lat, lon):
+    self.gpx.tracks[0].segments[0].append( GPXTrackPoint(lat=str(lat),lon=str(lon)) )
+    with open('output.gpx', 'w') as output_file:
+      output_file.write(self.gpx.to_xml())
+
+  def _encode109(self, info):
 
     # Declare frame
     frame = bytearray(109)
@@ -193,6 +224,7 @@ def signal_handler(sig, frame):
   client.ws.close()
   logger.info('DONE!')
   sys.exit(0)
+
 
 if __name__ == "__main__":
 
