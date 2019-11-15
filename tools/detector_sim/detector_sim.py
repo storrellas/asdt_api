@@ -83,23 +83,24 @@ class DetectorWSClient(object):
     else:
       return False
   
-  def start(self):
+  def configure_ioloop(self):
     """
-    Start WS infinite loop
+    Configures ioloop to be running
     """
     #PeriodicCallback(self.keep_alive, 20000).start()
-    PeriodicCallback(self.send_detection, 2000).start()
+    PeriodicCallback(self.send_detection, self.timeout * 1000).start()
     
     # Create IOLoop
     self.ioloop = IOLoop.instance()
     
+    # Add to the ioloop 
     self.ioloop.spawn_callback(self.connect)
 
     # # Runs single task
     # self.ioloop.run_sync(self.connect)
 
-    print("Starting IOLoop")
-    self.ioloop.start()
+    # print("Starting IOLoop")
+    # self.ioloop.start()
 
   # NOTE: This is kept here for reference
   # @gen.coroutine
@@ -262,9 +263,25 @@ if __name__ == "__main__":
   signal.signal(signal.SIGINT, signal_handler)
 
   # Create websocket client
-  lat = 41.7
-  lon = 1.8
-  sn = "888XIXXPXX0025"
+  detector = DETECTOR_LIST[0]
+  lat = detector['lat']
+  lon = detector['lon']
+  sn = detector['sn']
+  client = DetectorWSClient(WS_HOST, sn, lat, lon, 3)    
+  logger.info("Login detector with ({}/{})".format(DETECTOR, PASSWORD))
+  result = client.login(DETECTOR, PASSWORD)
+  if not result:
+    logger.error("Login Failed. Aborting")
+    sys.exit(0)
+  # Infinite loop
+  client.configure_ioloop()
+
+
+  # Create websocket client
+  detector = DETECTOR_LIST[1]
+  lat = detector['lat']
+  lon = detector['lon']
+  sn = detector['sn']
   client = DetectorWSClient(WS_HOST, sn, lat, lon, 5)    
   logger.info("Login detector with ({}/{})".format(DETECTOR, PASSWORD))
   result = client.login(DETECTOR, PASSWORD)
@@ -272,8 +289,13 @@ if __name__ == "__main__":
     logger.error("Login Failed. Aborting")
     sys.exit(0)
   # Infinite loop
-  client.start()
-  
+  client.configure_ioloop()
+
+
+  # Create IOLoop
+  ioloop = IOLoop.instance()
+  print("Starting IOLoop")
+  ioloop.start()
 
 
 
