@@ -83,6 +83,30 @@ class TestCase(helper_tests.DeviceTestCase):
 
   def test_update_only_group(self):
     
+    # Two groups for checking
+    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
+    group_updated = Group.objects.get(name='ADMIN_CHILD2_ASDT')
+
+    # Create
+    body = {
+      'name' : 'myname',
+      'center' : {'lat': 12.3, 'lon': 3.2 },
+      'radius' : 2,
+      'perimiter' : [{'lat': 12.3, 'lon': 3.2 }],
+      'maxLat' : 2,
+      'maxLon' : 2,
+      'minLat' : 2,
+      'minLon' : 2,
+      'groups': [ str(group.id) ]
+    }
+
+    # Update
+    body = {
+      'groups': [ str(group_updated.id) ]
+    }
+    super().test_create_update_delete(body, bodyupdated)
+
+    """
     # Get Token
     self.authenticate("admin@asdt.eu", "asdt2019")
 
@@ -125,5 +149,6 @@ class TestCase(helper_tests.DeviceTestCase):
     self.assertFalse( group.has_device(zone) )
     self.assertTrue( group2.has_device(zone) )
     self.assertTrue( group2 in zone.groups )
+    """
 
 

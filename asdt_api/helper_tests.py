@@ -143,15 +143,15 @@ class DeviceTestCase(ASDTTestCase):
     # Get Token
     self.authenticate("admin@asdt.eu", "asdt2019")
 
-    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
-    group_2 = Group.objects.get(name='ADMIN_CHILD2_ASDT')
+    group = Group.objects.get(id=body['groups'][0])
+    group_updated = Group.objects.get(id=bodyupdated['groups'][0])
 
     # Create
     response = self.client.post('/{}/zones/'.format(settings.PREFIX), body, format='json')
     self.assertTrue(response.status_code == HTTPStatus.OK)
 
     # Check properly created
-    zone = Zone.objects.get( name='myname' )
+    instance = self.model.objects.get( name='myname' )
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')
     self.assertTrue( zone in group.devices.zones )
     self.assertTrue( group in zone.groups )
@@ -162,9 +162,9 @@ class DeviceTestCase(ASDTTestCase):
     self.assertTrue(response.status_code == HTTPStatus.OK)    
 
     # Check properly created
-    zone = Zone.objects.get( name='myname' )
-    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
-    group2 = Group.objects.get(name='ADMIN_CHILD2_ASDT')
+    instance = self.model.objects.get( name='myname' )
+    group = Group.objects.get(id=body['groups'][0])
+    group_updated = Group.objects.get(id=bodyupdated['groups'][0])
     self.assertFalse( group.has_device(zone) )
-    self.assertTrue( group2.has_device(zone) )
-    self.assertTrue( group2 in zone.groups )
+    self.assertTrue( group_updated.has_device(zone) )
+    self.assertTrue( group_updated in zone.groups )
