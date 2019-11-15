@@ -88,7 +88,7 @@ class DetectorWSClient(object):
     Configures ioloop to be running
     """
     #PeriodicCallback(self.keep_alive, 20000).start()
-    PeriodicCallback(self.send_detection, self.timeout * 1000).start()
+    PeriodicCallback(self.send_detection, self.timeout).start()
     
     # Create IOLoop
     self.ioloop = IOLoop.instance()
@@ -262,34 +262,18 @@ if __name__ == "__main__":
   # Configure signals
   signal.signal(signal.SIGINT, signal_handler)
 
-  # Create websocket client
-  detector = DETECTOR_LIST[0]
-  lat = detector['lat']
-  lon = detector['lon']
-  sn = detector['sn']
-  client = DetectorWSClient(WS_HOST, sn, lat, lon, 3)    
-  logger.info("Login detector with ({}/{})".format(DETECTOR, PASSWORD))
-  result = client.login(DETECTOR, PASSWORD)
-  if not result:
-    logger.error("Login Failed. Aborting")
-    sys.exit(0)
-  # Infinite loop
-  client.configure_ioloop()
-
-
-  # Create websocket client
-  detector = DETECTOR_LIST[1]
-  lat = detector['lat']
-  lon = detector['lon']
-  sn = detector['sn']
-  client = DetectorWSClient(WS_HOST, sn, lat, lon, 5)    
-  logger.info("Login detector with ({}/{})".format(DETECTOR, PASSWORD))
-  result = client.login(DETECTOR, PASSWORD)
-  if not result:
-    logger.error("Login Failed. Aborting")
-    sys.exit(0)
-  # Infinite loop
-  client.configure_ioloop()
+  # Looping to create multiple detectors
+  for detector in DETECTOR_LIST:
+    logger.info("Launching detector {} with timeout {}".format(detector['sn'], detector['timeout']))
+    client = DetectorWSClient(WS_HOST, detector['sn'], 
+                              detector['lat'], detector['lon'], detector['timeout'])    
+    logger.info("Login detector with ({}/{})".format(DETECTOR, PASSWORD))
+    result = client.login(DETECTOR, PASSWORD)
+    if not result:
+      logger.error("Login Failed. Aborting")
+      sys.exit(0)
+    # Infinite loop
+    client.configure_ioloop()
 
 
   # Create IOLoop
