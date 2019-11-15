@@ -35,12 +35,12 @@ class TestCase(helper_tests.DeviceTestCase):
     super().setUp()
 
   def test_list(self):
-    super().test_list()
+    super().list_device()
 
   def test_retrieve(self):    
     # Retrieve detector
     instance = Drone.objects.get(sn='1')
-    super().test_retrieve(instance.id)
+    super().retrieve_device(instance.id)
 
   def test_get_model(self):
     # Get token
@@ -72,59 +72,7 @@ class TestCase(helper_tests.DeviceTestCase):
       'hide' : True,
       'groups': [ str(group_updated.id) ]
     }
-    super().test_create_update_delete(body, bodyupdated)
-
-    """
-    # Get Token
-    self.authenticate("admin@asdt.eu", "asdt2019")
-
-    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
-    group_2 = Group.objects.get(name='ADMIN_CHILD2_ASDT')
-
-    # Create
-    body = {
-      'sn' : 'mysn',
-      'owner': 'myowner',
-      'hide' : True,
-      'groups': [ str(group.id) ]
-    }
-    response = self.client.post('/{}/drones/'.format(settings.PREFIX), body, format='json')
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-
-    # Check properly created
-    drone = Drone.objects.get(sn='mysn')
-    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
-    self.assertTrue( drone in group.devices.friendDrones )
-    self.assertTrue( group in drone.groups )
-
-
-    # Update
-    body = {
-      'sn' : 'mysnupdated',
-      'owner': 'myowner',
-      'hide' : True,
-      'groups': [ str(group_2.id) ]
-    }
-    response = self.client.put('/{}/drones/{}/'.format(settings.PREFIX, drone.id), body, format='json')
-    self.assertTrue(response.status_code == HTTPStatus.OK)    
-
-    # Check properly created
-    drone = Drone.objects.get( sn='mysnupdated' )
-    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
-    group2 = Group.objects.get(name='ADMIN_CHILD2_ASDT')
-    self.assertFalse( drone in group.devices.friendDrones )
-    self.assertTrue( drone in group2.devices.friendDrones )
-    self.assertTrue( group2 in drone.groups )
-
-    # Delete
-    response = self.client.delete('/{}/drones/{}/'.format(settings.PREFIX, drone.id), body, format='json')
-    self.assertTrue(response.status_code == HTTPStatus.NO_CONTENT) 
-
-    # Check properly created    
-    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
-    group2 = Group.objects.get(name='ADMIN_CHILD2_ASDT')
-    self.assertTrue( Drone.objects.filter( sn='mysnupdated' ).count() == 0 )
-    """
+    super().create_update_delete_device(body, bodyupdated)
 
   def test_update_only_group(self):
 
@@ -143,4 +91,4 @@ class TestCase(helper_tests.DeviceTestCase):
     bodyupdated = {
       'groups': [ str(group_updated.id) ]
     }
-    super().test_update_only_group(body, bodyupdated)
+    super().update_only_group_device(body, bodyupdated)

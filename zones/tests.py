@@ -39,12 +39,12 @@ class TestCase(helper_tests.DeviceTestCase):
     super().setUp()
 
   def test_list(self):
-    super().test_list()
+    super().list_device()
 
   def test_retrieve(self):    
     # Retrieve detector
     instance = Zone.objects.get(name='zone1')
-    super().test_retrieve(instance.id)
+    super().retrieve_device(instance.id)
 
   def test_create_update_delete(self):
     
@@ -77,7 +77,7 @@ class TestCase(helper_tests.DeviceTestCase):
       'minLon' : 2,
       'groups': [ str(group_updated.id) ]
     }
-    super().test_create_update_delete(body, bodyupdated)
+    super().create_update_delete_device(body, bodyupdated)
 
 
 
@@ -104,6 +104,6 @@ class TestCase(helper_tests.DeviceTestCase):
     bodyupdated = {
       'groups': [ str(group_updated.id) ]
     }
-    super().test_update_only_group(body, bodyupdated)
+    super().update_only_group_device(body, bodyupdated)
 
 

@@ -68,7 +68,7 @@ class DeviceTestCase(ASDTTestCase):
     """
     super().setUp()
 
-  def test_list(self):
+  def list_device(self):
     
     # Get Token
     self.authenticate("admin@asdt.eu", "asdt2019")
@@ -77,7 +77,7 @@ class DeviceTestCase(ASDTTestCase):
     response = self.client.get(self.base_url)
     self.assertTrue(response.status_code == HTTPStatus.OK)
 
-  def test_retrieve(self, id):
+  def retrieve_device(self, id):
     
     # Get Token
     self.authenticate("admin@asdt.eu", "asdt2019")
@@ -87,7 +87,7 @@ class DeviceTestCase(ASDTTestCase):
     self.assertTrue(response.status_code == HTTPStatus.OK)
 
   
-  def test_create_update_delete(self, body, bodyupdated):
+  def create_update_delete_device(self, body, bodyupdated):
     """
     Checks:
     - item created properly with body 
@@ -142,7 +142,7 @@ class DeviceTestCase(ASDTTestCase):
     self.assertTrue( self.model.objects.filter( id=instance_id ).count() == 0 )
 
 
-  def test_update_only_group(self, body, bodyupdated):
+  def update_only_group_device(self, body, bodyupdated):
     """
     Checks:
     - item created properly with body 
