@@ -127,7 +127,6 @@ class DetectorWSClient(object):
   #       break
 
   async def connect(self):    
-    logger.info("Attempting to connect")
     try:
       self.ws = await websocket_connect(self.url)
       # After connection first thing is sending token
@@ -135,7 +134,7 @@ class DetectorWSClient(object):
     except Exception as e:
       logger.error("connection error")
     else:
-      logger.info("connected")
+      logger.info("Detector '{}' connected".format(self.sn))
       await self.run()
 
   async def run(self):
@@ -267,7 +266,8 @@ if __name__ == "__main__":
     logger.info("Launching detector {} with timeout {}".format(detector['sn'], detector['timeout']))
     client = DetectorWSClient(WS_HOST, detector['sn'], 
                               detector['lat'], detector['lon'], detector['timeout'])    
-    logger.info("Login detector with ({}/{})".format(DETECTOR, PASSWORD))
+    # Login detector
+    #logger.info("Login detector with ({}/{})".format(DETECTOR, PASSWORD))
     result = client.login(DETECTOR, PASSWORD)
     if not result:
       logger.error("Login Failed. Aborting")
