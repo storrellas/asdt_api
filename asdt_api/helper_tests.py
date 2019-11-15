@@ -114,7 +114,6 @@ class DeviceTestCase(ASDTTestCase):
     elif 'sn' in body:
       self.assertEqual( instance.sn, body['sn'] )
     self.assertTrue( group.has_device(instance) )
-    self.assertTrue( group in instance.groups )
 
     # Update
     response = self.client.put('{}/{}/'.format(self.base_url_trimmed, instance.id), bodyupdated, format='json')
@@ -130,7 +129,6 @@ class DeviceTestCase(ASDTTestCase):
       self.assertEqual( instance.sn, bodyupdated['sn'] )
     self.assertFalse( group.has_device(instance) )
     self.assertTrue( group_updated.has_device(instance) )
-    self.assertTrue( group_updated in instance.groups )
 
     # Delete
     response = self.client.delete('{}/{}/'.format(self.base_url_trimmed, instance.id), format='json')
@@ -169,7 +167,6 @@ class DeviceTestCase(ASDTTestCase):
     elif 'sn' in body:
       self.assertEqual( instance.sn, body['sn'] )
     self.assertTrue( group.has_device(instance) )
-    self.assertTrue( group in instance.groups )
 
 
     # Update
@@ -186,4 +183,8 @@ class DeviceTestCase(ASDTTestCase):
       self.assertEqual( instance.sn, body['sn'] )
     self.assertFalse( group.has_device(instance) )
     self.assertTrue( group_updated.has_device(instance) )
-    self.assertTrue( group_updated in instance.groups )
+
+    # Delete instance
+    instance.delete()
+    group = Group.objects.get(id=body['groups'][0])
+    group_updated = Group.objects.get(id=bodyupdated['groups'][0])

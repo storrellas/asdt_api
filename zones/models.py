@@ -27,6 +27,9 @@ class Zone(ASDTDocument):
   maxLon = IntField()
   minLat = IntField()
   minLon = IntField()
+  # NOTE: This property is not used anymore
+  # Leave it here for compatiblity with old DB's
+  # Currently, making use of group.devices references
   groups = ListField(ReferenceField(Group, reverse_delete_rule = NULLIFY))
 
   def as_dict(self):

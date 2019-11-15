@@ -19,6 +19,9 @@ class Inhibitor(ASDTDocument):
   password = StringField(required=True, default='')
   location = EmbeddedDocumentField(Location)
   frequencies = ListField(StringField(required=True, default=''))
+  # NOTE: This property is not used anymore
+  # Leave it here for compatiblity with old DB's
+  # Currently, making use of group.devices references
   groups = ListField(ReferenceField(Group, reverse_delete_rule = NULLIFY))
 
   def as_dict(self):

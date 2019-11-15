@@ -28,6 +28,9 @@ class Drone(ASDTDocument):
   sn = StringField(required=True, unique=True, default='')
   owner = StringField(required=True, default='')
   hide = BooleanField(default=False)
+  # NOTE: This property is not used anymore
+  # Leave it here for compatiblity with old DB's
+  # Currently, making use of group.devices references
   groups = ListField(ReferenceField(Group, reverse_delete_rule = NULLIFY))
 
   def as_dict(self):

@@ -29,12 +29,20 @@ class DeviceViewset(viewsets.ViewSet):
 
     model = None
     devices = None
+    instance = None
 
     def get_id_list_allowed(self, request):
       """
       Returns all ids allowed for current user
       """
       return []
+
+    def get_groups(self, instance):
+      """
+      Returns all groups associated to instance
+      """
+      return []
+
 
     def list(self, request):
       """
@@ -97,7 +105,7 @@ class DeviceViewset(viewsets.ViewSet):
 
         # Create object
         data = serializer.validated_data
-        instance = self.model.objects.create(**data)
+        self.instance = self.model.objects.create(**data)
 
         # Check whether groups exist and apply them to model
         if 'groups' in request.data:
@@ -106,15 +114,12 @@ class DeviceViewset(viewsets.ViewSet):
           for group_id in request.data['groups']:
             # Add device to group
             group = Group.objects.get(id=group_id)
-            group.append_device(instance)
-
-            # Add group to device
-            instance.groups.append(group)
-          
+            group.append_device(self.instance)
+         
           # Save instance
-          instance.save()
+          self.instance.save()
 
-        return Response(instance.as_dict())
+        return Response(self.instance.as_dict())
       except Exception as e:
         print(e)
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -137,32 +142,30 @@ class DeviceViewset(viewsets.ViewSet):
         data = serializer.validated_data
 
         # Check if parameter to update
-        instance = self.model.objects.get(id=pk)
+        self.instance = self.model.objects.get(id=pk)
         if len(data) > 0:
-          instance.update(**data)
+          self.instance.update(**data)
         
         # Check whether groups exist and apply them to model        
         if 'groups' in request.data:
           # Remove device from groups
-          for group in instance.groups:
-            group.remove_device(instance)
+          group_list = self.get_groups(self.instance)
+          for group in group_list:
+            group.remove_device(self.instance)
 
+        
           # Adding to groups
-          instance.groups = []
           for group_id in request.data['groups']:
             
             # Add device to group
             group = Group.objects.get(id=group_id)
-            group.append_device(instance)
-
-            # Add group to device
-            instance.groups.append(group)
+            group.append_device(self.instance)
           
-          instance.save()
+          self.instance.save()
 
         # Get updated object
-        instance = self.model.objects.get(id=pk)
-        return Response(instance.as_dict())
+        self.instance = self.model.objects.get(id=pk)
+        return Response(self.instance.as_dict())
       except Exception as e:
         print(e)
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -177,14 +180,15 @@ class DeviceViewset(viewsets.ViewSet):
           raise APIException("NOT_ALLOWED")
 
         # Update object        
-        instance = self.model.objects.get(id=pk)
+        self.instance = self.model.objects.get(id=pk)
 
         # Remove item from groups
-        for group in instance.groups:
-          group.remove_device(instance)
+        group_list = self.get_groups(self.instance)
+        for group in group_list:
+          group.remove_device(self.instance)
 
         # Delete instance        
-        instance.delete()
+        self.instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
       except Exception as e:
         print(e)

@@ -51,6 +51,12 @@ class DetectorViewset(DeviceViewset):
         id_list.append(str(item.fetch().id) )
       return id_list
 
+    def get_groups(self, instance):
+      """
+      Returns all groups associated to instance
+      """
+      return Group.objects.filter(devices__detectors__in=[instance.id])
+
     # def list(self, request):
     #   """
     #   Retrieve all inhibitors 

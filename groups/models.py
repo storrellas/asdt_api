@@ -26,10 +26,10 @@ drones = importlib.import_module('drones')
 ###############################
 
 class GroupDevices(EmbeddedDocument):
-  detectors = ListField(LazyReferenceField('Detector'), reverse_delete_rule = NULLIFY)
-  inhibitors = ListField(LazyReferenceField('Inhibitor'), reverse_delete_rule = NULLIFY)
-  zones = ListField(LazyReferenceField('Zone'), reverse_delete_rule = NULLIFY)
-  friendDrones = ListField(LazyReferenceField('Drone'), reverse_delete_rule = NULLIFY)
+  detectors = ListField(LazyReferenceField('Detector'))
+  inhibitors = ListField(LazyReferenceField('Inhibitor'))
+  zones = ListField(LazyReferenceField('Zone'))
+  friendDrones = ListField(LazyReferenceField('Drone'))
 
 
 class Group(ASDTDocument):

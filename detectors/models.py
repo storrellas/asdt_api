@@ -27,6 +27,9 @@ class Detector(ASDTDocument):
   name = StringField(required=True, unique=True, default='')
   password = StringField(required=True, default='')
   location = EmbeddedDocumentField(DetectorLocation)
+  # NOTE: This property is not used anymore
+  # Leave it here for compatiblity with old DB's
+  # Currently, making use of group.devices references
   groups = ListField(ReferenceField(Group, reverse_delete_rule = NULLIFY))
 
   def set_password(self, password):

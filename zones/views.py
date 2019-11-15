@@ -45,15 +45,24 @@ class ZoneViewset(DeviceViewset):
 
     model = Zone
     serializer = ZoneSerializer
+    instance = None
 
     def get_id_list_allowed(self, request):
       """
       Returns all ids allowed for current user
       """
       id_list = []
+
       for item in self.devices.zones:
         id_list.append(str(item.fetch().id) )
       return id_list
+
+    def get_groups(self, instance):
+      """
+      Returns all groups associated to instance
+      """
+      return Group.objects.filter(devices__zones__in=[instance.id])
+
 
     # def create(self, request):
     #   return Response({"success": True, "data": "create"})

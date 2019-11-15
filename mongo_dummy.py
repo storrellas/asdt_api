@@ -317,8 +317,14 @@ if __name__ == "__main__":
   mongo_dummy.setup(settings.MONGO_DB, settings.MONGO_HOST, int(settings.MONGO_PORT))
   mongo_dummy.generate_scenario()
 
-
-
+  # Get single zone
+  zone = Zone.objects.get(name='zone2')
+  group_list = Group.objects.filter(name='ADMIN_ASDT')
+  print(group_list)
+  group_list = Group.objects.filter(devices__zones__in=[zone.id])
+  
+  for group in group_list:
+    print(zone.name, group.name)
   # user = User.objects.get(email='admin@asdt.eu')
   # user.group
 

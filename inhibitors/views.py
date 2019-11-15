@@ -51,6 +51,12 @@ class InhibitorViewset(DeviceViewset):
         id_list.append(str(item.fetch().id) )
       return id_list
 
+    def get_groups(self, instance):
+      """
+      Returns all groups associated to instance
+      """
+      return Group.objects.filter(devices__inhibitors__in=[instance.id])
+
     # def create(self, request):
     #   return Response({"success": True, "data": "create"})
 
