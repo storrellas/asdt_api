@@ -22,6 +22,7 @@ logger = utils.get_logger()
 class TestCase(helper_tests.DeviceTestCase):
 
   base_url = '/{}/detectors/'.format(settings.PREFIX)
+  model = Detector
 
   @classmethod
   def setUpClass(cls):
@@ -58,12 +59,9 @@ class TestCase(helper_tests.DeviceTestCase):
     self.assertTrue(response.status_code == HTTPStatus.BAD_REQUEST)
 
   def test_create_update_delete(self):
-    
-    # Get Token
-    self.authenticate("admin@asdt.eu", "asdt2019")
 
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')
-    group_2 = Group.objects.get(name='ADMIN_CHILD2_ASDT')
+    group_updated = Group.objects.get(name='ADMIN_CHILD2_ASDT')
 
     # Create
     body = {
@@ -72,40 +70,32 @@ class TestCase(helper_tests.DeviceTestCase):
       'location' : {'lat': 12.3, 'lon': 3.2, 'height': 5.4 },
       'groups': [ str(group.id) ]
     }
-    response = self.client.post('/{}/detectors/'.format(settings.PREFIX), body, format='json')
-    self.assertTrue(response.status_code == HTTPStatus.OK)
-
-    # Check properly created
-    detector = Detector.objects.get( name='myname' )
-    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
-    self.assertTrue( detector in group.devices.detectors )
-    self.assertTrue( group in detector.groups )
-
 
     # Update
-    body = {
+    bodyupdated = {
       'name' : 'mynameupdated',
       'password': 'mypassword',
       'location' : {'lat': 12.3, 'lon': 3.2, 'height': 5.4 },
-      'groups': [ str(group_2.id) ]
+      'groups': [ str(group_updated.id) ]
     }
-    response = self.client.put('/{}/detectors/{}/'.format(settings.PREFIX, detector.id), body, format='json')
-    self.assertTrue(response.status_code == HTTPStatus.OK)    
+    super().test_create_update_delete(body, bodyupdated)
 
-    # Check properly created
-    detector = Detector.objects.get( name='mynameupdated' )
+  def test_update_only_group(self):
+    
+    # Two groups for checking
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')
-    group2 = Group.objects.get(name='ADMIN_CHILD2_ASDT')
-    self.assertFalse( detector in group.devices.detectors )
-    self.assertTrue( detector in group2.devices.detectors )
-    self.assertTrue( group2 in detector.groups )
+    group_updated = Group.objects.get(name='ADMIN_CHILD2_ASDT')
 
-    # Delete
-    response = self.client.delete('/{}/detectors/{}/'.format(settings.PREFIX, detector.id), body, format='json')
-    self.assertTrue(response.status_code == HTTPStatus.NO_CONTENT)
+    # Create
+    body = {
+      'name' : 'myname',
+      'password': 'mypassword',
+      'location' : {'lat': 12.3, 'lon': 3.2, 'height': 5.4 },
+      'groups': [ str(group.id) ]
+    }
 
-    # Check properly created    
-    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
-    group2 = Group.objects.get(name='ADMIN_CHILD2_ASDT')
-    self.assertTrue( Detector.objects.filter( name='mynameupdated' ).count() == 0 )
-
+    # Update
+    bodyupdated = {
+      'groups': [ str(group_updated.id) ]
+    }
+    super().test_update_only_group(body, bodyupdated)

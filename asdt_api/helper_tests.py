@@ -104,11 +104,15 @@ class DeviceTestCase(ASDTTestCase):
     response = self.client.post('{}/'.format(self.base_url_trimmed), body, format='json')
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
+    instance_id = response_json['id']
 
     # Check properly created
-    instance = self.model.objects.get( id=response_json['id'] )
+    instance = self.model.objects.get( id=instance_id )
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')
-    self.assertEqual( instance.name, body['name'] )
+    if 'name' in body:
+      self.assertEqual( instance.name, body['name'] )
+    elif 'sn' in body:
+      self.assertEqual( instance.sn, body['sn'] )
     self.assertTrue( group.has_device(instance) )
     self.assertTrue( group in instance.groups )
 
@@ -117,10 +121,13 @@ class DeviceTestCase(ASDTTestCase):
     self.assertTrue(response.status_code == HTTPStatus.OK)    
 
     # Check properly created
-    instance = self.model.objects.get( id=response_json['id'] )
+    instance = self.model.objects.get( id=instance_id )
     group = Group.objects.get(id=body['groups'][0])
     group_updated = Group.objects.get(id=bodyupdated['groups'][0])
-    self.assertEqual( instance.name, bodyupdated['name'] )
+    if 'name' in bodyupdated:
+      self.assertEqual( instance.name, bodyupdated['name'] )
+    elif 'sn' in bodyupdated:
+      self.assertEqual( instance.sn, bodyupdated['sn'] )
     self.assertFalse( group.has_device(instance) )
     self.assertTrue( group_updated.has_device(instance) )
     self.assertTrue( group_updated in instance.groups )
@@ -132,7 +139,7 @@ class DeviceTestCase(ASDTTestCase):
     # Check properly created    
     group = Group.objects.get(id=body['groups'][0])
     group_updated = Group.objects.get(id=bodyupdated['groups'][0])
-    self.assertTrue( self.model.objects.filter( name='mynameupdated' ).count() == 0 )
+    self.assertTrue( self.model.objects.filter( id=instance_id ).count() == 0 )
 
 
   def test_update_only_group(self, body, bodyupdated):
@@ -152,11 +159,15 @@ class DeviceTestCase(ASDTTestCase):
     response = self.client.post('{}/'.format(self.base_url_trimmed), body, format='json')
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
+    instance_id = response_json['id']
 
     # Check properly created
-    instance = self.model.objects.get( id=response_json['id'] )
+    instance = self.model.objects.get( id=instance_id )
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')
-    self.assertEqual( instance.name, body['name'] )
+    if 'name' in body:
+      self.assertEqual( instance.name, body['name'] )
+    elif 'sn' in body:
+      self.assertEqual( instance.sn, body['sn'] )
     self.assertTrue( group.has_device(instance) )
     self.assertTrue( group in instance.groups )
 
@@ -166,10 +177,13 @@ class DeviceTestCase(ASDTTestCase):
     self.assertTrue(response.status_code == HTTPStatus.OK)    
 
     # Check properly updated
-    instance = self.model.objects.get( id=response_json['id'] )
+    instance = self.model.objects.get( id=instance_id )
     group = Group.objects.get(id=body['groups'][0])
     group_updated = Group.objects.get(id=bodyupdated['groups'][0])
-    self.assertEqual( instance.name, body['name'] )
+    if 'name' in body:
+      self.assertEqual( instance.name, body['name'] )
+    elif 'sn' in body:
+      self.assertEqual( instance.sn, body['sn'] )
     self.assertFalse( group.has_device(instance) )
     self.assertTrue( group_updated.has_device(instance) )
     self.assertTrue( group_updated in instance.groups )

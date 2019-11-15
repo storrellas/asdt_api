@@ -19,6 +19,7 @@ logger = utils.get_logger()
 class TestCase(helper_tests.DeviceTestCase):
 
   base_url = '/{}/drones/'.format(settings.PREFIX)
+  model = Drone
 
   @classmethod
   def setUpClass(cls):
@@ -52,7 +53,28 @@ class TestCase(helper_tests.DeviceTestCase):
     self.assertTrue(len(response_json['data']) > 0)
 
   def test_create_update_delete(self):
-    
+
+    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
+    group_updated = Group.objects.get(name='ADMIN_CHILD2_ASDT')
+
+    # Create
+    body = {
+      'sn' : 'mysn',
+      'owner': 'myowner',
+      'hide' : True,
+      'groups': [ str(group.id) ]
+    }
+
+    # Update
+    bodyupdated = {
+      'sn' : 'mysnupdated',
+      'owner': 'myowner',
+      'hide' : True,
+      'groups': [ str(group_updated.id) ]
+    }
+    super().test_create_update_delete(body, bodyupdated)
+
+    """
     # Get Token
     self.authenticate("admin@asdt.eu", "asdt2019")
 
@@ -102,3 +124,23 @@ class TestCase(helper_tests.DeviceTestCase):
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')
     group2 = Group.objects.get(name='ADMIN_CHILD2_ASDT')
     self.assertTrue( Drone.objects.filter( sn='mysnupdated' ).count() == 0 )
+    """
+
+  def test_update_only_group(self):
+
+    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
+    group_updated = Group.objects.get(name='ADMIN_CHILD2_ASDT')
+
+    # Create
+    body = {
+      'sn' : 'mysn',
+      'owner': 'myowner',
+      'hide' : True,
+      'groups': [ str(group.id) ]
+    }
+
+    # Update
+    bodyupdated = {
+      'groups': [ str(group_updated.id) ]
+    }
+    super().test_update_only_group(body, bodyupdated)
