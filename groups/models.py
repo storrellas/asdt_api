@@ -70,7 +70,6 @@ class Group(ASDTDocument):
     for child_group in self.childs:
       children.append( child_group.get_tree_children() )
     return {'id': str(self.id), 'children': children }
-    #return {'id': str(self.name), 'children': children }
 
   def get_full_children(self):
     """
