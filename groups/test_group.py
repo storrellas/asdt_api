@@ -101,7 +101,7 @@ class TestCase(helper_tests.ASDTTestCase):
     user.group.save()
     group.delete()
 
-  def test_create_group_to_add(self):
+  def test_create_with_parent(self):
 
     # Get Token
     self.authenticate("admin@asdt.eu", "asdt2019")
@@ -239,7 +239,7 @@ class TestCase(helper_tests.ASDTTestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Add user to group
-    response = self.client.post('/{}/groups/{}/users/{}/'.format(settings.PREFIX, group.id, user.id), {})
+    response = self.client.put('/{}/groups/{}/users/{}/'.format(settings.PREFIX, group.id, user.id), {})
     self.assertTrue(response.status_code == HTTPStatus.OK)
 
 
@@ -273,7 +273,7 @@ class TestCase(helper_tests.ASDTTestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Add groups
-    response = self.client.post('/{}/groups/{}/users/{}/'.format(settings.PREFIX, group.id, user.id), {})
+    response = self.client.put('/{}/groups/{}/users/{}/'.format(settings.PREFIX, group.id, user.id), {})
     self.assertTrue(response.status_code == HTTPStatus.BAD_REQUEST)
 
 

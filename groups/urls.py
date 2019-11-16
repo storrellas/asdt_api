@@ -16,10 +16,11 @@ router.register(r'(?P<group_id>[a-zA-Z0-9]+)/devices/detectors', GroupDetectorVi
 router.register(r'(?P<group_id>[a-zA-Z0-9]+)/devices/drones', GroupDroneViewset, basename='user')
 router.register(r'(?P<group_id>[a-zA-Z0-9]+)/devices/inhibitors', GroupInhibitorViewset, basename='user')
 router.register(r'(?P<group_id>[a-zA-Z0-9]+)/devices/zones', GroupZoneViewset, basename='user')
+router.register(r'(?P<group_id>[a-zA-Z0-9]+)/users', GroupUserViewset, basename='user')
 
 urlpatterns = [
     path('all/', GroupAllView.as_view()),
-    path('<str:group_id>/users/<str:user_id>/', GroupUserView.as_view()),
+    #path('<str:group_id>/users/<str:user_id>/', GroupUserView.as_view()),
     path('', include(router.urls))
 ]
 
