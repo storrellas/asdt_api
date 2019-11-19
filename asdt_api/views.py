@@ -37,6 +37,12 @@ class DeviceViewset(viewsets.ViewSet):
       """
       return []
 
+    def get_devices(self, instance):
+      """
+      Returns all groups associated to instance
+      """
+      return []
+
     def get_groups(self, instance):
       """
       Returns all groups associated to instance
@@ -49,9 +55,6 @@ class DeviceViewset(viewsets.ViewSet):
       Retrieve all models 
       """
       try:
-        # Get ids
-        self.devices = request.user.group.get_full_devices()
-
         # Get queryset
         id_list = self.get_id_list_allowed(request)
         
@@ -70,10 +73,7 @@ class DeviceViewset(viewsets.ViewSet):
       """
       Retrieve single model
       """
-      try:
-        # Get ids
-        self.devices = request.user.group.get_full_devices()
-
+      try:       
         # Get queryset
         id_list = self.get_id_list_allowed(request)
 
@@ -94,8 +94,6 @@ class DeviceViewset(viewsets.ViewSet):
       Create model
       """
       try:
-        if request.user.role != User.ADMIN:
-          raise APIException("NOT_ALLOWED")
 
         # Validate Serializer
         serializer = self.serializer(data=request.data)
@@ -129,8 +127,6 @@ class DeviceViewset(viewsets.ViewSet):
       Update model
       """
       try:
-        if request.user.role != User.ADMIN:
-          raise APIException("NOT_ALLOWED")
 
         # Validate Serializer
         serializer = self.serializer(data=request.data)
@@ -176,8 +172,6 @@ class DeviceViewset(viewsets.ViewSet):
       Delete model
       """
       try:
-        if request.user.role != User.ADMIN:
-          raise APIException("NOT_ALLOWED")
 
         # Update object        
         self.instance = self.model.objects.get(id=pk)

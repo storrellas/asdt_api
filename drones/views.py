@@ -20,11 +20,12 @@ from asdt_api.authentication import ASDTIsAdminOrMasterPermission, ASDTAuthentic
 from asdt_api.views import DeviceViewset
 from bson.objectid import ObjectId
 from .models import *
+from user.models import User
+from groups.models import *
 
 class DroneModelView(APIView):
     authentication_classes = [ASDTAuthentication]
     permission_classes = (IsAuthenticated, )
-
 
     def get(self, request, log_id = None):
         queryset = DroneModel.objects.fields(id=0).all()
@@ -56,6 +57,14 @@ class DroneViewset(DeviceViewset):
       """
       Returns all ids allowed for current user
       """
+      # Get devices allowed for user
+      if request.user.role == User.ADMIN:
+        self.devices = request.user.group.get_full_devices()
+      elif request.user.role == User.MASTER:
+        queryset = Drone.objects.all()
+        self.devices = GroupDevices(friendDrones=queryset)
+
+      # id_list
       id_list = []
       for item in self.devices.friendDrones:
         id_list.append(str(item.fetch().id) )

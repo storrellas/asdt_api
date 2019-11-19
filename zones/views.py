@@ -22,6 +22,7 @@ from asdt_api.views import DeviceViewset
 
 from .models import *
 from groups.models import *
+from user.models import User
 
 logger = get_logger()
 
@@ -51,8 +52,16 @@ class ZoneViewset(DeviceViewset):
       """
       Returns all ids allowed for current user
       """
-      id_list = []
+    
+      # Get devices allowed for user
+      if request.user.role == User.ADMIN:
+        self.devices = request.user.group.get_full_devices()
+      elif request.user.role == User.MASTER:
+        queryset = Zone.objects.all()
+        self.devices = GroupDevices(zones=queryset)
 
+      # Get id_list
+      id_list = []
       for item in self.devices.zones:
         id_list.append(str(item.fetch().id) )
       return id_list

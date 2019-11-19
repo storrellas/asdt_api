@@ -22,6 +22,7 @@ from asdt_api.views import DeviceViewset
 
 from .models import *
 from groups.models import *
+from user.models import User
 
 logger = get_logger()
 
@@ -46,6 +47,14 @@ class InhibitorViewset(DeviceViewset):
       """
       Returns all ids allowed for current user
       """
+      # Get devices allowed for user
+      if request.user.role == User.ADMIN:
+        self.devices = request.user.group.get_full_devices()
+      elif request.user.role == User.MASTER:
+        queryset = Inhibitor.objects.all()
+        self.devices = GroupDevices(inhibitors=queryset)
+
+      # Get id_list
       id_list = []
       for item in self.devices.inhibitors:
         id_list.append(str(item.fetch().id) )
