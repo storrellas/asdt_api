@@ -97,8 +97,6 @@ class TestCase(helper_tests.ASDTTestCase):
     self.assertEqual(user.group, group.parent)
     
     # Remove resources
-    user.group.childs.remove(group)
-    user.group.save()
     group.delete()
 
   def test_create_with_parent(self):
@@ -118,9 +116,6 @@ class TestCase(helper_tests.ASDTTestCase):
     self.assertEqual(parent, group.parent)
 
     # Remove resources
-    group_to_add = Group.objects.get(name='ADMIN_CHILD_ASDT')
-    group_to_add.childs.remove(group)
-    group_to_add.save()
     group.delete()
 
   def test_update(self):
@@ -162,8 +157,6 @@ class TestCase(helper_tests.ASDTTestCase):
     former_group_parent = Group.objects.get(name='ADMIN_ASDT')
     group_parent = Group.objects.get(name='ADMIN_CHILD2_ASDT')
     self.assertTrue(group.parent == group_parent)
-    self.assertFalse( group in former_group_parent.childs )
-    self.assertTrue( group in group_parent.childs )
 
     # Leave it as it was
     group.name = 'ADMIN_CHILD_ASDT'
@@ -176,7 +169,7 @@ class TestCase(helper_tests.ASDTTestCase):
     # Creating scenario
     delete_child_group = Group.objects.create(name='DELETE_CHILD_ASDT', 
                                             devices=GroupDevices(), parent=admin_group)
-    delete_group = Group.objects.create(name='DELETE_ASDT', childs=[delete_child_group], 
+    delete_group = Group.objects.create(name='DELETE_ASDT', 
                                             devices=GroupDevices(), parent=admin_group)    
     delete_child_group.parent = delete_group
     delete_child_group.save()
@@ -186,9 +179,6 @@ class TestCase(helper_tests.ASDTTestCase):
                                   group=delete_child_group, hasGroup=True)
     delete_child_group.users.append(delete_user)                                  
     delete_child_group.save()
-
-    admin_group.childs.append(delete_group)
-    admin_group.save()
     
     # Get Token
     self.authenticate("admin@asdt.eu", "asdt2019")

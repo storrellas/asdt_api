@@ -54,15 +54,10 @@ class GroupViewset(viewsets.ViewSet):
           if request.user.is_allowed_group(parent_group) == False:
             raise APIException("NOT_ALLOWED")
 
-
-          parent_group.childs.append(group)
-          parent_group.save()
           group.parent = parent_group
           group.save()
         elif request.user.group is not None:
           logger.info('Parent is group from user requesting ...')
-          request.user.group.childs.append(group)
-          request.user.group.save()
           group.parent = request.user.group
           group.save()
         else:
@@ -107,16 +102,9 @@ class GroupViewset(viewsets.ViewSet):
           else:
             raise APIException("NOT_ALLOWED")
 
-          # Remove group from old parent
-          group.parent.childs.remove(group)
-          group.parent.save()
-
           # Set new configuration
           group.parent = parent_group
           group.save()
-          parent_group.childs.append(group)
-          parent_group.save()
-
 
         # Update operation
         group.name = request.data['name']
@@ -147,10 +135,7 @@ class GroupViewset(viewsets.ViewSet):
         #   group.delete_recursive()  
         # else:
         #   group.delete()
-        # Remove group from childs in parent
-        group.parent.childs.remove(group)
-        group.parent.save()
-        # Delete grouip recursively
+        # Delete group recursively
         group.delete_recursive()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -167,8 +152,8 @@ class GroupViewset(viewsets.ViewSet):
 
         # Generate data
         data = []
-        for group in group.childs:
-          data.append(group.as_dict())
+        for group in Group.objects.filter(parent=group.id):
+          data.append(group.as_dict())        
 
         return Response(data)
       except Exception as e:

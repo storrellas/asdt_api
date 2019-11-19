@@ -38,6 +38,9 @@ class Group(ASDTDocument):
 
   name = StringField(required=True, unique=True, default='')
   parent = ReferenceField("self", reverse_delete_rule = NULLIFY)
+  # NOTE: This property is not used anymore
+  # Leave it here for compatiblity with old DB's
+  # Currently, making use of Group.parent references
   childs = ListField(ReferenceField("self", reverse_delete_rule = NULLIFY))
   # NOTE: This property is not used anymore
   # Leave it here for compatiblity with old DB's
@@ -66,23 +69,28 @@ class Group(ASDTDocument):
     
     return devices
 
-  def get_tree_children(self):
-    """
-    Returns a tree with all children
-    """
-    children = []
-    for child_group in self.childs:
-      children.append( child_group.get_tree_children() )
-    return {'id': str(self.id), 'children': children }
+  # def get_tree_children(self):
+  #   """
+  #   Returns a tree with all children
+  #   NOTE: Not used anymore
+  #   """
+  #   children = []
+  #   for child_group in self.childs:
+  #     children.append( child_group.get_tree_children() )
+  #   return {'id': str(self.id), 'children': children }
 
   def get_full_children(self):
     """
     Returns a list of all devices within child groups
     """
-    children = self.childs      
-    for child_group in self.childs:
-      children.extend( child_group.get_full_children() )
-    return children
+    children = self._qs().filter(parent=self.id)
+    children_list = []
+    for child_group in children:
+      # Append my children
+      children_list.append( child_group )
+      # Append children of my children
+      children_list.extend( child_group.get_full_children() )
+    return children_list
 
   def is_parent_of(self, group):
     """
@@ -105,9 +113,10 @@ class Group(ASDTDocument):
     """
     Removes references for users / devices
     """
-    for child in self.childs:
+    children = self._qs().filter(parent=self.id)
+    for child in children:
       child.delete_recursive()
-    self.delete()
+    return self.delete()
 
   def append_device(self, instance):
     """
@@ -173,9 +182,8 @@ class Group(ASDTDocument):
     for user_item in user.models.User.objects.filter(group=self.id):
       item['users'].append(user_item.as_dict())
     item['childs'] = []
-    for group_child in self.childs:
+    for group_child in self._qs().filter(parent=self.id):
       item['childs'].append(str(group_child.id))
-    
     detectors_list = []
     for detector in self.devices.detectors:
       detectors_list.append( str(detector.id) )

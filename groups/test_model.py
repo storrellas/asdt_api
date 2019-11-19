@@ -59,20 +59,23 @@ class TestCase(helper_tests.ASDTTestCase):
     group_children = group.get_full_children()
     self.assertTrue(len(group_children) == 4)
 
-  def print_tree(self, group):
-    print(group.name)
-    output = group.name + ": "
-    print(output)
-    for item in group.childs:      
-      output = output + self.print_tree(item) + " "
-    return output
+  # def print_tree(self, group):
+  #   print(group.name)
+  #   output = group.name + ": "
+  #   print(output)
+  #   for item in group.childs:      
+  #     output = output + self.print_tree(item) + " "
+  #   return output
     
-  def test_group_get_tree_children(self):
-    group = Group.objects.get(name='ADMIN_ASDT')
-    group_tree = group.get_tree_children()
-    self.assertEqual(len(group_tree['children']), 2)
-    self.assertEqual(len(group_tree['children'][0]['children']), 2)
-    self.assertEqual(len(group_tree['children'][1]['children']), 0)
+  # def test_group_get_tree_children(self):
+  #   """  
+  #   NOTE: Not used anymore
+  #   """
+  #   group = Group.objects.get(name='ADMIN_ASDT')
+  #   group_tree = group.get_tree_children()
+  #   self.assertEqual(len(group_tree['children']), 2)
+  #   self.assertEqual(len(group_tree['children'][0]['children']), 2)
+  #   self.assertEqual(len(group_tree['children'][1]['children']), 0)
 
   def test_delete_recursive(self):
     # Creating scenario
