@@ -47,12 +47,19 @@ class User(ASDTDocument):
   
   __original_password = None
 
+  MASTER = 'MASTER'
+  ADMIN = 'ADMIN'
+  EMPOWERED = 'EMPOWERED'
+  VIEWER = 'VIEWER'
+  role_list = [MASTER, ADMIN, EMPOWERED, VIEWER]
+
+
   email = StringField(required=True, unique=True, default='')
   name = StringField(required=True, default='')
   password = StringField(required=True, default='')
   displayOptions = EmbeddedDocumentField(DisplayOptions, default=DisplayOptions())
   location = EmbeddedDocumentField(Location)
-  role = StringField(choices=['MASTER', 'ADMIN', 'EMPOWERED', 'VIEWER'], default='ADMIN')
+  role = StringField(choices=role_list, default=ADMIN)
   hasGroup = BooleanField(default=False)
   group = ReferenceField(Group, reverse_delete_rule = NULLIFY)
   concrete_model = None
