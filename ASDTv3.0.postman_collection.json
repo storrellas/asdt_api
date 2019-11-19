@@ -17,7 +17,7 @@
 								"id": "cb4e2690-22bc-425b-8b11-3fa81e5eab1d",
 								"exec": [
 									"var jsonData = JSON.parse(responseBody);",
-									"postman.setEnvironmentVariable(\"token\", jsonData.data.token);"
+									"postman.setEnvironmentVariable(\"token\", jsonData.token);"
 								],
 								"type": "text/javascript"
 							}
@@ -90,7 +90,7 @@
 							"raw": "{\n    \"email\": \"a@a.com\",\n    \"password\": \"asdt2019\",\n    \"name\": \"Oussama\",\n    \"role\": \"EMPOWERED\",\n    \"hasGroup\": false\n}"
 						},
 						"url": {
-							"raw": "{{url}}/api/v3/user/info/",
+							"raw": "{{url}}/api/v3/user/me/",
 							"host": [
 								"{{url}}"
 							],
@@ -98,7 +98,7 @@
 								"api",
 								"v3",
 								"user",
-								"info",
+								"me",
 								""
 							]
 						}
@@ -142,7 +142,7 @@
 							"raw": "{\n    \"email\": \"a@a.com\",\n    \"password\": \"asdt2019\",\n    \"name\": \"Oussama\",\n    \"role\": \"EMPOWERED\",\n    \"hasGroup\": false\n}"
 						},
 						"url": {
-							"raw": "{{url}}/api/v3/user/tools/",
+							"raw": "{{url}}/api/v3/user/me/tools/",
 							"host": [
 								"{{url}}"
 							],
@@ -150,6 +150,7 @@
 								"api",
 								"v3",
 								"user",
+								"me",
 								"tools",
 								""
 							]
@@ -699,7 +700,7 @@
 							"raw": "{\n    \"email\": \"a@a.com\",\n    \"password\": \"asdt2019\",\n    \"name\": \"Oussama\",\n    \"role\": \"EMPOWERED\",\n    \"hasGroup\": false\n}"
 						},
 						"url": {
-							"raw": "{{url}}/api/v3/groups/123/users/",
+							"raw": "{{url}}/api/v3/groups/5dcf217e1f386df1f5c48129/users/",
 							"host": [
 								"{{url}}"
 							],
@@ -707,7 +708,7 @@
 								"api",
 								"v3",
 								"groups",
-								"123",
+								"5dcf217e1f386df1f5c48129",
 								"users",
 								""
 							]
@@ -730,7 +731,7 @@
 						}
 					],
 					"request": {
-						"method": "POST",
+						"method": "PUT",
 						"header": [
 							{
 								"key": "Content-Type",
@@ -869,109 +870,6 @@
 						}
 					},
 					"response": []
-				},
-				{
-					"name": "Groups - Add Group",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "cb4e2690-22bc-425b-8b11-3fa81e5eab1d",
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"type": "text",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"a@a.com\",\n    \"password\": \"asdt2019\",\n    \"name\": \"Oussama\",\n    \"role\": \"EMPOWERED\",\n    \"hasGroup\": false\n}"
-						},
-						"url": {
-							"raw": "{{url}}/api/v3/groups/123/devices/detectors/456/",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"api",
-								"v3",
-								"groups",
-								"123",
-								"devices",
-								"detectors",
-								"456",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Groups - Remove Group",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "cb4e2690-22bc-425b-8b11-3fa81e5eab1d",
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"type": "text",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"a@a.com\",\n    \"password\": \"asdt2019\",\n    \"name\": \"Oussama\",\n    \"role\": \"EMPOWERED\",\n    \"hasGroup\": false\n}"
-						},
-						"url": {
-							"raw": "{{url}}/api/v3/groups/123/groups/456/",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"api",
-								"v3",
-								"groups",
-								"123",
-								"groups",
-								"456",
-								""
-							]
-						}
-					},
-					"response": []
 				}
 			],
 			"protocolProfileBehavior": {}
@@ -1034,6 +932,109 @@
 					"response": []
 				},
 				{
+					"name": "Groups - Add Detector",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "cb4e2690-22bc-425b-8b11-3fa81e5eab1d",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"a@a.com\",\n    \"password\": \"asdt2019\",\n    \"name\": \"Oussama\",\n    \"role\": \"EMPOWERED\",\n    \"hasGroup\": false\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v3/groups/123/devices/detectors/456/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v3",
+								"groups",
+								"123",
+								"devices",
+								"detectors",
+								"456",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Groups - Remove Detector",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "cb4e2690-22bc-425b-8b11-3fa81e5eab1d",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"a@a.com\",\n    \"password\": \"asdt2019\",\n    \"name\": \"Oussama\",\n    \"role\": \"EMPOWERED\",\n    \"hasGroup\": false\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v3/groups/123/detectors/123/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v3",
+								"groups",
+								"123",
+								"detectors",
+								"123",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Groups - List Drone",
 					"event": [
 						{
@@ -1081,6 +1082,109 @@
 								"123aA",
 								"devices",
 								"drones",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Groups - Add Drone",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "cb4e2690-22bc-425b-8b11-3fa81e5eab1d",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"a@a.com\",\n    \"password\": \"asdt2019\",\n    \"name\": \"Oussama\",\n    \"role\": \"EMPOWERED\",\n    \"hasGroup\": false\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v3/groups/123/devices/drones/456/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v3",
+								"groups",
+								"123",
+								"devices",
+								"drones",
+								"456",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Groups - Remove Drone",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "cb4e2690-22bc-425b-8b11-3fa81e5eab1d",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"a@a.com\",\n    \"password\": \"asdt2019\",\n    \"name\": \"Oussama\",\n    \"role\": \"EMPOWERED\",\n    \"hasGroup\": false\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v3/groups/123/drones/123/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v3",
+								"groups",
+								"123",
+								"drones",
+								"123",
 								""
 							]
 						}
@@ -1142,6 +1246,109 @@
 					"response": []
 				},
 				{
+					"name": "Groups - Add Inhibitor",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "cb4e2690-22bc-425b-8b11-3fa81e5eab1d",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"a@a.com\",\n    \"password\": \"asdt2019\",\n    \"name\": \"Oussama\",\n    \"role\": \"EMPOWERED\",\n    \"hasGroup\": false\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v3/groups/123/devices/drones/456/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v3",
+								"groups",
+								"123",
+								"devices",
+								"drones",
+								"456",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Groups - Remove Inhibitor",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "cb4e2690-22bc-425b-8b11-3fa81e5eab1d",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"a@a.com\",\n    \"password\": \"asdt2019\",\n    \"name\": \"Oussama\",\n    \"role\": \"EMPOWERED\",\n    \"hasGroup\": false\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v3/groups/123/drones/123/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v3",
+								"groups",
+								"123",
+								"drones",
+								"123",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Groups - List Zone",
 					"event": [
 						{
@@ -1178,7 +1385,7 @@
 							"raw": "{\n    \"email\": \"a@a.com\",\n    \"password\": \"asdt2019\",\n    \"name\": \"Oussama\",\n    \"role\": \"EMPOWERED\",\n    \"hasGroup\": false\n}"
 						},
 						"url": {
-							"raw": "{{url}}/api/v3/groups/123aA/devices/zones/",
+							"raw": "{{url}}/api/v3/groups/5dcf17e661aeecb42f3f66c9/devices/zones2/",
 							"host": [
 								"{{url}}"
 							],
@@ -1186,9 +1393,112 @@
 								"api",
 								"v3",
 								"groups",
-								"123aA",
+								"5dcf17e661aeecb42f3f66c9",
 								"devices",
-								"zones",
+								"zones2",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Groups - Add Zone",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "cb4e2690-22bc-425b-8b11-3fa81e5eab1d",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"a@a.com\",\n    \"password\": \"asdt2019\",\n    \"name\": \"Oussama\",\n    \"role\": \"EMPOWERED\",\n    \"hasGroup\": false\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v3/groups/123/devices/drones/456/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v3",
+								"groups",
+								"123",
+								"devices",
+								"drones",
+								"456",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Groups - Remove Zone",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "cb4e2690-22bc-425b-8b11-3fa81e5eab1d",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"a@a.com\",\n    \"password\": \"asdt2019\",\n    \"name\": \"Oussama\",\n    \"role\": \"EMPOWERED\",\n    \"hasGroup\": false\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v3/groups/123/drones/123/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v3",
+								"groups",
+								"123",
+								"drones",
+								"123",
 								""
 							]
 						}
@@ -1937,640 +2247,6 @@
 							]
 						},
 						"description": "Recive el log segun su id solo si lo ha detectado un usuario o una zona en su posesion"
-					},
-					"response": []
-				}
-			],
-			"protocolProfileBehavior": {}
-		},
-		{
-			"name": "groups devices - deleted",
-			"item": [
-				{
-					"name": "Groups - List Detector",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "cb4e2690-22bc-425b-8b11-3fa81e5eab1d",
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"type": "text",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"a@a.com\",\n    \"password\": \"asdt2019\",\n    \"name\": \"Oussama\",\n    \"role\": \"EMPOWERED\",\n    \"hasGroup\": false\n}"
-						},
-						"url": {
-							"raw": "{{url}}/api/v3/groups/123aA/devices/detectors/",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"api",
-								"v3",
-								"groups",
-								"123aA",
-								"devices",
-								"detectors",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Groups - Add Detector",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "cb4e2690-22bc-425b-8b11-3fa81e5eab1d",
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"type": "text",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"a@a.com\",\n    \"password\": \"asdt2019\",\n    \"name\": \"Oussama\",\n    \"role\": \"EMPOWERED\",\n    \"hasGroup\": false\n}"
-						},
-						"url": {
-							"raw": "{{url}}/api/v3/groups/123/devices/detectors/456/",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"api",
-								"v3",
-								"groups",
-								"123",
-								"devices",
-								"detectors",
-								"456",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Groups - Remove Detector",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "cb4e2690-22bc-425b-8b11-3fa81e5eab1d",
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"type": "text",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"a@a.com\",\n    \"password\": \"asdt2019\",\n    \"name\": \"Oussama\",\n    \"role\": \"EMPOWERED\",\n    \"hasGroup\": false\n}"
-						},
-						"url": {
-							"raw": "{{url}}/api/v3/groups/123/detectors/123/",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"api",
-								"v3",
-								"groups",
-								"123",
-								"detectors",
-								"123",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Groups - List Drone",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "cb4e2690-22bc-425b-8b11-3fa81e5eab1d",
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"type": "text",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"a@a.com\",\n    \"password\": \"asdt2019\",\n    \"name\": \"Oussama\",\n    \"role\": \"EMPOWERED\",\n    \"hasGroup\": false\n}"
-						},
-						"url": {
-							"raw": "{{url}}/api/v3/groups/123aA/devices/drones/",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"api",
-								"v3",
-								"groups",
-								"123aA",
-								"devices",
-								"drones",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Groups - Add Drone",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "cb4e2690-22bc-425b-8b11-3fa81e5eab1d",
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"type": "text",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"a@a.com\",\n    \"password\": \"asdt2019\",\n    \"name\": \"Oussama\",\n    \"role\": \"EMPOWERED\",\n    \"hasGroup\": false\n}"
-						},
-						"url": {
-							"raw": "{{url}}/api/v3/groups/123/devices/drones/456/",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"api",
-								"v3",
-								"groups",
-								"123",
-								"devices",
-								"drones",
-								"456",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Groups - Remove Drone",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "cb4e2690-22bc-425b-8b11-3fa81e5eab1d",
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"type": "text",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"a@a.com\",\n    \"password\": \"asdt2019\",\n    \"name\": \"Oussama\",\n    \"role\": \"EMPOWERED\",\n    \"hasGroup\": false\n}"
-						},
-						"url": {
-							"raw": "{{url}}/api/v3/groups/123/drones/123/",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"api",
-								"v3",
-								"groups",
-								"123",
-								"drones",
-								"123",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Groups - List Inhibitor",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "cb4e2690-22bc-425b-8b11-3fa81e5eab1d",
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"type": "text",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"a@a.com\",\n    \"password\": \"asdt2019\",\n    \"name\": \"Oussama\",\n    \"role\": \"EMPOWERED\",\n    \"hasGroup\": false\n}"
-						},
-						"url": {
-							"raw": "{{url}}/api/v3/groups/123aA/devices/inhibitors/",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"api",
-								"v3",
-								"groups",
-								"123aA",
-								"devices",
-								"inhibitors",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Groups - Add Inhibitor",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "cb4e2690-22bc-425b-8b11-3fa81e5eab1d",
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"type": "text",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"a@a.com\",\n    \"password\": \"asdt2019\",\n    \"name\": \"Oussama\",\n    \"role\": \"EMPOWERED\",\n    \"hasGroup\": false\n}"
-						},
-						"url": {
-							"raw": "{{url}}/api/v3/groups/123/devices/drones/456/",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"api",
-								"v3",
-								"groups",
-								"123",
-								"devices",
-								"drones",
-								"456",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Groups - Remove Inhibitor",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "cb4e2690-22bc-425b-8b11-3fa81e5eab1d",
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"type": "text",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"a@a.com\",\n    \"password\": \"asdt2019\",\n    \"name\": \"Oussama\",\n    \"role\": \"EMPOWERED\",\n    \"hasGroup\": false\n}"
-						},
-						"url": {
-							"raw": "{{url}}/api/v3/groups/123/drones/123/",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"api",
-								"v3",
-								"groups",
-								"123",
-								"drones",
-								"123",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Groups - List Zone",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "cb4e2690-22bc-425b-8b11-3fa81e5eab1d",
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"type": "text",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"a@a.com\",\n    \"password\": \"asdt2019\",\n    \"name\": \"Oussama\",\n    \"role\": \"EMPOWERED\",\n    \"hasGroup\": false\n}"
-						},
-						"url": {
-							"raw": "{{url}}/api/v3/groups/123aA/devices/zones/",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"api",
-								"v3",
-								"groups",
-								"123aA",
-								"devices",
-								"zones",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Groups - Add Zone",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "cb4e2690-22bc-425b-8b11-3fa81e5eab1d",
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"type": "text",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"a@a.com\",\n    \"password\": \"asdt2019\",\n    \"name\": \"Oussama\",\n    \"role\": \"EMPOWERED\",\n    \"hasGroup\": false\n}"
-						},
-						"url": {
-							"raw": "{{url}}/api/v3/groups/123/devices/drones/456/",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"api",
-								"v3",
-								"groups",
-								"123",
-								"devices",
-								"drones",
-								"456",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Groups - Remove Zone",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "cb4e2690-22bc-425b-8b11-3fa81e5eab1d",
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"type": "text",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"a@a.com\",\n    \"password\": \"asdt2019\",\n    \"name\": \"Oussama\",\n    \"role\": \"EMPOWERED\",\n    \"hasGroup\": false\n}"
-						},
-						"url": {
-							"raw": "{{url}}/api/v3/groups/123/drones/123/",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"api",
-								"v3",
-								"groups",
-								"123",
-								"drones",
-								"123",
-								""
-							]
-						}
 					},
 					"response": []
 				}
