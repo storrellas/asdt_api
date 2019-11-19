@@ -71,7 +71,7 @@ class DeviceTestCase(ASDTTestCase):
   def list_device(self):
     
     # Get Token
-    self.authenticate("admin@asdt.eu", "asdt2019")
+    self.authenticate("master@asdt.eu", "asdt2019")
 
     # Get All
     response = self.client.get(self.base_url)
