@@ -158,23 +158,6 @@ class GroupViewset(viewsets.ViewSet):
         print(e)
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=True, methods=['get'], url_path='users')
-    def users(self, request, sport_id = None, pk=None):
-      try:
-        group = Group.objects.get(id=pk)
-        if request.user.is_allowed_group(group) == False:
-          raise APIException("NOT_ALLOWED")
-
-        # Generate data
-        data = []
-        for user in group.users:
-           data.append(user.fetch().as_dict())
-
-        return Response(data)
-      except Exception as e:
-        print(str(e))
-        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
     @action(detail=True, methods=['get'], url_path='groups')
     def groups(self, request, pk=None):
       try:
@@ -215,97 +198,25 @@ class GroupAllView(APIView):
         data_dict.append(group.as_dict())
       return Response(data_dict)
 
-# class GroupUserView(APIView):
-#     authentication_classes = [ASDTAuthentication]
-#     permission_classes = (IsAuthenticated, )
-
-#     def put(self, request, *args, **kwargs):
-#       """
-#       Adds user to group
-#       """
-#       try:
-#         # TODO: Put all this logic into a function
-#         if request.user.role != 'ADMIN':
-#           raise APIException("NOT_ALLOWED")
-        
-#         # Get instances
-#         group = Group.objects.get(id=kwargs['group_id'])
-#         user = User.objects.get(id=kwargs['user_id'])
-
-#         # Check whether request user has id
-#         if request.user.group is None:
-#           raise APIException("GROUP_ID_NOT_FOUND")
-
-#         # Check permissions
-#         if request.user.group.is_parent_of( group ):
-#           pass
-#         elif request.user.group == group and user.role == 'ADMIN':
-#           # If targeted user is ADMIN do not allow to modify group
-#           raise APIException("NOT_ALLOWED")
-#         else:
-#           raise APIException("NOT_ALLOWED")
-
-#         # Remove user from current group
-#         if user.group is not None:
-#           user.group.users.remove(user)
-#           user.group.save()
-
-#         # Set group to user
-#         user.group = group
-#         user.save()
-
-#         # Add user to group
-#         group.users.append(user)
-#         group.save()
-        
-
-#         return Response(user.as_dict())
-#       except Exception as e:
-#         print(e)
-#         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-
-#     def delete(self, request, *args, **kwargs):
-#       """
-#       Removes user from group
-#       """
-#       try:
-#         if request.user.role != 'ADMIN':
-#           raise APIException("NOT_ALLOWED")
-
-
-#         # Get instances
-#         group = Group.objects.get(id=kwargs['group_id'])
-#         user = User.objects.get(id=kwargs['user_id'])
-#         # Check whether request user has id
-#         if request.user.group is None:
-#           raise APIException("GROUP_ID_NOT_FOUND")
-
-#         # Check permissions
-#         if request.user.group.is_parent_of( group ):
-#           pass
-#         elif request.user.group == group and user.role == 'ADMIN':
-#           # If targeted user is ADMIN do not allow to modify group
-#           raise APIException("NOT_ALLOWED")
-#         else:
-#           raise APIException("NOT_ALLOWED")
-
-#         # Remove user from group
-#         if user.group is not None:
-#           user.group.users.remove(user)
-#           user.group.save()
-
-#         user.group = None
-#         user.save()
-
-#         return Response(status=status.HTTP_204_NO_CONTENT)
-#       except Exception as e:
-#         print(e)
-#         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
 class GroupUserViewset(viewsets.ViewSet):
     authentication_classes = [ASDTAuthentication]
     permission_classes = (IsAuthenticated, )
+
+    def list(self, request, *args, **kwargs):
+      try:
+        group = Group.objects.get(id=kwargs['group_id'])
+        if request.user.is_allowed_group(group) == False:
+          raise APIException("NOT_ALLOWED")
+
+        # Generate data
+        data = []
+        for user in group.users:
+           data.append(user.fetch().as_dict())
+
+        return Response(data)
+      except Exception as e:
+        print(str(e))
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
       """
