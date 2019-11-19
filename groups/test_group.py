@@ -251,7 +251,6 @@ class TestCase(helper_tests.ASDTTestCase):
     user = User.objects.get(email='test@asdt.eu')
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')
     self.assertEqual( user.group, group )
-    self.assertTrue( user in group.users )
 
     # Delete user from group
     response = self.client.delete('/{}/groups/{}/users/{}/'.format(settings.PREFIX, group.id, user.id), {})

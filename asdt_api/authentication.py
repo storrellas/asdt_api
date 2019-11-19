@@ -39,10 +39,10 @@ class ASDTAuthentication(authentication.BaseAuthentication):
         logger.info("Expired " + str(e))
         return (None, None)
 
-class ASDTIsAdminPermission(permissions.BasePermission):
+class ASDTIsAdminOrMasterPermission(permissions.BasePermission):
 
     def has_permission(self, request, view):
-      if request.user.role == 'ADMIN':
+      if request.user.role == User.ADMIN or request.user.role == User.MASTER:
         return True
       else:
         return False

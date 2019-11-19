@@ -191,7 +191,6 @@ class GroupAllView(APIView):
       elif request.user.role == 'VIEWER' or request.user.role == 'EMPOWERED':
         group_list = [request.user.group]
 
-
       # Generate dict
       data_dict = []
       for group in group_list:
@@ -209,9 +208,9 @@ class GroupUserViewset(viewsets.ViewSet):
           raise APIException("NOT_ALLOWED")
 
         # Generate data
-        data = []
-        for user in group.users:
-           data.append(user.fetch().as_dict())
+        data = []       
+        for user in User.objects.filter(group=group):
+           data.append(user.as_dict())
 
         return Response(data)
       except Exception as e:
@@ -244,19 +243,9 @@ class GroupUserViewset(viewsets.ViewSet):
         else:
           raise APIException("NOT_ALLOWED")
 
-        # Remove user from current group
-        if user.group is not None:
-          user.group.users.remove(user)
-          user.group.save()
-
-        # Set group to user
-        user.group = group
-        user.save()
-
         # Add user to group
-        group.users.append(user)
-        group.save()
-        
+        user.group = group
+        user.save()       
 
         return Response(user.as_dict())
       except Exception as e:
@@ -290,10 +279,6 @@ class GroupUserViewset(viewsets.ViewSet):
           raise APIException("NOT_ALLOWED")
 
         # Remove user from group
-        if user.group is not None:
-          user.group.users.remove(user)
-          user.group.save()
-
         user.group = None
         user.save()
 

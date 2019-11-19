@@ -78,7 +78,7 @@ class UserSerializer(serializers.Serializer):
 
 class UserViewset(viewsets.ViewSet):
     authentication_classes = [ASDTAuthentication]
-    permission_classes = (IsAuthenticated, ASDTIsAdminPermission,)
+    permission_classes = (IsAuthenticated, ASDTIsAdminOrMasterPermission,)
 
     def list(self, request):
       
@@ -93,7 +93,6 @@ class UserViewset(viewsets.ViewSet):
 
           # Queryset
           group_list = [ item.id for item in groups ]
-
           queryset = User.objects.filter(group__in=group_list)
 
         # Generate response
@@ -145,10 +144,7 @@ class UserViewset(viewsets.ViewSet):
             user.group = group
             user.save()
 
-            # Append to group
-            group.users.append(user)
-            group.save()
-
+          # Save user
           user.save()   
 
         return Response( user.as_dict() )
@@ -184,9 +180,6 @@ class UserViewset(viewsets.ViewSet):
             user.group = group
             user.save()
 
-            # Append to group
-            group.users.append(user)
-            group.save()
           user.save()   
 
         # Generate response
@@ -203,10 +196,6 @@ class UserViewset(viewsets.ViewSet):
         user = User.objects.get(id=pk)
         if request.user.has_power_over(user) == False:
           return Response({"success": False, "error": "NOT_ALLOWED"})
-
-        # Remove user from group        
-        user.group.users.remove(user)
-        user.group.save()
 
         # Delete user
         user.delete()

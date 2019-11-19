@@ -132,9 +132,6 @@ class TestCase(helper_tests.ASDTTestCase):
 
     # Delete user
     user = User.objects.get(email='user2@test.eu')
-    group = Group.objects.get(name='ADMIN_CHILD_ASDT')    
-    group.users.remove(user)
-    group.save()
 
     # Delete user
     user.delete()
@@ -240,12 +237,9 @@ class TestCase(helper_tests.ASDTTestCase):
     # Check properly created
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')
     user = User.objects.get(email='albert@asdt.eu')
-    self.assertTrue(user in group.users)
     self.assertTrue(user.group == group)
 
     # Leave it as it was
-    group.users.remove(user)
-    group.save()
     user.delete()
 
   def test_update_only_group(self):
@@ -271,12 +265,9 @@ class TestCase(helper_tests.ASDTTestCase):
     # Check properly created
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')
     user = User.objects.get(email='sergi@asdt.eu')
-    self.assertTrue(user in group.users)
     self.assertTrue(user.group == group)
 
     # Leave it as it was
-    group.users.remove(user)
-    group.save()
     user.delete()
 
 
@@ -288,18 +279,11 @@ class TestCase(helper_tests.ASDTTestCase):
     # Create custom user    
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')
     user = User.objects.create(email='test_delete@asdt.eu', hasGroup=True, group=group)
-    
-    # Add user to group
-    group.users.append(user)
-    group.save()
 
     # Delete user
     response = self.client.delete('/{}/user/{}/'.format(settings.PREFIX, user.id))
     self.assertTrue(response.status_code == HTTPStatus.NO_CONTENT)
     self.assertTrue( User.objects.filter(email='test_delete@asdt.eu').count() == 0 )
-
-    group = Group.objects.get(name='ADMIN_CHILD_ASDT')
-    self.assertTrue(len(group.users), 1)
 
 
 

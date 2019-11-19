@@ -20,6 +20,7 @@ inhibitors = importlib.import_module('inhibitors')
 detectors = importlib.import_module('detectors')
 zones = importlib.import_module('zones')
 drones = importlib.import_module('drones')
+user = importlib.import_module('user')
 
 ###############################
 # GROUP
@@ -38,6 +39,9 @@ class Group(ASDTDocument):
   name = StringField(required=True, unique=True, default='')
   parent = ReferenceField("self", reverse_delete_rule = NULLIFY)
   childs = ListField(ReferenceField("self", reverse_delete_rule = NULLIFY))
+  # NOTE: This property is not used anymore
+  # Leave it here for compatiblity with old DB's
+  # Currently, making use of User.parent references
   users = ListField(LazyReferenceField('User'), reverse_delete_rule = NULLIFY)  
   devices = EmbeddedDocumentField(GroupDevices, default=GroupDevices())
 
@@ -166,8 +170,8 @@ class Group(ASDTDocument):
     item['name'] = str(self.name)
     item['parent'] = str(self.parent.id) if self.parent is not None else 'undef'
     item['users'] = []
-    for user in self.users:
-      item['users'].append(str(user.id))
+    for user_item in user.models.User.objects.filter(group=self.id):
+      item['users'].append(user_item.as_dict())
     item['childs'] = []
     for group_child in self.childs:
       item['childs'].append(str(group_child.id))
