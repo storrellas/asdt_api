@@ -16,10 +16,11 @@ from rest_framework.decorators import action, permission_classes
 
 # Project imports
 from asdt_api.utils import get_logger
-from asdt_api.authentication import *
+from asdt_api.authentication import ASDTIsAdminOrMasterPermission, ASDTAuthentication
 from asdt_api.models import Location
 
 from .models import *
+from user.models import User
 
 logger = get_logger()
 
@@ -29,7 +30,7 @@ class GroupSerializer(serializers.Serializer):
 
 class GroupViewset(viewsets.ViewSet):
     authentication_classes = [ASDTAuthentication]
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, ASDTIsAdminOrMasterPermission, )
 
     def create(self, request):
 
@@ -84,10 +85,7 @@ class GroupViewset(viewsets.ViewSet):
 
     def update(self, request, pk=None):
       try:
-        # Check role
-        if request.user.role != User.ADMIN:
-          raise APIException("NOT_ALLOWED")
-        
+       
         # Check allowed group
         group = Group.objects.get(id=pk)
         if request.user.is_allowed_group(group) == False:
@@ -117,9 +115,6 @@ class GroupViewset(viewsets.ViewSet):
 
     def delete(self, request, pk=None):
       try:
-        # Check role
-        if request.user.role != User.ADMIN:
-          raise APIException("NOT_ALLOWED")
 
         # Check allowed group
         group = Group.objects.get(id=pk)
@@ -157,19 +152,16 @@ class GroupViewset(viewsets.ViewSet):
 
 class GroupAllView(APIView):
     authentication_classes = [ASDTAuthentication]
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, ASDTIsAdminOrMasterPermission, )
 
     def get(self, request):
-
-      # Check whether current user hasGroup
-      if request.user.hasGroup == False:
-        return Response({"success": False, "error": "THE_USER_HAS_NO_GROUP"})
 
       if request.user.role == User.ADMIN:
         group_list = request.user.group.get_full_children()
         group_list.append(request.user.group)
-      elif request.user.role == 'VIEWER' or request.user.role == 'EMPOWERED':
-        group_list = [request.user.group]
+      elif request.user.role == User.MASTER:
+        group_list = Group.objects.all()
+      
 
       # Generate dict
       data_dict = []
@@ -179,7 +171,7 @@ class GroupAllView(APIView):
 
 class GroupUserViewset(viewsets.ViewSet):
     authentication_classes = [ASDTAuthentication]
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated, ASDTIsAdminOrMasterPermission, )
 
     def list(self, request, *args, **kwargs):
       try:
@@ -201,28 +193,16 @@ class GroupUserViewset(viewsets.ViewSet):
       """
       Adds user to group
       """
-      try:
-        # TODO: Put all this logic into a function
-        if request.user.role != 'ADMIN':
-          raise APIException("NOT_ALLOWED")
-        
+      try:       
+
         # Get instances
         group = Group.objects.get(id=kwargs['group_id'])
         user = User.objects.get(id=kwargs['pk'])
 
-        # Check whether request user has id
-        if request.user.group is None:
-          raise APIException("GROUP_ID_NOT_FOUND")
-
         # Check permissions
-        if request.user.group.is_parent_of( group ):
-          pass
-        elif request.user.group == group and user.role == User.ADMIN:
-          # If targeted user is ADMIN do not allow to modify group
+        if request.user.is_allowed_group(group) == False:
           raise APIException("NOT_ALLOWED")
-        else:
-          raise APIException("NOT_ALLOWED")
-
+        
         # Add user to group
         user.group = group
         user.save()       
@@ -238,24 +218,12 @@ class GroupUserViewset(viewsets.ViewSet):
       Removes user from group
       """
       try:
-        if request.user.role != User.ADMIN:
-          raise APIException("NOT_ALLOWED")
-
-
         # Get instances
         group = Group.objects.get(id=kwargs['group_id'])
         user = User.objects.get(id=kwargs['pk'])
-        # Check whether request user has id
-        if request.user.group is None:
-          raise APIException("GROUP_ID_NOT_FOUND")
 
         # Check permissions
-        if request.user.group.is_parent_of( group ):
-          pass
-        elif request.user.group == group and user.role == User.ADMIN:
-          # If targeted user is ADMIN do not allow to modify group
-          raise APIException("NOT_ALLOWED")
-        else:
+        if request.user.is_allowed_group(group) == False:
           raise APIException("NOT_ALLOWED")
 
         # Remove user from group

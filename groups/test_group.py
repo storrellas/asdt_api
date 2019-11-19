@@ -69,16 +69,16 @@ class TestCase(helper_tests.ASDTTestCase):
     response_json = json.loads(response.content.decode())
     self.assertEqual(len(response_json), 5)
 
-  def test_get_all_viewer(self):
+  def test_get_all_master(self):
     
     # Get Token
-    self.authenticate("viewer@asdt.eu", "asdt2019")
+    self.authenticate("master@asdt.eu", "asdt2019")
 
     # Get All
     response = self.client.get('/{}/groups/all/'.format(settings.PREFIX))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
-    self.assertEqual(len(response_json), 1)
+    self.assertEqual(len(response_json), 6)
 
   def test_create(self):
     

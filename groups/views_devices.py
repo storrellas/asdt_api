@@ -15,7 +15,7 @@ from rest_framework.exceptions import APIException
 
 # Project imports
 from asdt_api.utils import get_logger
-from asdt_api.authentication import *
+from asdt_api.authentication import ASDTIsAdminOrMasterPermission, ASDTAuthentication
 from asdt_api.models import Location
 
 from .models import *
@@ -30,7 +30,7 @@ logger = get_logger()
 class GroupDevicesViewset(viewsets.ViewSet):
 
     authentication_classes = [ASDTAuthentication]
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated, ASDTIsAdminOrMasterPermission)
     model = None
     queryset = None
     group = None
@@ -98,7 +98,7 @@ class GroupDevicesViewset(viewsets.ViewSet):
 class GroupDetectorViewset(GroupDevicesViewset):
 
     authentication_classes = [ASDTAuthentication]
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, ASDTIsAdminOrMasterPermission, )
     model = Detector
     group = None
 
@@ -108,7 +108,7 @@ class GroupDetectorViewset(GroupDevicesViewset):
 class GroupDroneViewset(GroupDevicesViewset):
 
     authentication_classes = [ASDTAuthentication]
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, ASDTIsAdminOrMasterPermission, )
     model = Drone
     group = None
 
@@ -118,7 +118,7 @@ class GroupDroneViewset(GroupDevicesViewset):
 class GroupInhibitorViewset(GroupDevicesViewset):
 
     authentication_classes = [ASDTAuthentication]
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, ASDTIsAdminOrMasterPermission, )
     model = Inhibitor
     group = None
 
@@ -128,7 +128,7 @@ class GroupInhibitorViewset(GroupDevicesViewset):
 class GroupZoneViewset(GroupDevicesViewset):
 
     authentication_classes = [ASDTAuthentication]
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, ASDTIsAdminOrMasterPermission, )
     model = Zone
     group = None
 

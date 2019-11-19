@@ -155,7 +155,7 @@ class UserViewset(viewsets.ViewSet):
     def update(self, request, pk=None):
 
       try:
-      
+        
         # Get user
         user = User.objects.get(id=pk)
         if request.user.has_power_over(user) == False:
