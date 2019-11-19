@@ -77,6 +77,15 @@ class DeviceTestCase(ASDTTestCase):
     response = self.client.get(self.base_url)
     self.assertTrue(response.status_code == HTTPStatus.OK)
 
+  def list_device_not_allowed(self):
+    
+    # Get Token
+    self.authenticate("viewer@asdt.eu", "asdt2019")
+
+    # Get All
+    response = self.client.get(self.base_url)
+    self.assertTrue(response.status_code == HTTPStatus.FORBIDDEN)   
+
   def retrieve_device(self, id):
     
     # Get Token

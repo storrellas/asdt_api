@@ -20,7 +20,6 @@ router.register(r'(?P<group_id>[a-zA-Z0-9]+)/users', GroupUserViewset, basename=
 
 urlpatterns = [
     path('all/', GroupAllView.as_view()),
-    #path('<str:group_id>/users/<str:user_id>/', GroupUserView.as_view()),
     path('', include(router.urls))
 ]
 

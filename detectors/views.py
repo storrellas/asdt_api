@@ -16,9 +16,10 @@ from rest_framework.decorators import action, permission_classes
 
 # Project imports
 from asdt_api.utils import get_logger
-from asdt_api.authentication import *
+from asdt_api.authentication import ASDTIsAdminOrMasterPermission, ASDTAuthentication
 from asdt_api.models import Location
 from asdt_api.views import DeviceViewset
+
 
 from .models import *
 from groups.models import *
@@ -37,7 +38,7 @@ class DetectorSerializer(serializers.Serializer):
 
 class DetectorViewset(DeviceViewset):
     authentication_classes = [ASDTAuthentication]
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, ASDTIsAdminOrMasterPermission, )
 
     model = Detector
     serializer = DetectorSerializer

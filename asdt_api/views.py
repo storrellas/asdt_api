@@ -94,7 +94,7 @@ class DeviceViewset(viewsets.ViewSet):
       Create model
       """
       try:
-        if request.user.role != 'ADMIN':
+        if request.user.role != User.ADMIN:
           raise APIException("NOT_ALLOWED")
 
         # Validate Serializer
@@ -129,7 +129,7 @@ class DeviceViewset(viewsets.ViewSet):
       Update model
       """
       try:
-        if request.user.role != 'ADMIN':
+        if request.user.role != User.ADMIN:
           raise APIException("NOT_ALLOWED")
 
         # Validate Serializer
@@ -176,7 +176,7 @@ class DeviceViewset(viewsets.ViewSet):
       Delete model
       """
       try:
-        if request.user.role != 'ADMIN':
+        if request.user.role != User.ADMIN:
           raise APIException("NOT_ALLOWED")
 
         # Update object        

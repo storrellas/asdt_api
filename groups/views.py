@@ -34,7 +34,7 @@ class GroupViewset(viewsets.ViewSet):
     def create(self, request):
 
       try:
-        if request.user.role != 'ADMIN':
+        if request.user.role != User.ADMIN:
           raise APIException('NOT_ALLOWED')
 
         # Group serializer
@@ -85,7 +85,7 @@ class GroupViewset(viewsets.ViewSet):
     def update(self, request, pk=None):
       try:
         # Check role
-        if request.user.role != 'ADMIN':
+        if request.user.role != User.ADMIN:
           raise APIException("NOT_ALLOWED")
         
         # Check allowed group
@@ -118,7 +118,7 @@ class GroupViewset(viewsets.ViewSet):
     def delete(self, request, pk=None):
       try:
         # Check role
-        if request.user.role != 'ADMIN':
+        if request.user.role != User.ADMIN:
           raise APIException("NOT_ALLOWED")
 
         # Check allowed group
@@ -131,11 +131,6 @@ class GroupViewset(viewsets.ViewSet):
           raise APIException("CANNOT_REMOVE_ROOT_GROUP")
 
         # Delete operation
-        # if 'recursive' in request.query_params:
-        #   group.delete_recursive()  
-        # else:
-        #   group.delete()
-        # Delete group recursively
         group.delete_recursive()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -170,7 +165,7 @@ class GroupAllView(APIView):
       if request.user.hasGroup == False:
         return Response({"success": False, "error": "THE_USER_HAS_NO_GROUP"})
 
-      if request.user.role == 'ADMIN':
+      if request.user.role == User.ADMIN:
         group_list = request.user.group.get_full_children()
         group_list.append(request.user.group)
       elif request.user.role == 'VIEWER' or request.user.role == 'EMPOWERED':
@@ -222,7 +217,7 @@ class GroupUserViewset(viewsets.ViewSet):
         # Check permissions
         if request.user.group.is_parent_of( group ):
           pass
-        elif request.user.group == group and user.role == 'ADMIN':
+        elif request.user.group == group and user.role == User.ADMIN:
           # If targeted user is ADMIN do not allow to modify group
           raise APIException("NOT_ALLOWED")
         else:
@@ -243,7 +238,7 @@ class GroupUserViewset(viewsets.ViewSet):
       Removes user from group
       """
       try:
-        if request.user.role != 'ADMIN':
+        if request.user.role != User.ADMIN:
           raise APIException("NOT_ALLOWED")
 
 
@@ -257,7 +252,7 @@ class GroupUserViewset(viewsets.ViewSet):
         # Check permissions
         if request.user.group.is_parent_of( group ):
           pass
-        elif request.user.group == group and user.role == 'ADMIN':
+        elif request.user.group == group and user.role == User.ADMIN:
           # If targeted user is ADMIN do not allow to modify group
           raise APIException("NOT_ALLOWED")
         else:

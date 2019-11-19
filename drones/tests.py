@@ -37,6 +37,9 @@ class TestCase(helper_tests.DeviceTestCase):
   def test_list(self):
     super().list_device()
 
+  def test_list_not_allowed(self):
+    super().list_device_not_allowed()
+
   def test_retrieve(self):    
     # Retrieve detector
     instance = Drone.objects.get(sn='1')

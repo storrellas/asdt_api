@@ -87,7 +87,7 @@ class User(ASDTDocument):
   def has_power_over(self, user):
     if self.hasGroup == False or \
         self.group is None or \
-        self.role != 'ADMIN':
+        self.role != User.ADMIN:
       return False
 
     # User does not have group and user is root of site (self.group.parent == None)
@@ -97,7 +97,7 @@ class User(ASDTDocument):
     # If both self and user share group
     if user.group == self.group:
       # Return True when user is not admin
-      return True if user.role != 'ADMIN' else False
+      return True if user.role != User.ADMIN else False
     else:
       # Return True when current group is parent of user group
       return self.group.is_parent_of(user.group)

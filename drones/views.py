@@ -16,14 +16,14 @@ from rest_framework import serializers
 from rest_framework.permissions import IsAuthenticated
 
 # Project imports
-from asdt_api.authentication import ASDTAuthentication
+from asdt_api.authentication import ASDTIsAdminOrMasterPermission, ASDTAuthentication
 from asdt_api.views import DeviceViewset
 from bson.objectid import ObjectId
 from .models import *
 
 class DroneModelView(APIView):
     authentication_classes = [ASDTAuthentication]
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, )
 
 
     def get(self, request, log_id = None):
@@ -47,7 +47,7 @@ class DroneSerializer(serializers.Serializer):
 
 class DroneViewset(DeviceViewset):
     authentication_classes = [ASDTAuthentication]
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, ASDTIsAdminOrMasterPermission)
 
     model = Drone
     serializer = DroneSerializer

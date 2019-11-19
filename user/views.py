@@ -28,7 +28,7 @@ from rest_framework.exceptions import APIException
 
 # Project imports
 from asdt_api.utils import get_logger
-from asdt_api.authentication import *
+from asdt_api.authentication import ASDTIsAdminOrMasterPermission, ASDTAuthentication
 from asdt_api.models import Location
 
 from .models import *
