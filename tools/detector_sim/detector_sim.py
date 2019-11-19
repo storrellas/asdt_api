@@ -77,6 +77,7 @@ class DetectorWSClient(object):
     # Get token
     if response.status_code == HTTPStatus.OK:
       response_json = json.loads(response.content.decode()) 
+      print(response_json)
       self.token = response_json['data']['token']
       return True
     else:
