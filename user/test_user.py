@@ -182,6 +182,17 @@ class TestCase(helper_tests.ASDTTestCase):
     response = self.client.get('/{}/user/'.format(settings.PREFIX))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
+    self.assertEqual(len(response_json), 3)
+
+  def test_list_master(self):
+    
+    # Get Token
+    self.authenticate("master@asdt.eu", "asdt2019")
+
+    # Get list of users
+    response = self.client.get('/{}/user/'.format(settings.PREFIX))
+    self.assertTrue(response.status_code == HTTPStatus.OK)
+    response_json = json.loads(response.content.decode())
     self.assertEqual(len(response_json), 7)
 
   def test_list_admin_child(self):
@@ -214,7 +225,8 @@ class TestCase(helper_tests.ASDTTestCase):
 
     # Create custom user    
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')
-    user = User.objects.create(email='sergi@asdt.eu', name='Sergi')
+    group_former = Group.objects.get(name='ADMIN_CHILD2_ASDT')
+    user = User.objects.create(email='sergi@asdt.eu', name='Sergi', group=group_former)
     user.set_password('asdt2019')
     
     # Update user
@@ -245,12 +257,13 @@ class TestCase(helper_tests.ASDTTestCase):
   def test_update_only_group(self):
     
     # Get Token
-    self.authenticate("admin@asdt.eu", "asdt2019")
+    self.authenticate("master@asdt.eu", "asdt2019")
 
 
     # Create custom user    
     group = Group.objects.get(name='ADMIN_CHILD_ASDT')
-    user = User.objects.create(email='sergi@asdt.eu', name='Sergi')
+    group_former = Group.objects.get(name='ADMIN_CHILD2_ASDT')
+    user = User.objects.create(email='sergi@asdt.eu', name='Sergi', group=group_former)
     user.set_password('asdt2019')
     
     # Update user

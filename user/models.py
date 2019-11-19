@@ -85,27 +85,45 @@ class User(ASDTDocument):
     return True
   
   def has_power_over(self, user):
-    if self.hasGroup == False or \
-        self.group is None or \
-        self.role != User.ADMIN:
-      return False
+    # If MASTER
+    if self.role == User.MASTER:
+      return True
 
-    # User does not have group and user is root of site (self.group.parent == None)
-    if user.group is None:
-      return True if self.group.parent is None else False
+    # If ADMIN
+    if self.role == User.ADMIN and self.group is not None:
+      if user.group == self.group or self.group.is_parent_of(user.group):
+        return True
 
-    # If both self and user share group
-    if user.group == self.group:
-      # Return True when user is not admin
-      return True if user.role != User.ADMIN else False
-    else:
-      # Return True when current group is parent of user group
-      return self.group.is_parent_of(user.group)
+    return False
+
+    # if self.hasGroup == False or \
+    #     self.group is None or \
+    #     self.role != User.ADMIN:
+    #   return False
+
+    # # User does not have group and user is root of site (self.group.parent == None)
+    # if user.group is None:
+    #   return True if self.group.parent is None else False
+
+    # # If both self and user share group
+    # if user.group == self.group:
+    #   # Return True when user is not admin
+    #   return True if user.role != User.ADMIN else False
+    # else:
+    #   # Return True when current group is parent of user group
+    #   return self.group.is_parent_of(user.group)
 
   def is_allowed_group(self, group):
-    cond =  (self.group == group or self.group.is_parent_of(group) )
-    return True if cond else False
+    # If MASTER
+    if self.role == self.MASTER:
+      return True
+
+    # If ADMIN
+    if self.role == self.ADMIN:
+      return  (self.group == group or self.group.is_parent_of(group) )
     
+    return False
+
   def as_dict(self):
     item = {}
     item['id'] = str(self.id)

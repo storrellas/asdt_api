@@ -83,10 +83,7 @@ class UserViewset(viewsets.ViewSet):
     def list(self, request):
       
       try:
-        if request.user.group.parent is None:
-          queryset = User.objects.all()
-        else:
-
+        if request.user.role == User.ADMIN:
           # Get groups assigned
           groups = request.user.group.get_full_children() 
           groups.append( request.user.group )        
@@ -94,6 +91,9 @@ class UserViewset(viewsets.ViewSet):
           # Queryset
           group_list = [ item.id for item in groups ]
           queryset = User.objects.filter(group__in=group_list)
+        elif request.user.role == User.MASTER:
+          queryset = User.objects.all()
+
 
         # Generate response
         user_dict = []
@@ -155,12 +155,12 @@ class UserViewset(viewsets.ViewSet):
     def update(self, request, pk=None):
 
       try:
-
+      
         # Get user
         user = User.objects.get(id=pk)
         if request.user.has_power_over(user) == False:
           raise APIException("NOT_ALLOWED")
-
+      
         group = None
         if 'group' in request.data:    
           group = Group.objects.get(id=request.data['group'])
