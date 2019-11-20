@@ -19,7 +19,15 @@ sys.path.append(parentdir)
 
 API_USER_INFO = 'http://asdtdev.mooo.com/api/user/info'
 
-#from models import ConnectionLog
+MONGO_HOST = 'localhost'
+MONGO_PORT = 27017
+MONGO_DB = 'asdt'
+
+from models import ConnectionLog
+
+# Mongoengine connect
+import mongoengine
+
 
 
 
@@ -60,6 +68,13 @@ application = tornado.web.Application([
  
  
 if __name__ == "__main__":
+
+  # connecting MongoEngine
+  mongoengine.connect(MONGO_DB, host=MONGO_HOST, port=int(MONGO_PORT))
+  logger.info("Connected MONGODB against mongodb://{}:{}/{}".format(MONGO_HOST, MONGO_PORT, MONGO_DB))
+
+  ConnectionLog.objects.create(type=ConnectionLog.USER, reason=ConnectionLog.CONNECTION)
+
   # Starting WS Server
   http_server = tornado.httpserver.HTTPServer(application)
   http_server.listen(8081)
