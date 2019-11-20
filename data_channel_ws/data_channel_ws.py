@@ -95,48 +95,6 @@ application = tornado.web.Application([
 ])
  
 
-def test_encoder_decoder():
-  """
-  Test function to test encoder
-  """
-  print("----- ENCODING ---")
-
-  coder = DetectorCoder()
-
-  # Generate package
-  info = coder.template()
-  info['sn'] = '111BBBBBBBBB16'
-
-  info['driverLocation']['lat'] = 41.2
-  info['driverLocation']['lon'] = 2.3  
-
-  info['droneLocation']['lat'] = 41.2
-  info['droneLocation']['lon'] = 2.3
-  info['droneLocation']['fHeight'] = 8.8
-  info['droneLocation']['aHeight'] = 1
-
-  info['homeLocation']['lat'] = 41.2
-  info['homeLocation']['lon'] = 2.3
-
-  info['driverLocation']['lat'] = 41.2
-  info['driverLocation']['lon'] = 2.3
-
-  info['productId'] = 16
-
-
-
-  # Encode frame
-  encoded = coder.encode( info ) 
-  print("info", info)
-  print("encoded", encoded)
-
-  print("----- DECODING ---")
-  decoded = coder.decode( encoded )
-  print("decoded", decoded)
-
-  print(decoded == info)
-
-
 
 ###########################
 ## Signal handling to avoid exception when closing
@@ -150,7 +108,7 @@ def signal_handler(sig, frame):
   sys.exit(0)
 
 if __name__ == "__main__":
-  """
+
   # Configure signals
   signal.signal(signal.SIGINT, signal_handler)
 
@@ -166,5 +124,5 @@ if __name__ == "__main__":
   http_server = tornado.httpserver.HTTPServer(application)
   http_server.listen(WS_PORT)
   tornado.ioloop.IOLoop.instance().start()
-  """
+
  

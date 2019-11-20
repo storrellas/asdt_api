@@ -27,6 +27,7 @@ from gpx_parser.GPXTrack import GPXTrack
 
 # Project imports
 from common.utils import get_logger
+from common import DetectorCoder
 
 # Create logger
 logger = get_logger()
@@ -215,7 +216,8 @@ class DetectorWSClient(object):
     self._gpx_output(self.lat, self.lon)
 
     # Encode package
-    frame = self._encode109(info)    
+    coder = DetectorCoder()
+    frame = coder.encode(info)    
     self.ws.write_message(bytes(frame), binary=True)
 
   def _gpx_output(self, lat, lon):
@@ -232,54 +234,6 @@ class DetectorWSClient(object):
     filename = self.sn + '.gpx'
     with open(OUTPUT_PATH + '/' + filename, 'w') as output_file:
       output_file.write(self.output_gpx.to_xml())
-
-  def _encode109(self, info):
-
-    # Declare frame
-    frame = bytearray(109)
-    frame[11] = 0x1F
-
-    # 25 -> + 14 bytes [serial number] (string)
-    sn_ba = bytearray(info['sn'], 'utf-8')
-    #sn_ba = bytearray()
-    #sn_ba.extend(map(ord, info['sn']))
-    frame[25:25+len(sn_ba)] = sn_ba
-
-    # 41 -> + 4 bytes [long drone]    
-    lon = int(info['droneLocation']['lon'] * self.__toDegrees).to_bytes(4, 'little', signed=True)
-    frame[41:41+4] = lon
-    # 45 -> + 4 byes [lat drone]
-    lat = int(info['droneLocation']['lat'] * self.__toDegrees).to_bytes(4, 'little', signed=True)
-    frame[45:45+4] = lat
-
-    # 49 -> + 2 bytes [absolute height] - NOTE: aHeight does not exist
-    # aHeight = int(info['droneLocation']['aHeight'] * __toDegrees).to_bytes(2, 'little', signed=True)
-    # frame[49:49+2] = aHeight
-    # 51 -> + 2 bytes [floor height]
-    fHeight = int(info['droneLocation']['fHeight'] * 10).to_bytes(2, 'little', signed=True)
-    frame[51:51+2] = fHeight
-
-    # NOTE: WATCH OUT THIS ONE IS LAT first, LON second
-    # 69 -> + 4 bytes [lat driver] 
-    lat = int(info['driverLocation']['lat'] * self.__toDegrees).to_bytes(4, 'little', signed=True)
-    frame[69:69+4] = lat
-    # 73 -> + 4 bytes [lon driver]
-    lon = int(info['driverLocation']['lon'] * self.__toDegrees).to_bytes(4, 'little', signed=True)
-    frame[73:73+4] = lon
-
-    # 77 -> + 4 bytes [lon home]
-    lon = int(info['homeLocation']['lon'] * self.__toDegrees).to_bytes(4, 'little', signed=True)
-    frame[77:77+4] = lon
-    # 81 -> + 4 bytes [lat home]
-    lat = int(info['homeLocation']['lat'] * self.__toDegrees).to_bytes(4, 'little', signed=True)
-    frame[81:81+4] = lat
-
-    # 85 -> + 1 byte [product type]
-    productId = int(info['productId']).to_bytes(1, 'little', signed=False)
-    frame[85:85] = productId
-
-    #print(frame)
-    return frame
 
 
 ###########################
