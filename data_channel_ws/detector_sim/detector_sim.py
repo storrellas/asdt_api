@@ -1,3 +1,10 @@
+# Update syspath
+import os, sys
+currentdir = os.path.dirname(os.path.abspath(__file__))
+parentdir = os.path.dirname(currentdir)
+sys.path.append(parentdir)
+
+# Python imports
 import requests
 import json
 import sys
@@ -18,7 +25,7 @@ from gpx_parser.GPXTrackPoint import GPXTrackPoint
 from gpx_parser.GPXTrack import GPXTrack
 
 # Project imports
-from utils import get_logger
+from common.utils import get_logger
 
 # Create logger
 logger = get_logger()

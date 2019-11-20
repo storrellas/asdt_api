@@ -16,7 +16,7 @@ import jwt
 import mongoengine
 
 # Project imports
-from utils import get_logger
+from common.utils import get_logger
 from models import ConnectionLog
 
 # Create logger
