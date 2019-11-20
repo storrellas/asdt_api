@@ -1,1 +1,1 @@
-from .detector_decoder import DetectorDecoder
+from .detector_coder import DetectorCoder

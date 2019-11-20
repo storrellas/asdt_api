@@ -17,6 +17,7 @@ import mongoengine
 
 # Project imports
 from common.utils import get_logger
+from common import DetectorCoder
 from models import ConnectionLog
 
 # Create logger
@@ -43,7 +44,7 @@ class DetectorConnection:
     self.host = host
     self.id = id
 
-from common import DetectorDecoder
+
 
 class WSHandler(WebSocketHandler):
 
@@ -93,45 +94,21 @@ application = tornado.web.Application([
   (r'/api', WSHandler),
 ])
  
-###########################
-## Signal handling to avoid exception when closing
-###########################
-client = None
-def signal_handler(sig, frame):
-  logger.info('You pressed Ctrl+C!')
-  logger.info('Closing WS Server ...')
-  tornado.ioloop.IOLoop.instance().stop()
-  logger.info('DONE!')
-  sys.exit(0)
 
-if __name__ == "__main__":
-
+def test_encoder_decoder():
+  """
+  Test function to test encoder
+  """
   print("----- ENCODING ---")
 
+  coder = DetectorCoder()
+
   # Generate package
-  # info = { 
-  #   'sn': '111BBBBBBBBB16', 
-  #   'driverLocation': { 
-  #     'lat': 41.2, 'lon': 2.3,
-  #     'fHeight': 8.8,
-  #     'aHeight': 0.0
-  #   },
-  #   'droneLocation': { 
-  #     'lat': 41.2, 'lon': 2.3,
-  #     'fHeight': 8.8,
-  #     'aHeight': 0.0 
-  #   }, 
-  #   'homeLocation': { 'lat': 0.0, 'lon': 0.0 }, 
-  #   'driverLocation': { 'lat': 0.0, 'lon': 0.0 }, 
-  #   'productId': 16 
-  # }
-  info = DetectorDecoder.template()
+  info = coder.template()
   info['sn'] = '111BBBBBBBBB16'
 
   info['driverLocation']['lat'] = 41.2
-  info['driverLocation']['lon'] = 2.3
-  info['driverLocation']['fHeight'] = 8.8
-  info['driverLocation']['aHeight'] = 8.8
+  info['driverLocation']['lon'] = 2.3  
 
   info['droneLocation']['lat'] = 41.2
   info['droneLocation']['lon'] = 2.3
@@ -149,14 +126,30 @@ if __name__ == "__main__":
 
 
   # Encode frame
-  encoded = DetectorDecoder.encode( info ) 
+  encoded = coder.encode( info ) 
   print("info", info)
   print("encoded", encoded)
 
   print("----- DECODING ---")
-  decoded = DetectorDecoder.decode( encoded )
+  decoded = coder.decode( encoded )
   print("decoded", decoded)
 
+  print(decoded == info)
+
+
+
+###########################
+## Signal handling to avoid exception when closing
+###########################
+client = None
+def signal_handler(sig, frame):
+  logger.info('You pressed Ctrl+C!')
+  logger.info('Closing WS Server ...')
+  tornado.ioloop.IOLoop.instance().stop()
+  logger.info('DONE!')
+  sys.exit(0)
+
+if __name__ == "__main__":
   """
   # Configure signals
   signal.signal(signal.SIGINT, signal_handler)
