@@ -1,0 +1,8 @@
+HOST = 'http://asdtdev.mooo.com'
+WS_HOST = 'ws://asdtdev.mooo.com'
+DETECTOR = ''
+PASSWORD = ''
+DETECTOR_LIST = [
+  {'sn': '888XIXXPXX0025', lat: 41.7, lon: 1.8 },
+  {'sn': '888XIXXPXX0026', lat: 41.5, lon: 1.4 },
+]
