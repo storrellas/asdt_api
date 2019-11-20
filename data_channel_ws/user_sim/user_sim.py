@@ -19,15 +19,8 @@ from tornado.ioloop import IOLoop, PeriodicCallback
 from tornado import gen
 from tornado.websocket import websocket_connect
 
-# GPX Export
-import gpx_parser
-from gpx_parser.GPXTrackSegment import GPXTrackSegment
-from gpx_parser.GPXTrackPoint import GPXTrackPoint
-from gpx_parser.GPXTrack import GPXTrack
-
 # Project imports
 from common.utils import get_logger
-from common import DetectorCoder
 
 # Create logger
 logger = get_logger()
@@ -36,10 +29,9 @@ logger.propagate = False
 # Loads configuration
 from detector_sim_config import *
 
-class DetectorWSClient(object):
+class UserWSClient(object):
   """
-  Client to connect to Websocket simulating logs generated 
-  by detector localising drones
+  Client to connect to Websocket simulating user receiveing logs
   """
   token = None
   url = None
