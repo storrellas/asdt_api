@@ -43,8 +43,7 @@ class DetectorConnection:
     self.host = host
     self.id = id
 
-
-
+from common import DetectorDecoder
 
 class WSHandler(WebSocketHandler):
 
@@ -107,6 +106,58 @@ def signal_handler(sig, frame):
 
 if __name__ == "__main__":
 
+  print("----- ENCODING ---")
+
+  # Generate package
+  # info = { 
+  #   'sn': '111BBBBBBBBB16', 
+  #   'driverLocation': { 
+  #     'lat': 41.2, 'lon': 2.3,
+  #     'fHeight': 8.8,
+  #     'aHeight': 0.0
+  #   },
+  #   'droneLocation': { 
+  #     'lat': 41.2, 'lon': 2.3,
+  #     'fHeight': 8.8,
+  #     'aHeight': 0.0 
+  #   }, 
+  #   'homeLocation': { 'lat': 0.0, 'lon': 0.0 }, 
+  #   'driverLocation': { 'lat': 0.0, 'lon': 0.0 }, 
+  #   'productId': 16 
+  # }
+  info = DetectorDecoder.template()
+  info['sn'] = '111BBBBBBBBB16'
+
+  info['driverLocation']['lat'] = 41.2
+  info['driverLocation']['lon'] = 2.3
+  info['driverLocation']['fHeight'] = 8.8
+  info['driverLocation']['aHeight'] = 8.8
+
+  info['droneLocation']['lat'] = 41.2
+  info['droneLocation']['lon'] = 2.3
+  info['droneLocation']['fHeight'] = 8.8
+  info['droneLocation']['aHeight'] = 1
+
+  info['homeLocation']['lat'] = 41.2
+  info['homeLocation']['lon'] = 2.3
+
+  info['driverLocation']['lat'] = 41.2
+  info['driverLocation']['lon'] = 2.3
+
+  info['productId'] = 16
+
+
+
+  # Encode frame
+  encoded = DetectorDecoder.encode( info ) 
+  print("info", info)
+  print("encoded", encoded)
+
+  print("----- DECODING ---")
+  decoded = DetectorDecoder.decode( encoded )
+  print("decoded", decoded)
+
+  """
   # Configure signals
   signal.signal(signal.SIGINT, signal_handler)
 
@@ -122,4 +173,5 @@ if __name__ == "__main__":
   http_server = tornado.httpserver.HTTPServer(application)
   http_server.listen(WS_PORT)
   tornado.ioloop.IOLoop.instance().start()
+  """
  

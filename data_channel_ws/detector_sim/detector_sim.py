@@ -4,7 +4,8 @@ currentdir = os.path.dirname(os.path.abspath(__file__))
 parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
 
-# Python imports
+
+# Python
 import requests
 import json
 import sys
