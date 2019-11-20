@@ -86,15 +86,23 @@ class DetectorWSClient(object):
     """
     self.id = id
     body = { 'id': id, 'password': password }
-    print("body", body)
+    print("url", API_AUTH)
     response = requests.post(API_AUTH, data=body)
+    #print(response.content)
     # Get token
     if response.status_code == HTTPStatus.OK:
       response_json = json.loads(response.content.decode()) 
       print(response_json)
-      if response_json['success']:
-        self.token = response_json['data']['token']
-        return True      
+
+      # API /v1/ and /v2/ API versions
+      if 'success' in response_json:
+        if response_json['success']:
+          self.token = response_json['data']['token']
+          return True      
+      else:
+        # API v3
+        self.token = response_json['token']
+        return True
     return False
     
     # # Hacking

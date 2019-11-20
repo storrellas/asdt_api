@@ -19,7 +19,7 @@ import mongoengine
 from common.utils import get_logger
 from common import DetectorCoder
 from models import ConnectionLog
-from detector.models import Detector
+from detectors.models import Detector
 
 # Create logger
 logger = get_logger()
@@ -28,6 +28,7 @@ logger.propagate = False
 
 # Configuration
 API_USER_INFO = 'http://asdtdev.mooo.com/api/user/info'
+#API_USER_INFO = 'http://localhost:8081/api/v3/user/info'
 WS_PORT = 8081
 MONGO_HOST = 'localhost'
 MONGO_PORT = 27017
@@ -96,11 +97,22 @@ class WSMessageBroker():
   def __init__(self, repository=[]):
     self.repository = repository
 
-  def treat_message(self, detector_conn_origin: DetectorConnection, msg: dict):
+  def treat_message(self, detector_conn_origin: DetectorConnection, msg: WSMessage):
     logger.info("Received messgae {} from {} ".format(detector_conn_origin.host, msg.content))
 
-    #detector = Detector.objects.get(id=detector_conn_origin.id)
-
+    if msg.type == 'detector':
+      logger.info("Treating detector message")
+      try:
+        detector = Detector.objects.get(id=detector_conn_origin.id)
+        logger.info("Identified detector as {}".format(detector.name))
+      except Exception as e:
+        print(str(e))
+        logger.error("Detector not found")
+    elif msg.type == 'user':
+      logger.info("Treating user message")
+    elif msg.type == 'inhibitor':
+      logger.info("Treating inhibitor message")
+      
 
 
 
@@ -114,7 +126,7 @@ class WSHandler(WebSocketHandler):
     self.broker = broker
 
   def open(self):
-    # print('new connection')
+    print('new connection')
     # print(self.request.remote_ip)
     # print(self.request)
     # self.write_message("Hello World")

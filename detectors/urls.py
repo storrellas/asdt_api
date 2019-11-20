@@ -13,6 +13,7 @@ router = routers.DefaultRouter()
 router.register(r'', DetectorViewset, basename='user')
 
 urlpatterns = [
+    path('authenticate/', DetectorAuthenticateView.as_view()),
     path('', include(router.urls))
 ]
 

@@ -1,5 +1,7 @@
-from django.shortcuts import render
+import time
+import jwt
 
+# Django imports
 from django.conf import settings
 
 # rest framework import
@@ -26,6 +28,39 @@ from groups.models import *
 from user.models import User
 
 logger = get_logger()
+
+class DetectorAuthenticateView(APIView):
+
+    def post(self, request):
+    
+      if 'id' not in request.data or 'password' not in request.data:
+        return Response({"success": False, "error": "WRONG_PARAMETERS"})
+
+      # Checking password
+      id = request.data['id']
+      password = request.data['password']
+
+      # Check whether user exists
+      try:
+        instance = Detector.objects.get(id=id)
+        if bcrypt.checkpw(password.encode(), instance.password.encode()) == False:
+          raise APIException("WRONG_PASSWORD")
+
+        # Generate payload
+        iat = int(time.time()) 
+        exp = int(time.time()) + 6 * 3600        
+        payload = {
+          'type': 'detector',
+          'id': str(instance.id),
+          'iss': 'ASDT', 
+          'iat': iat,
+          'exp': exp
+        }
+        encoded = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
+        return Response({ 'token': encoded })
+      except Exception as e:
+        print(e)
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class LocationDetectorSerializer(serializers.Serializer):
     lat = serializers.FloatField()
