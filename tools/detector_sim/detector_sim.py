@@ -37,6 +37,9 @@ class DetectorWSClient(object):
   ioloop = None
   ws = None
 
+  # Detector
+  id = None
+
   # Drone status
   sn = None
   lat = None
@@ -72,17 +75,24 @@ class DetectorWSClient(object):
     """
     Logs detector in and stores token
     """
+    self.id = id
     body = { 'id': id, 'password': password }
+    print("body", body)
     response = requests.post(API_AUTH, data=body)
     # Get token
     if response.status_code == HTTPStatus.OK:
       response_json = json.loads(response.content.decode()) 
       print(response_json)
-      self.token = response_json['data']['token']
-      return True
-    else:
-      return False
-  
+      if response_json['success']:
+        self.token = response_json['data']['token']
+        return True      
+    return False
+    
+    # # Hacking
+    # self.token = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiZGV0ZWN0b3IiLCJpZCI6IjVkYjFiMDVmZWRkNjg1MTkwNzE5ZjkyNCIsImlhdCI6MTU3NDI1NDU3MywiZXhwIjoxNTc0Mjc2MTczLCJpc3MiOiJBU0RUIn0.XCjIUaCQIbZRGyB9T4UAXkolTCcRVEnWMzhcHLCOYppsB4KfFrkTc5rQEktw_Tc26pXh868PjxrZ4uZGTW7q8Q'
+    # return True
+
+
   def configure_ioloop(self):
     """
     Configures ioloop to be running
@@ -126,7 +136,7 @@ class DetectorWSClient(object):
   #       self.ws = None
   #       break
 
-  async def connect(self):    
+  async def connect(self):
     try:
       self.ws = await websocket_connect(self.url)
       # After connection first thing is sending token
@@ -134,7 +144,7 @@ class DetectorWSClient(object):
     except Exception as e:
       logger.error("connection error")
     else:
-      logger.info("Detector '{}' connected".format(self.sn))
+      logger.info("Detector '{}' connected".format(self.id))
       await self.run()
 
   async def run(self):
@@ -175,8 +185,6 @@ class DetectorWSClient(object):
       self.current_segment = self.current_segment + 1
       if self.current_segment >= len(self.input_gpx[0].segments):
         self.current_segment = 0
-
-    print(self.lat, self.lon)
 
     # Generate package
     info = { 
@@ -278,34 +286,48 @@ def signal_handler(sig, frame):
   sys.exit(0)
 
 
+import argparse
+
+
 if __name__ == "__main__":
+  print("MyPython")
+
+  # Configure argparse
+  parser = argparse.ArgumentParser(description='Detector sim arguments')
+  parser.add_argument("--detector", default=None, help="detector")
+  parser.add_argument("--password", default=None, help="password")
+
+  # Parse arguments if any
+  args = parser.parse_args()
+  detector_id = args.detector if args.detector is not None else DETECTOR
+  password = args.password if args.password is not None else PASSWORD
 
   # Configure signals
   signal.signal(signal.SIGINT, signal_handler)
 
-
   if not os.path.exists(OUTPUT_PATH):
       os.makedirs(OUTPUT_PATH)
-
+  
   # Looping to create multiple detectors
   for detector in DETECTOR_LIST:
     logger.info("Launching detector {} with timeout {}".format(detector['sn'], detector['timeout']))
     client = DetectorWSClient(WS_HOST, detector['sn'], 
                               detector['lat'], detector['lon'], detector['timeout'], detector['gpx'])    
     # Login detector
-    #logger.info("Login detector with ({}/{})".format(DETECTOR, PASSWORD))
-    result = client.login(DETECTOR, PASSWORD)
+    logger.info("Login detector with ({}/{})".format(DETECTOR, PASSWORD))
+    result = client.login(detector_id, password)
     if not result:
       logger.error("Login Failed. Aborting")
       sys.exit(0)
     # Infinite loop
     client.configure_ioloop()
 
-
+  
   # Create IOLoop
   ioloop = IOLoop.instance()
   logger.info("Starting IOLoop")
   ioloop.start()
+  
 
 
 
