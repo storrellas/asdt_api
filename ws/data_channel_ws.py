@@ -1,35 +1,35 @@
+# Update syspath
+import os, sys
+currentdir = os.path.dirname(os.path.abspath(__file__))
+parentdir = os.path.dirname(currentdir)
+sys.path.append(parentdir)
+
+# Python imports
 import tornado
+import signal
 from tornado.websocket import WebSocketHandler
 import requests
 from http import HTTPStatus
 import jwt
 
+# Mongoengine connect
+import mongoengine
+
 # Project imports
 from utils import get_logger
+from models import ConnectionLog
 
 # Create logger
 logger = get_logger()
 logger.propagate = False
 
-import os
-import sys
-currentdir = os.path.dirname(os.path.abspath(__file__))
-parentdir = os.path.dirname(currentdir)
-sys.path.append(parentdir)
 
+# Configuration
 API_USER_INFO = 'http://asdtdev.mooo.com/api/user/info'
-
+WS_PORT = 8081
 MONGO_HOST = 'localhost'
 MONGO_PORT = 27017
 MONGO_DB = 'asdt'
-
-from models import ConnectionLog
-
-# Mongoengine connect
-import mongoengine
-
-
-
 
 class WSHandler(WebSocketHandler):
 
@@ -66,16 +66,31 @@ application = tornado.web.Application([
   (r'/api', WSHandler),
 ])
  
- 
+###########################
+## Signal handling to avoid exception when closing
+###########################
+client = None
+def signal_handler(sig, frame):
+  logger.info('You pressed Ctrl+C!')
+  logger.info('Closing WS Server ...')
+  tornado.ioloop.IOLoop.instance().stop()
+  logger.info('DONE!')
+  sys.exit(0)
+
 if __name__ == "__main__":
+
+  # Configure signals
+  signal.signal(signal.SIGINT, signal_handler)
 
   # connecting MongoEngine
   mongoengine.connect(MONGO_DB, host=MONGO_HOST, port=int(MONGO_PORT))
   logger.info("Connected MONGODB against mongodb://{}:{}/{}".format(MONGO_HOST, MONGO_PORT, MONGO_DB))
 
+  # Create connection log object
   ConnectionLog.objects.create(type=ConnectionLog.USER, reason=ConnectionLog.CONNECTION)
 
   # Starting WS Server
+  logger.info("Started Data Channel WS 0.0.0.0@{}".format(WS_PORT))
   http_server = tornado.httpserver.HTTPServer(application)
   http_server.listen(8081)
   tornado.ioloop.IOLoop.instance().start()
