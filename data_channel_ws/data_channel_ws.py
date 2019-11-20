@@ -60,7 +60,7 @@ class WSHandler(WebSocketHandler):
     self.write_message("Hello World")
     
   def on_message(self, message):
-    print('message received {}'.format(message) )
+    #print('message received {}'.format(message) )
 
     # Finding connector
     detector_conn = None
@@ -84,6 +84,9 @@ class WSHandler(WebSocketHandler):
         logger.info("Detector login failed")
     else:
       logger.info("Connection identified {}".format(detector_conn.id) ) 
+      coder = DetectorCoder()
+      info = coder.decode(message)
+      print(info)
 
       
 
