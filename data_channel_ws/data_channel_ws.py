@@ -18,8 +18,11 @@ import mongoengine
 # Project imports
 from common.utils import get_logger
 from common import DetectorCoder
+
 from models import ConnectionLog
+from user.models import User
 from detectors.models import Detector
+from inhibitors.models import Inhibitor
 
 # Create logger
 logger = get_logger()
@@ -112,13 +115,6 @@ class WSMessageBroker():
 
     if msg.type == 'detector':
       logger.info("Treating detector message")
-
-      # # Check if another connection for this detector and close it
-      # detector_conn = self.repository.find_by_id(detector_conn_origin.id)
-      # if detector_conn is not None:
-      #   detector_conn.ws_handler.close()
-      #   self.repository.remove(detector_conn)
-
       try:
         detector = Detector.objects.get(id=detector_conn_origin.id)
         logger.info("Identified detector as {}".format(detector.name))
@@ -136,14 +132,26 @@ class WSMessageBroker():
 class WSHandler(WebSocketHandler):
 
   broker = None
-  connection_repository = None
+  repository = None
 
   def create_connection_log(self, type, id):
     # Create connection log object
-    ConnectionLog.objects.create(type=type, detector=id, reason=ConnectionLog.CONNECTION)
+    connection_log = ConnectionLog.objects.create(type=type, detector=id,
+                                                  reason=ConnectionLog.CONNECTION)
+    if type == ConnectionLog.DETECTOR:
+      print("Detector", id)
+      connection_log.detector = Detector.objects.get(id=id)
+    elif type == ConnectionLog.USER: 
+      print("user", id)
+      connection_log.user = User.objects.get(id=id)
+    elif type == ConnectionLog.INHIBITOR:
+      print("inhibitor", id)
+      connection_log.inhibitor = Inhibitor.objects.get(id=id)
+    connection_log.save()
+    
 
-  def initialize(self, connection_repository, broker):
-    self.connection_repository = connection_repository
+  def initialize(self, repository, broker):
+    self.repository = repository
     self.broker = broker
 
   def open(self):
@@ -157,15 +165,25 @@ class WSHandler(WebSocketHandler):
     #print('message received {}'.format(message) )
 
     # Check whether existing connection
-    detector_conn = self.connection_repository.find_by_handler(self)
+    detector_conn = self.repository.find_by_handler(self)
     if detector_conn is None:
       response = requests.get(API_USER_INFO, headers={'Authorization': message })
       if response.status_code == HTTPStatus.OK:
-        # Decode message        
+        # Decode token
         payload = jwt.decode(message, verify=False)
-        logger.info("Detector '{}' login ok!".format(payload['id']))        
+        logger.info("Detector '{}' login ok!".format(payload['id']))
+
+        # Check if another connection for this detector and close the former
+        # NOTE: For me its simpler to reject new connection
+        detector_conn = self.repository.find_by_id(payload['id'])
+        if detector_conn is not None:
+          logger.error("Logging in duplicate detector with id '{}'".format(payload['id']))
+          detector_conn.ws_handler.close()
+          self.repository.remove(detector_conn)
+
+        # Append new connection
         conn = WSConnection(ws_handler=self, host=self.request.host, id=payload['id'], type=payload['type'])
-        self.connection_repository.add( conn )
+        self.repository.add( conn )
         self.create_connection_log( conn.type.upper(), conn.id )
       else:
         logger.info("Detector login failed")
@@ -183,10 +201,10 @@ class WSHandler(WebSocketHandler):
 
 
   def on_close(self):    
-    detector_conn = self.connection_repository.find_by_handler(self)
+    detector_conn = self.repository.find_by_handler(self)
     if detector_conn is not None:
       logger.info("Closed connection. Removing detector '{}' from host {}".format(detector_conn.id, detector_conn.host))
-      self.connection_repository.remove(detector_conn)
+      self.repository.remove(detector_conn)
 
 
 ###########################
@@ -210,10 +228,10 @@ if __name__ == "__main__":
   logger.info("Connected MONGODB against mongodb://{}:{}/{}".format(MONGO_HOST, MONGO_PORT, MONGO_DB))
 
   # Create web application
-  connection_repository = WSConnectionReposirory()
-  broker = WSMessageBroker(connection_repository)
+  repository = WSConnectionReposirory()
+  broker = WSMessageBroker(repository)
   application = tornado.web.Application([
-    (r'/api', WSHandler, dict(connection_repository=connection_repository, broker=broker)),
+    (r'/api', WSHandler, dict(repository=repository, broker=broker)),
   ])
  
 
