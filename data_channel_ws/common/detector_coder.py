@@ -3,12 +3,15 @@ from .utils import get_logger
 logger = get_logger()
 
 
-
 class DetectorCoder:
 
   __toDegrees = 174533.0
 
   def template(self):
+    """
+    Holds the basic template info
+    NOTE: We should migrate this to a POJO
+    """
     info = { 
       'sn': '', 
       'driverLocation': { 
