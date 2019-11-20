@@ -26,6 +26,6 @@ class ConnectionLog(ASDTDocument):
 
   CONNECTION = 'CONNECTION'
   DISCONNECTION = 'DISCONNECTION'
-  reason_list = [CONNECTION, DISCONNECTION]
-
-  reason = StringField(choices=reason_list, default=CONNECTION)
+  action_list = [CONNECTION, DISCONNECTION]
+  action = StringField(choices=action_list, default=CONNECTION)
+  reason = StringField(default='')
