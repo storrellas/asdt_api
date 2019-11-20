@@ -19,6 +19,7 @@ import mongoengine
 from common.utils import get_logger
 from common import DetectorCoder
 from models import ConnectionLog
+from detector.models import Detector
 
 # Create logger
 logger = get_logger()
@@ -97,6 +98,10 @@ class WSMessageBroker():
 
   def treat_message(self, detector_conn_origin: DetectorConnection, msg: dict):
     logger.info("Received messgae {} from {} ".format(detector_conn_origin.host, msg.content))
+
+    #detector = Detector.objects.get(id=detector_conn_origin.id)
+
+
 
 
 class WSHandler(WebSocketHandler):
