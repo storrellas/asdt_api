@@ -39,11 +39,11 @@ class DetectorConnection:
   host = None
   id = None
   logged = False
-  connection = None
+  ws_handler = None
   msg = None
 
-  def __init__(self, connection = None, host = None, id = None):
-    self.connection = connection
+  def __init__(self, ws_handler = None, host = None, id = None):
+    self.ws_handler = ws_handler
     self.host = host
     self.id = id
 
@@ -51,19 +51,19 @@ class WSConnectionReposirory:
 
   __detector_conn_list = []
 
-  def add(self, conn):
+  def add(self, detector_conn: DetectorConnection):
     """
     Adds a client
     """
-    self.__detector_conn_list.append(conn)
+    self.__detector_conn_list.append(detector_conn)
 
-  def remove(self, conn):
+  def remove(self, detector_conn: DetectorConnection):
     """
     Remove a client
     """
-    self.__detector_conn_list.remove(conn)
+    self.__detector_conn_list.remove(detector_conn)
 
-  def find(self, candidate_conn):
+  def find(self, ws_handler):
     """
     Finds client connection
     """    
@@ -71,7 +71,7 @@ class WSConnectionReposirory:
     detector_conn = None
     for idx, detector_conn in enumerate(self.__detector_conn_list):
       #logger.info("Checking conn {}".format(detector_conn.id))      
-      if candidate_conn == detector_conn.connection:
+      if ws_handler == detector_conn.ws_handler:
         return detector_conn
     return None
 
@@ -81,7 +81,7 @@ class WSMessage:
   encoded = None
   content = None
 
-  def __init__(self, type = None, origin = None, encoded = None, content = None):
+  def __init__(self, type:str = None, origin: str = None, encoded: bytearray = None, content: str = None):
     self.type = type
     self.origin = origin
     self.encoded = encoded
@@ -95,8 +95,9 @@ class WSMessageBroker():
   def __init__(self, repository=[]):
     self.repository = repository
 
-  def treat_message(self, origin, msg):
-    logger.info("Received messgae {} from {} ".format(origin.host, msg.content))
+  def treat_message(self, detector_conn_origin: DetectorConnection, msg: dict):
+    logger.info("Received messgae {} from {} ".format(detector_conn_origin.host, msg.content))
+
 
 class WSHandler(WebSocketHandler):
 
@@ -125,7 +126,7 @@ class WSHandler(WebSocketHandler):
         # Decode message        
         payload = jwt.decode(message, verify=False)
         logger.info("Detector '{}' login ok!".format(payload['id']))
-        conn = DetectorConnection(connection=self, host=self.request.host, id=payload['id'])
+        conn = DetectorConnection(ws_handler=self, host=self.request.host, id=payload['id'])
         self.connection_repository.add( conn )
       else:
         logger.info("Detector login failed")
