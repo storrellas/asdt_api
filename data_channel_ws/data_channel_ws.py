@@ -65,15 +65,25 @@ class WSConnectionReposirory:
     """
     self.__detector_conn_list.remove(detector_conn)
 
-  def find(self, ws_handler):
+  def find_by_handler(self, ws_handler):
     """
-    Finds client connection
+    Finds client connection by its handler
     """    
-
     detector_conn = None
     for idx, detector_conn in enumerate(self.__detector_conn_list):
       #logger.info("Checking conn {}".format(detector_conn.id))      
       if ws_handler == detector_conn.ws_handler:
+        return detector_conn
+    return None
+
+  def find_by_id(self, id):
+    """
+    Finds client connection by its handler
+    """    
+    detector_conn = None
+    for idx, detector_conn in enumerate(self.__detector_conn_list):
+      #logger.info("Checking conn {}".format(detector_conn.id))      
+      if ws_handler == detector_conn.id:
         return detector_conn
     return None
 
@@ -102,6 +112,13 @@ class WSMessageBroker():
 
     if msg.type == 'detector':
       logger.info("Treating detector message")
+
+      # Check if another connection for this detector and close it
+      detector_conn = self.repository.find_by_id(msg.id)
+      if detector_conn is not None:
+        detector_conn.ws_handler.close()
+        self.repository.remove(detector_conn)
+
       try:
         detector = Detector.objects.get(id=detector_conn_origin.id)
         logger.info("Identified detector as {}".format(detector.name))
@@ -121,6 +138,10 @@ class WSHandler(WebSocketHandler):
   broker = None
   connection_repository = None
 
+  def create_connection_log(self, id):
+    # Create connection log object
+    ConnectionLog.objects.create(type=ConnectionLog.DETECTOR, detector=id, reason=ConnectionLog.CONNECTION)
+
   def initialize(self, connection_repository, broker):
     self.connection_repository = connection_repository
     self.broker = broker
@@ -136,7 +157,7 @@ class WSHandler(WebSocketHandler):
     #print('message received {}'.format(message) )
 
     # Check whether existing connection
-    detector_conn = self.connection_repository.find(self)
+    detector_conn = self.connection_repository.find_by_handler(self)
     if detector_conn is None:
       response = requests.get(API_USER_INFO, headers={'Authorization': message })
       if response.status_code == HTTPStatus.OK:
@@ -145,6 +166,9 @@ class WSHandler(WebSocketHandler):
         logger.info("Detector '{}' login ok!".format(payload['id']))
         conn = DetectorConnection(ws_handler=self, host=self.request.host, id=payload['id'])
         self.connection_repository.add( conn )
+        self.create_connection_log( conn.id )
+
+
       else:
         logger.info("Detector login failed")
     else:
@@ -161,7 +185,7 @@ class WSHandler(WebSocketHandler):
 
 
   def on_close(self):    
-    detector_conn = self.connection_repository.find(self)
+    detector_conn = self.connection_repository.find_by_handler(self)
     logger.info("Removed detector '{}' from host {}".format(detector_conn.id, detector_conn.host))
     self.connection_repository.remove(detector_conn)
 
@@ -185,9 +209,6 @@ if __name__ == "__main__":
   # connecting MongoEngine
   mongoengine.connect(MONGO_DB, host=MONGO_HOST, port=int(MONGO_PORT))
   logger.info("Connected MONGODB against mongodb://{}:{}/{}".format(MONGO_HOST, MONGO_PORT, MONGO_DB))
-
-  # Create connection log object
-  ConnectionLog.objects.create(type=ConnectionLog.USER, reason=ConnectionLog.CONNECTION)
 
   # Create web application
   connection_repository = WSConnectionReposirory()
