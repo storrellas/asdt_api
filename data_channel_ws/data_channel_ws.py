@@ -34,32 +34,34 @@ MONGO_HOST = 'localhost'
 MONGO_PORT = 27017
 MONGO_DB = 'asdt'
 
-class DetectorConnection:
+class WSConnection:
   """
   Class to store info about a connection
   """
   host = None
   id = None
+  type = None
   logged = False
   ws_handler = None
   msg = None
 
-  def __init__(self, ws_handler = None, host = None, id = None):
+  def __init__(self, ws_handler = None, host = None, id = None, type = None):
     self.ws_handler = ws_handler
     self.host = host
     self.id = id
+    self.type = type
 
 class WSConnectionReposirory:
 
   __detector_conn_list = []
 
-  def add(self, detector_conn: DetectorConnection):
+  def add(self, detector_conn: WSConnection):
     """
     Adds a client
     """
     self.__detector_conn_list.append(detector_conn)
 
-  def remove(self, detector_conn: DetectorConnection):
+  def remove(self, detector_conn: WSConnection):
     """
     Remove a client
     """
@@ -69,7 +71,6 @@ class WSConnectionReposirory:
     """
     Finds client connection by its handler
     """    
-    detector_conn = None
     for idx, detector_conn in enumerate(self.__detector_conn_list):
       #logger.info("Checking conn {}".format(detector_conn.id))      
       if ws_handler == detector_conn.ws_handler:
@@ -80,10 +81,9 @@ class WSConnectionReposirory:
     """
     Finds client connection by its handler
     """    
-    detector_conn = None
     for idx, detector_conn in enumerate(self.__detector_conn_list):
       #logger.info("Checking conn {}".format(detector_conn.id))      
-      if ws_handler == detector_conn.id:
+      if id == detector_conn.id:
         return detector_conn
     return None
 
@@ -107,17 +107,17 @@ class WSMessageBroker():
   def __init__(self, repository=[]):
     self.repository = repository
 
-  def treat_message(self, detector_conn_origin: DetectorConnection, msg: WSMessage):
+  def treat_message(self, detector_conn_origin: WSConnection, msg: WSMessage):
     logger.info("Received messgae {} from {} ".format(detector_conn_origin.host, msg.content))
 
     if msg.type == 'detector':
       logger.info("Treating detector message")
 
-      # Check if another connection for this detector and close it
-      detector_conn = self.repository.find_by_id(msg.id)
-      if detector_conn is not None:
-        detector_conn.ws_handler.close()
-        self.repository.remove(detector_conn)
+      # # Check if another connection for this detector and close it
+      # detector_conn = self.repository.find_by_id(detector_conn_origin.id)
+      # if detector_conn is not None:
+      #   detector_conn.ws_handler.close()
+      #   self.repository.remove(detector_conn)
 
       try:
         detector = Detector.objects.get(id=detector_conn_origin.id)
@@ -138,9 +138,9 @@ class WSHandler(WebSocketHandler):
   broker = None
   connection_repository = None
 
-  def create_connection_log(self, id):
+  def create_connection_log(self, type, id):
     # Create connection log object
-    ConnectionLog.objects.create(type=ConnectionLog.DETECTOR, detector=id, reason=ConnectionLog.CONNECTION)
+    ConnectionLog.objects.create(type=type, detector=id, reason=ConnectionLog.CONNECTION)
 
   def initialize(self, connection_repository, broker):
     self.connection_repository = connection_repository
@@ -163,12 +163,10 @@ class WSHandler(WebSocketHandler):
       if response.status_code == HTTPStatus.OK:
         # Decode message        
         payload = jwt.decode(message, verify=False)
-        logger.info("Detector '{}' login ok!".format(payload['id']))
-        conn = DetectorConnection(ws_handler=self, host=self.request.host, id=payload['id'])
+        logger.info("Detector '{}' login ok!".format(payload['id']))        
+        conn = WSConnection(ws_handler=self, host=self.request.host, id=payload['id'], type=payload['type'])
         self.connection_repository.add( conn )
-        self.create_connection_log( conn.id )
-
-
+        self.create_connection_log( conn.type.upper(), conn.id )
       else:
         logger.info("Detector login failed")
     else:
@@ -186,8 +184,9 @@ class WSHandler(WebSocketHandler):
 
   def on_close(self):    
     detector_conn = self.connection_repository.find_by_handler(self)
-    logger.info("Removed detector '{}' from host {}".format(detector_conn.id, detector_conn.host))
-    self.connection_repository.remove(detector_conn)
+    if detector_conn is not None:
+      logger.info("Closed connection. Removing detector '{}' from host {}".format(detector_conn.id, detector_conn.host))
+      self.connection_repository.remove(detector_conn)
 
 
 ###########################
