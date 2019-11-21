@@ -29,6 +29,8 @@ from detectors.models import Detector
 from inhibitors.models import Inhibitor
 from groups.models import Group
 
+from data_channel_mb import WSRequestMessage, WSMessageBroker
+
 # Create logger
 logger = get_logger()
 logger.propagate = False
@@ -85,25 +87,25 @@ class WSConnectionReposirory:
     self.send_disconnection_alert(detector_conn.id)
     self.__detector_conn_list.remove(detector_conn)
 
-  def find_by_handler(self, ws_handler):
+  def find_by_handler(self, ws_handler: WSConnection) -> WSConnection:
     """
     Finds client connection by its handler
     """    
-    for idx, detector_conn in enumerate(self.__detector_conn_list):
+    for idx, ws_conn in enumerate(self.__detector_conn_list):
       #logger.info("Checking conn {}".format(detector_conn.id))      
-      if ws_handler == detector_conn.ws_handler:
-        detector_conn.last_msg = datetime.datetime.now()
-        return detector_conn
+      if ws_handler == ws_conn.ws_handler:
+        ws_conn.last_msg = datetime.datetime.now()
+        return ws_conn
     return None
 
-  def find_by_id(self, id):
+  def find_by_id(self, id: str) -> WSConnection:
     """
     Finds client connection by its handler
     """    
-    for idx, detector_conn in enumerate(self.__detector_conn_list):
+    for idx, ws_conn in enumerate(self.__detector_conn_list):
       #logger.info("Checking conn {}".format(detector_conn.id))      
-      if id == detector_conn.id:
-        return detector_conn
+      if id == ws_conn.id:
+        return ws_conn
     return None
 
   def keep_alive_connection_repository(self):
@@ -122,7 +124,7 @@ class WSConnectionReposirory:
         self.send_disconnection_alert(detector_conn.id)
 
 
-  def alert_message(self, detector_id, status):
+  def alert_message(self, detector_id, status) -> dict:
     return { 
       'deviceType': 'detector',
       'messageType': 'status change',
@@ -159,53 +161,10 @@ class WSConnectionReposirory:
           and detector_conn.id in user_related_list:
         detector_conn.ws_handler.write_message(msg)
 
-class WSRequestMessage:
-  type = None
-  source_id = None
-  encoded = None
-  content = None
-
-  def __init__(self, type:str = None, source_id: str = None, encoded: bytearray = None, content: str = None):
-    self.type = type
-    self.source_id = source_id
-    self.encoded = encoded
-    self.content = content
-    
-
-class WSMessageBroker():
-  
-  repository = None
-
-  def __init__(self, repository=[]):
-    self.repository = repository
-
-  def treat_message(self, req: WSRequestMessage):
-    """
-    treating message
-    """
-    logger.info("Received messgae {} from {} ".format(req.source_id, req.content))
-
-    if req.type == 'detector':
-      logger.info("Treating detector message")
-      self.treat_message_detector(input_message)
-    elif req.type == 'user':
-      logger.info("Treating user message")
-    elif req.type == 'inhibitor':
-      logger.info("Treating inhibitor message")
-      
-  def treat_message_detector(self, req: WSRequestMessage):
-    try:
-      detector = Detector.objects.get(id=req.source_id)
-      logger.info("Identified detector as {}".format(detector.name))
-    except Exception as e:
-      print(str(e))
-      logger.error("Detector not found")
-
-
 class WSHandler(WebSocketHandler):
 
-  broker = None
-  repository = None
+  broker : WSMessageBroker = None
+  repository : WSConnectionReposirory = None
 
   def get_model(self, type_id):
     model = None
@@ -249,7 +208,7 @@ class WSHandler(WebSocketHandler):
     connection_log.save()
 
 
-  def initialize(self, repository, broker):
+  def initialize(self, repository : WSConnectionReposirory, broker : WSMessageBroker):
     self.repository = repository
     self.broker = broker
 
@@ -319,10 +278,11 @@ class WSHandler(WebSocketHandler):
 
 
   def on_close(self):    
-    detector_conn = self.repository.find_by_handler(self)
-    if detector_conn is not None:
-      logger.info("Closed connection. Removing detector '{}' from host {}".format(detector_conn.id, detector_conn.host))
-      self.repository.remove(detector_conn)
+    ws_conn = self.repository.find_by_handler(self)
+    
+    if ws_conn is not None:
+      logger.info("Closed connection. Removing type='{}' id='{}' host={}".format(ws_conn.id, ws_conn.type, ws_conn.host))
+      self.repository.remove(ws_conn)
 
 
 
