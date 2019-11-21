@@ -10,13 +10,14 @@ import requests
 from http import HTTPStatus
 import jwt
 import datetime
+from geopy.distance import geodesic
 
 # Mongoengine connect
 import mongoengine
 
 # Project imports
 from common.utils import get_logger
-from common import DetectorCoder
+from common import DetectorCoder, LogMessage, LogLocationMessage
 
 from models import ConnectionLog
 from user.models import User
@@ -28,25 +29,29 @@ from groups.models import Group
 logger = get_logger()
 logger.propagate = False
 
-class LogRepository:
-  """
-  Repository of the Logs
-  """
+class LogStorageDataMessage(LogMessage):
+  dateIni = datetime.datetime.now()
+  detectors = []
+  sn = None
+  model = None
+  ownder = None
+  route = []
+  maxHeight = None
+  distaceTraveled = None
+  distanceToDetector = None
+  model = None
 
-  __log_list = []
+class LogStorageMessage:
+  lastUpdate = datetime.datetime.now()
+  detectors = []
+  detector = None
+  sendInfo = False
+  msgCount = 0
+  data = LogStorageDataMessage()
 
-  def add(self, item):
-    """
-    Adds a client
-    """
-    self.__log_list.append(item)
-
-  def remove(self, item):
-    """
-    Remove a client
-    """
-    self.__log_list.remove(item)
-
+  def __init__(self, detector):
+    self.detectors = [detector.id]
+    self.detector = detector
 
 class WSRequestMessage:
   type = None
@@ -67,16 +72,13 @@ class WSRequestMessage:
 
 class WSMessageBroker:
   
-  repository = None
-
-  def __init__(self, repository=[]):
-    self.repository = repository
+  # repository = LogMessageRepository()
+  __log_dict = {}
 
   def treat_message(self, req: WSRequestMessage):
     """
     treating message
     """
-    print("req.type", req.type)
     if req.type == WSRequestMessage.DETECTOR:
       logger.info("Treating detector message")
       self.treat_message_detector(req)
@@ -87,16 +89,47 @@ class WSMessageBroker:
       
   def treat_message_detector(self, req: WSRequestMessage):
     try:
-
+      # Decode binary message
       coder = DetectorCoder()
       req.content = coder.decode(req.encoded)    
-      print(req.content.__dict__)
 
+      # Print log
       logger.info("Received messgae {} from {} ".format(req.source_id, req.content))
 
+      # Get detector object
       detector = Detector.objects.get(id=req.source_id)
       logger.info("Identified detector as {}".format(detector.name))
+
+      # Log Storage
+      if req.content.sn in self.__log_dict:
+        logger.info("Drone has been detected '{}'".format(req.content.sn))
+      else:
+        logger.info("New Drone has been detected '{}'".format(req.content.sn))
+
+        # NOTE: This model of data is veeery dark
+        log_storage = LogStorageMessage(detector)
+        if req.content.driverLocation is not None:
+          log_storage.data.driverLocation = req.content.driverLocation
+        if req.content.homeLocation is not None:
+          log_storage.data.homeLocation = req.content.homeLocation
+        if req.content.droneLocation is not None:
+          log_storage.data.maxHeight = req.content.droneLocation.fHeight
+          log_storage.data.droneLocation = req.content.droneLocation
+          # Getting distance
+          drone_location = (info.droneLocation.lat, info.droneLocation.lon)
+          detector_location = (detector.location.lat, detector.location.lon)
+          log_storage.distanceToDetector = geodesic(drone_location, detector_location)
+
+        if req.content.productId is not None:
+          log_storage.data.productId = req.content.productId
+
+        self.__log_dict[req.content.sn] = log
+
+        # NOTE: Call logsUpdate
+
+
+
     except Exception as e:
       print(str(e))
-      logger.error("Detector not found")
+      logger.error("Error occurred while treating detector message")
 

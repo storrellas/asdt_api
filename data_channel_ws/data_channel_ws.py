@@ -309,7 +309,7 @@ if __name__ == "__main__":
 
   # Create web application
   repository = WSConnectionReposirory()
-  broker = WSMessageBroker(repository)
+  broker = WSMessageBroker()
   application = tornado.web.Application([
     (r'/api', WSHandler, dict(repository=repository, broker=broker)),
   ])
