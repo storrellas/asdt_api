@@ -112,15 +112,14 @@ class WSConnectionReposirory:
     NOTE: For me, this is a double check as WS is a persistent connection
     """
     for idx, detector_conn in enumerate(self.__detector_conn_list):
-      #logger.info("Checking conn {}".format(detector_conn.id))      
-      print(detector_conn.last_msg.isoformat() )
+      #logger.info("Checking conn {}".format(detector_conn.id))            
       ellapsed_delta = datetime.datetime.now() - detector_conn.last_msg
       if ellapsed_delta.total_seconds() > 300:
         logger.info("Disconnecting '{}' due to inactivity".format(detector_conn.id))      
         detector_conn.close()
         self.remove(detector_conn)
-
-        # NOTE: Add here some logic to notify users
+        # Notify users
+        self.send_disconnection_alert(detector_conn.id)
 
 
   def alert_message(self, detector_id, status):
@@ -136,7 +135,7 @@ class WSConnectionReposirory:
     Sends to users a detector has been connected
     """
     msg = self.alert_message(detector_id, 'connected')
-    self.send_alert(msg)
+    self.send_alert(msg, detector_id)
 
 
   def send_disconnection_alert(self, detector_id):
@@ -144,9 +143,9 @@ class WSConnectionReposirory:
     Sends to users a detector has been disconnected
     """
     msg = self.alert_message(detector_id, 'disconnected')
-    self.send_alert(msg)
+    self.send_alert(msg, detector_id)
     
-  def send_alert(self, msg):
+  def send_alert(self, msg, detector_id):
     # groups related to detector
     groups_related_list = Group.objects.filter(devices__detectors__in=[detector_id])
 
@@ -156,20 +155,19 @@ class WSConnectionReposirory:
 
     for idx, detector_conn in enumerate(self.__detector_conn_list):
       # Check whether user is allowed
-      if detector_conn.type == WSConnection.USER 
+      if detector_conn.type == WSConnection.USER \
           and detector_conn.id in user_related_list:
         detector_conn.ws_handler.write_message(msg)
 
-
-class WSMessage:
+class WSRequestMessage:
   type = None
-  origin = None
+  source_id = None
   encoded = None
   content = None
 
-  def __init__(self, type:str = None, origin: str = None, encoded: bytearray = None, content: str = None):
+  def __init__(self, type:str = None, source_id: str = None, encoded: bytearray = None, content: str = None):
     self.type = type
-    self.origin = origin
+    self.source_id = source_id
     self.encoded = encoded
     self.content = content
     
@@ -181,23 +179,23 @@ class WSMessageBroker():
   def __init__(self, repository=[]):
     self.repository = repository
 
-  def treat_message(self, detector_conn_origin: WSConnection, msg: WSMessage):
+  def treat_message(self, req: WSRequestMessage):
     """
     treating message
     """
-    logger.info("Received messgae {} from {} ".format(detector_conn_origin.host, msg.content))
+    logger.info("Received messgae {} from {} ".format(req.source_id, req.content))
 
-    if msg.type == 'detector':
+    if req.type == 'detector':
       logger.info("Treating detector message")
-      self.treat_message_detector(detector_conn_origin, msg)
-    elif msg.type == 'user':
+      self.treat_message_detector(input_message)
+    elif req.type == 'user':
       logger.info("Treating user message")
-    elif msg.type == 'inhibitor':
+    elif req.type == 'inhibitor':
       logger.info("Treating inhibitor message")
       
-  def treat_message_detector(self, detector_conn_origin: WSConnection, msg: WSMessage):
+  def treat_message_detector(self, req: WSRequestMessage):
     try:
-      detector = Detector.objects.get(id=detector_conn_origin.id)
+      detector = Detector.objects.get(id=req.source_id)
       logger.info("Identified detector as {}".format(detector.name))
     except Exception as e:
       print(str(e))
@@ -209,13 +207,25 @@ class WSHandler(WebSocketHandler):
   broker = None
   repository = None
 
+  def get_model(self, type_id):
+    model = None
+    if type_id == WSConnection.DETECTOR:
+      model = Detector
+    elif type_id == WSConnection.USER:
+      model = User
+    elif type_id == WSConnection.INHIBITOR:
+      model = Inhibitor
+    return model
+
+
   def create_connection_log(self, type, id):
     """
     Shortcut functions
     """
     connection_log = ConnectionLog.objects.create(type=type, detector=id,
                                                   action=ConnectionLog.CONNECTION)
-    if type == ConnectionLog.DETECTOR:
+    model = self.get_model(type)
+    if type == ConnectionLog.DETECTOR:    
       connection_log.detector = Detector.objects.get(id=id)
     elif type == ConnectionLog.USER: 
       connection_log.user = User.objects.get(id=id)
@@ -254,49 +264,57 @@ class WSHandler(WebSocketHandler):
     #print('message received {}'.format(message) )
 
     # Check whether existing connection
-    detector_conn = self.repository.find_by_handler(self)
-    if detector_conn is None:
+    ws_conn = self.repository.find_by_handler(self)
+    if ws_conn is None:
       response = requests.get(API_USER_INFO, headers={'Authorization': message })
       if response.status_code == HTTPStatus.OK:
         # Decode token
         payload = jwt.decode(message, verify=False)
         instance_id = payload['id']
-        type_id = payload['type']
-        self.create_connection_log( type_id.upper(), instance_id )
+        type_id = payload['type'].upper()
+        self.create_connection_log( type_id, instance_id )
 
         # Check if another connection for this detector and close the former
         # NOTE: For me (ST) its simpler to reject new connection
-        detector_conn = self.repository.find_by_id(payload['id'])
-        if detector_conn is not None:
+        ws_conn = self.repository.find_by_id(payload['id'])
+        if ws_conn is not None:
           logger.error("Logging in duplicate detector with id '{}'".format(payload['id']))
-          detector_conn.ws_handler.close()
-          self.repository.remove(detector_conn)
-          self.create_disconnection_log( type_id.upper(), instance_id, reason='DUPLICATED_CONNECTION' )
+          ws_conn.ws_handler.close()
+          self.repository.remove(ws_conn)
+          self.create_disconnection_log( type_id, instance_id, reason='DUPLICATED_CONNECTION' )
 
-        # Check whether detector in DB
+        # Check whether instance in DB
         # NOTE: This would be removed when logging in comes through WS
-        if Detector.objects.filter(id=instance_id).count() == 0:
-          logger.error("Detector not found id '{}'".format(payload['id']))
-          self.create_disconnection_log( type_id.upper(), instance_id, reason='NOT_FOUND_IN_DATABASE' )
+        model = self.get_model(type_id)
+        if model is None:
+          logger.error("Type {} not identified".format(type_id))
+          self.close()
+          return        
+        # Check if exists
+        if model.objects.filter(id=instance_id).count() == 0:
+          logger.error("Instance type='{}' id='{}' not found".format(type_id, instance_id))
+          self.create_disconnection_log( type_id, instance_id, reason='NOT_FOUND_IN_DATABASE' )
 
 
         # Append new connection to repository
-        logger.info("Detector '{}' login ok!".format(payload['id']))
+        logger.info("Client type='{}' id='{}' login ok!".format(type_id, instance_id))
         conn = WSConnection(ws_handler=self, host=self.request.host, 
                             id=instance_id, type=type_id.upper())
         self.repository.add( conn )
       else:
         logger.info("Detector login failed")
     else:
-      logger.info("Message from detector '{}'".format(detector_conn.id) ) 
+      logger.info("Message from peer type='{}' id='{}'".format(ws_conn.type, ws_conn.id) ) 
 
       # Decode message
       coder = DetectorCoder()
       info = coder.decode(message)      
-      message = WSMessage(origin=detector_conn.id, type='detector', 
-                          encoded=message, content=info)
+      request = WSRequestMessage(source_id=ws_conn.id, type=ws_conn.type, 
+                                  encoded=message, content=info)
       # Broker message
-      self.broker.treat_message(detector_conn, message)
+      response = self.broker.treat_message(request)
+      
+      # NOTE: Reply to peers (myself and other indicated by response)
 
 
 
