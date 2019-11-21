@@ -1,3 +1,5 @@
+import datetime
+
 from .utils import get_logger
 
 logger = get_logger()
@@ -8,6 +10,7 @@ class LogLocationMessage:
   lon : float = None
   fHeight : float = None
   aHeight : float = None
+  time = datetime.datetime.now()
 
   def __init__(self, lat : float = None, lon : float = None, 
                 fHeight : float = None, aHeight : float = None):
@@ -56,35 +59,6 @@ class DetectorCoder:
 
   __toDegrees = 174533.0
 
-  def template(self):
-    """
-    Holds the basic template info
-    NOTE: We should migrate this to a POJO
-    """
-    info = { 
-      'sn': '', 
-      'driverLocation': { 
-        'lat': 0, 'lon': 0,
-        #'fHeight': 0, 'aHeight': 0 
-      },
-      'droneLocation': { 
-        'lat': 0, 'lon': 0,
-        'fHeight': 0, 'aHeight': 0 
-      }, 
-      'vx': 0,
-      'vy': 0,
-      'vz': 0,
-      'pitch': 0,
-      'roll': 0,
-      'yaw': 0,
-      'homeLocation': { 'lat': 0, 'lon': 0 }, 
-      'driverLocation': { 'lat': 0, 'lon': 0 }, 
-      'productId': 0,
-      'uuid': ''
-    }
-
-    return info
-
   def _encode109(self, log):
 
     # Declare frame
@@ -130,7 +104,7 @@ class DetectorCoder:
     productId = int(log.productId).to_bytes(1, 'little', signed=False)
     frame[85:85] = productId
 
-    #print(frame)
+    print("productId", frame[85])
     return frame
 
   def encode(self, info):
@@ -204,10 +178,10 @@ class DetectorCoder:
     log.homeLocation.lat = int.from_bytes(data[45:45+4], byteorder='little') / self.__toDegrees
 
     # productId
-    log.productId = int.from_bytes(data[85:85], byteorder='little', signed=False)
+    log.productId = int.from_bytes(data[85:86], byteorder='little', signed=False)
 
     # uuidLength
-    uuidLength = int.from_bytes(data[86:86], byteorder='little', signed=False)
+    uuidLength = int.from_bytes(data[86:87], byteorder='little', signed=False)
     log.uuid = data[86:86+uuidLength].decode("utf-8")
 
     return log

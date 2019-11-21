@@ -29,7 +29,7 @@ from detectors.models import Detector
 from inhibitors.models import Inhibitor
 from groups.models import Group
 
-from data_channel_mb import WSRequestMessage, WSMessageBroker
+from data_channel_mb import WSRequestMessage, WSResponseMessage, WSMessageBroker
 
 # Create logger
 logger = get_logger()
@@ -216,7 +216,7 @@ class WSHandler(WebSocketHandler):
     self.broker = broker
 
   def open(self):
-    print('new connection')
+    #print('new connection')
     # print(self.request.remote_ip)
     # print(self.request)
     # self.write_message("Hello World")
@@ -268,13 +268,15 @@ class WSHandler(WebSocketHandler):
     else:
       logger.info("Message from peer type='{}' id='{}'".format(ws_conn.type, ws_conn.id) ) 
 
-      # Decode message  
+      # Treat message
+
       request = WSRequestMessage(source_id=ws_conn.id, type=ws_conn.type, 
-                                  encoded=message)
-      # Broker message
-      response = self.broker.treat_message(request)
+                            encoded=message)
+      response_list = self.broker.treat_message(request)
       
       # NOTE: Reply to peers (myself and other indicated by response)
+      for response in response_list:
+        logger.info("Generating response to type={}, id={}".format(response.type, response.destination_id))
 
 
 

@@ -14,8 +14,6 @@ if __name__ == "__main__":
 
   coder = DetectorCoder()
 
-
-
   # LogMessage
   driverLocation = LogLocationMessage(lat=41.2, lon=2.3)
   droneLocation = LogLocationMessage(lat=41.2, lon=2.3, fHeight=8.8, aHeight=1)
