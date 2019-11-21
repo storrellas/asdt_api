@@ -33,6 +33,7 @@ logger.propagate = False
 
 class LogStorageDataMessage(LogMessage):
   dateIni = datetime.datetime.now()
+  dateFin = datetime.datetime.now()
   detectors = []
   sn = None
   model = None
@@ -93,8 +94,25 @@ class WSResponseMessage(WSMessage):
 class WSMessageBroker:
   
   # repository = LogMessageRepository()
-  __log_dict = {}
+  __log_message_dict = {}
 
+  def logs_update(self):
+    """
+    Update logs in DB
+    NOTE: We should move this to the former
+    """
+    for sn in self.__log_message_dict.keys():
+      log_message = self.__log_message_dict[sn]
+      now = datetime.datetime.now()
+      if (now - log_message.lastUpdate).total_seconds() * 1000 > self.maxElapsedTime:
+        log_message.data.dateFin = now
+        if log_message.sendInfo:
+          logger.info("Save logs and notify users")
+      else:
+        log_message.data.dateFin = now
+        
+  def save_logs(self, data, detector):
+    logger.info("Saving log to DB")
 
   def treat_message(self, req: WSRequestMessage):
     """
@@ -124,10 +142,10 @@ class WSMessageBroker:
 
       # Log Storage
       log_storage = None
-      if req.content.sn in self.__log_dict:
+      if req.content.sn in self.__log_message_dict:
         # Already existing drone
         logger.info("Drone has been identified '{}'".format(req.content.sn))
-        log_storage = self.__log_dict[req.content.sn]
+        log_storage = self.__log_message_dict[req.content.sn]
         if not str(detector.id) in log_storage.data.detectors:
           log_storage.data.detectors.append(str(detector.id))
         # Update lastUpdate
@@ -203,7 +221,7 @@ class WSMessageBroker:
         log_storage.msgCount = log_storage.msgCount + 1
 
         # Add log_storage to dict
-        self.__log_dict[req.content.sn] = log_storage
+        self.__log_message_dict[req.content.sn] = log_storage
 
         
 

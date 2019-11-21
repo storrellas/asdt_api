@@ -43,7 +43,8 @@ WS_PORT = 8081
 MONGO_HOST = 'localhost'
 MONGO_PORT = 27017
 MONGO_DB = 'asdt'
-KEEP_ALIVE_CONNECTION=2000
+KEEP_ALIVE_CONNECTION_PERIOD=2000 # 
+LOGS_UPDATE_PERIOD=2000
 
 
 class WSConnection:
@@ -323,7 +324,10 @@ if __name__ == "__main__":
   http_server.listen(WS_PORT)
 
   # Checks latest activity on every connection
-  PeriodicCallback(repository.keep_alive_connection_repository, KEEP_ALIVE_CONNECTION).start()
+  PeriodicCallback(repository.keep_alive_connection_repository, 
+                    KEEP_ALIVE_CONNECTION_PERIOD).start()
+  PeriodicCallback(broker.logs_update, 
+                    LOGS_UPDATE_PERIOD).start()
 
   IOLoop.instance().start()
 
