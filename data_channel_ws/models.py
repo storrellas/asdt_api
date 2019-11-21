@@ -29,3 +29,7 @@ class ConnectionLog(ASDTDocument):
   action_list = [CONNECTION, DISCONNECTION]
   action = StringField(choices=action_list, default=CONNECTION)
   reason = StringField(default='')
+
+
+
+

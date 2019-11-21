@@ -28,12 +28,35 @@ from groups.models import Group
 logger = get_logger()
 logger.propagate = False
 
+class LogRepository:
+  """
+  Repository of the Logs
+  """
+
+  __log_list = []
+
+  def add(self, item):
+    """
+    Adds a client
+    """
+    self.__log_list.append(item)
+
+  def remove(self, item):
+    """
+    Remove a client
+    """
+    self.__log_list.remove(item)
+
 
 class WSRequestMessage:
   type = None
   source_id = None
   encoded = None
   content = None
+
+  USER = 'USER'
+  DETECTOR = 'DETECTOR'
+  INHIBITOR = 'INHIBITOR'
 
   def __init__(self, type:str = None, source_id: str = None, encoded: bytearray = None, content: str = None):
     self.type = type
@@ -53,18 +76,24 @@ class WSMessageBroker:
     """
     treating message
     """
-    logger.info("Received messgae {} from {} ".format(req.source_id, req.content))
-
-    if req.type == 'detector':
+    print("req.type", req.type)
+    if req.type == WSRequestMessage.DETECTOR:
       logger.info("Treating detector message")
-      self.treat_message_detector(input_message)
-    elif req.type == 'user':
+      self.treat_message_detector(req)
+    elif req.type == WSRequestMessage.USER:
       logger.info("Treating user message")
-    elif req.type == 'inhibitor':
+    elif req.type == WSRequestMessage.INHIBITOR:
       logger.info("Treating inhibitor message")
       
   def treat_message_detector(self, req: WSRequestMessage):
     try:
+
+      coder = DetectorCoder()
+      req.content = coder.decode(req.encoded)    
+      print(req.content.__dict__)
+
+      logger.info("Received messgae {} from {} ".format(req.source_id, req.content))
+
       detector = Detector.objects.get(id=req.source_id)
       logger.info("Identified detector as {}".format(detector.name))
     except Exception as e:

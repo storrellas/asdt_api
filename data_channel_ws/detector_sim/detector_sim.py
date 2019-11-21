@@ -27,7 +27,7 @@ from gpx_parser.GPXTrack import GPXTrack
 
 # Project imports
 from common.utils import get_logger
-from common import DetectorCoder
+from common import DetectorCoder, LogMessage, LogLocationMessage
 
 # Create logger
 logger = get_logger()
@@ -204,20 +204,12 @@ class DetectorWSClient(object):
         self.current_segment = 0
 
     # Generate package
-    info = { 
-      'sn': self.sn, 
-      'driverLocation': { 
-        'lat': self.lat, 'lon': self.lon,
-        'fHeight': random.random()*10 
-      },
-      'droneLocation': { 
-        'lat': self.lat, 'lon': self.lon,  
-        'fHeight': random.random()*10 
-      }, 
-      'homeLocation': { 'lat': 0.0, 'lon': 0.0 }, 
-      'driverLocation': { 'lat': 0.0, 'lon': 0.0 }, 
-      'productId': 16 
-    }
+    driverLocation = LogLocationMessage(lat=self.lat, lon=self.lon, fHeight=random.random()*10)
+    droneLocation = LogLocationMessage(lat=self.lat, lon=self.lon, fHeight=random.random()*10)
+    homeLocation = LogLocationMessage(lat=self.lat, lon=self.lon)
+    log = LogMessage(sn=self.sn, driverLocation=driverLocation,
+                      droneLocation=droneLocation, homeLocation=homeLocation,
+                      productId=16)
     logger.info ("SimulatingDetection - SN:{}/Lat:{}/Lon:{}".format(self.sn, self.lat, self.lon))
 
     # Output GPX file
@@ -225,7 +217,7 @@ class DetectorWSClient(object):
 
     # Encode package
     coder = DetectorCoder()
-    frame = coder.encode(info)    
+    frame = coder.encode(log)    
     self.ws.write_message(bytes(frame), binary=True)
 
   def _gpx_output(self, lat, lon):

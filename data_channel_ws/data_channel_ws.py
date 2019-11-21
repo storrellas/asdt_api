@@ -70,28 +70,31 @@ class WSConnection:
     self.last_msg = datetime.datetime.now()
 
 class WSConnectionReposirory:
+  """
+  Repository of the connections
+  """
 
-  __detector_conn_list = []
+  __ws_conn_list = []
 
   def add(self, detector_conn: WSConnection):
     """
     Adds a client
     """
     self.send_connection_alert(detector_conn.id)
-    self.__detector_conn_list.append(detector_conn)
+    self.__ws_conn_list.append(detector_conn)
 
   def remove(self, detector_conn: WSConnection):
     """
     Remove a client
     """
     self.send_disconnection_alert(detector_conn.id)
-    self.__detector_conn_list.remove(detector_conn)
+    self.__ws_conn_list.remove(detector_conn)
 
   def find_by_handler(self, ws_handler: WSConnection) -> WSConnection:
     """
     Finds client connection by its handler
     """    
-    for idx, ws_conn in enumerate(self.__detector_conn_list):
+    for idx, ws_conn in enumerate(self.__ws_conn_list):
       #logger.info("Checking conn {}".format(detector_conn.id))      
       if ws_handler == ws_conn.ws_handler:
         ws_conn.last_msg = datetime.datetime.now()
@@ -102,7 +105,7 @@ class WSConnectionReposirory:
     """
     Finds client connection by its handler
     """    
-    for idx, ws_conn in enumerate(self.__detector_conn_list):
+    for idx, ws_conn in enumerate(self.__ws_conn_list):
       #logger.info("Checking conn {}".format(detector_conn.id))      
       if id == ws_conn.id:
         return ws_conn
@@ -113,7 +116,7 @@ class WSConnectionReposirory:
     Check whether connection is active
     NOTE: For me, this is a double check as WS is a persistent connection
     """
-    for idx, detector_conn in enumerate(self.__detector_conn_list):
+    for idx, detector_conn in enumerate(self.__ws_conn_list):
       #logger.info("Checking conn {}".format(detector_conn.id))            
       ellapsed_delta = datetime.datetime.now() - detector_conn.last_msg
       if ellapsed_delta.total_seconds() > 300:
@@ -155,7 +158,7 @@ class WSConnectionReposirory:
     user_related_list = User.objects.filter(group__in=groups_related_list)
     user_related_list = [ str(user.id) for user in user_related_list ]
 
-    for idx, detector_conn in enumerate(self.__detector_conn_list):
+    for idx, detector_conn in enumerate(self.__ws_conn_list):
       # Check whether user is allowed
       if detector_conn.type == WSConnection.USER \
           and detector_conn.id in user_related_list:
@@ -265,11 +268,9 @@ class WSHandler(WebSocketHandler):
     else:
       logger.info("Message from peer type='{}' id='{}'".format(ws_conn.type, ws_conn.id) ) 
 
-      # Decode message
-      coder = DetectorCoder()
-      info = coder.decode(message)      
+      # Decode message  
       request = WSRequestMessage(source_id=ws_conn.id, type=ws_conn.type, 
-                                  encoded=message, content=info)
+                                  encoded=message)
       # Broker message
       response = self.broker.treat_message(request)
       
