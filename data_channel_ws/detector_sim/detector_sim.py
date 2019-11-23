@@ -192,7 +192,7 @@ class DetectorWSClient(object):
     """
     # Configuration of maximum number of detections
     if self.max_detection > 0:
-      if self.current_detection > self.max_detection:
+      if self.current_detection >= self.max_detection:
         logger.info("Reached max number of segments/detections")
         return
     self.current_detection = self.current_detection + 1
@@ -262,7 +262,6 @@ def signal_handler(sig, frame):
 
 
 if __name__ == "__main__":
-  print("MyPython")
 
   # Configure argparse
   parser = argparse.ArgumentParser(description='Detector sim arguments')

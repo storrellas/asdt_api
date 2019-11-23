@@ -164,10 +164,18 @@ class WSMessageBroker:
       logger.info("Treating user message")
     elif req.type == WSRequestMessage.INHIBITOR:
       logger.info("Treating inhibitor message")
-      
+  
+  def calculate_distance(self, location1, location2):
+    location_tuple_1 = (location1.lat, location1.lon)
+    location_tuple_2 = (location2.lat, location2.lon)
+    return geodesic(location_tuple_1, location_tuple_2).km * 1000            
+
   def treat_message_detector(self, req: WSRequestMessage):
     response_list = []
     try:
+      logger.info("+++++++++++++++++++++++++++")
+      logger.info("INIT: MESSAGE PROCESSING ")
+      logger.info("+++++++++++++++++++++++++++")
       # Decode binary message
       coder = DetectorCoder()
       req.content = coder.decode(req.encoded)    
@@ -181,10 +189,11 @@ class WSMessageBroker:
 
       # Log Storage
       log_storage = None
-      if req.content.sn in self.__log_message_dict:
+      content = req.content
+      if content.sn in self.__log_message_dict:
         # Already existing drone
-        logger.info("Drone has been identified '{}'".format(req.content.sn))
-        log_storage = self.__log_message_dict[req.content.sn]
+        logger.info("Drone has been identified '{}'".format(content.sn))
+        log_storage = self.__log_message_dict[content.sn]
         if not str(detector.id) in log_storage.data.detectors:
           log_storage.data.detectors.append(str(detector.id))
         # Update lastUpdate
@@ -192,54 +201,53 @@ class WSMessageBroker:
 
         log_storage.lastDetector = detector
         
-        if req.content.driverLocation is not None:
-          log_storage.data.driverLocation = req.content.driverLocation
-        if req.content.homeLocation is not None:
-          log_storage.data.homeLocation = req.content.homeLocation
+        if content.driverLocation is not None:
+          log_storage.data.driverLocation = content.driverLocation
+        if content.homeLocation is not None:
+          log_storage.data.homeLocation = content.homeLocation
 
-        if req.content.droneLocation is not None:
+        if content.droneLocation is not None:
           lastLocation = log_storage.data.route[-1] if len(log_storage.data.route) > 0 else None          
           detector_location = (detector.location.lat, detector.location.lon)
 
+          log_storage.data.maxHeight = max(log_storage.data.maxHeight, content.droneLocation.fHeight)
           if lastLocation is None:
             logger.info("Last location NOT found")
-            log_storage.data.maxHeight = req.content.droneLocation.fHeight
+
             log_storage.data.distanceTraveled = 0            
           else:
             logger.info("Last location found")
             drone_last_location = (lastLocation.lat, lastLocation.lon)
-            current_distanceTraveled = geodesic(detector_location, drone_last_location).km * 1000            
+            current_distanceTraveled = geodesic(content.droneLocation, drone_last_location).km * 1000            
             log_storage.data.distanceTraveled = log_storage.data.distanceTraveled + current_distanceTraveled
 
           # distanceToDetector                    
-          drone_location = (req.content.droneLocation.lat, req.content.droneLocation.lon)
-          current_distanceToDetector = geodesic(drone_location, detector_location).km * 1000
-          log_storage.data.distanceToDetector = current_distanceToDetector
+          log_storage.data.distanceToDetector = \
+            self.calculate_distance(content.droneLocation, detector.location)
 
           # Append item to route
-          log_storage.data.route.append( req.content.droneLocation )
+          log_storage.data.route.append( content.droneLocation )
       else:
         # New Drone detected
-        logger.info("Drone has been detected '{}'".format(req.content.sn))
+        logger.info("Drone has been detected '{}'".format(content.sn))
         # Generate LogStorageMessage
         # NOTE: This model of data is veeery dark
         log_storage = LogStorageMessage()
         log_storage.detectors = [detector.id]
         log_storage.lastDetector = detector
-        if req.content.sn is not None:
-          log_storage.data.sn = req.content.sn
-        if req.content.driverLocation is not None:
-          log_storage.data.driverLocation = req.content.driverLocation
-        if req.content.homeLocation is not None:
+        if content.sn is not None:
+          log_storage.data.sn = content.sn
+        if content.driverLocation is not None:
+          log_storage.data.driverLocation = content.driverLocation
+        if content.homeLocation is not None:
           log_storage.data.homeLocation = req.content.homeLocation
-        if req.content.droneLocation is not None:
+        if content.droneLocation is not None:
           log_storage.data.maxHeight = req.content.droneLocation.fHeight
           log_storage.data.droneLocation = req.content.droneLocation
           # Getting distance
-          drone_location = (req.content.droneLocation.lat, req.content.droneLocation.lon)
-          detector_location = (detector.location.lat, detector.location.lon)
-          log_storage.data.distanceToDetector = geodesic(drone_location, detector_location).km * 1000
-        if req.content.productId is not None:
+          log_storage.data.distanceToDetector = \
+            self.calculate_distance(req.content.droneLocation, detector.location)
+        if content.productId is not None:
           log_storage.data.productId = req.content.productId
           try:
             drone_model = DroneModel.objects.get(productId=req.content.productId)
@@ -266,10 +274,6 @@ class WSMessageBroker:
         self.__log_message_dict[req.content.sn] = log_storage
 
         
-
-        # NOTE: Call logsUpdate (within if)
-
-
       # Send info if requested
       # print(req.content.__dict__)
       # print(log_storage.__dict__)
@@ -281,7 +285,10 @@ class WSMessageBroker:
         # NOTE: Sending info to users
         logger.info("Sending info to users ...")
         response_list = self.generate_response_list(detector, log_storage, req.content)
-        
+      
+      logger.info("+++++++++++++++++++++++++++")
+      logger.info("END: MESSAGE PROCESSING ")
+      logger.info("+++++++++++++++++++++++++++")
     except Exception as e:
       print(str(e))
       logger.error("Error occurred while treating detector message")
