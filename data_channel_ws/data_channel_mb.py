@@ -35,14 +35,19 @@ class LogStorageDataMessage(LogMessage):
   dateIni = datetime.datetime.now()
   dateFin = datetime.datetime.now()
   detectors = []
+  # Coming from detector
   sn = None
+  # Matching with Drone if any
   model = None
   owner = None
-  route = []
+
+  # Calculated fields
   maxHeight = None
   distaceTraveled = None
   distanceToDetector = 0
-  model = None
+
+  # Adding successive items
+  route = []
 
 class LogStorageMessage:
   lastUpdate = datetime.datetime.now()
@@ -214,7 +219,7 @@ class WSMessageBroker:
             log_storage.sendInfo = not drone.hide
           except Exception as e:
             print(str(e))
-            logger.error("Drone with sn '{}' not found. Sending info to user anyway".format(req.content.sn))
+            logger.info("Drone with sn '{}' not found. Sending info to user anyway".format(req.content.sn))
             log_storage.sendInfo = True
 
         # Increment msgCount

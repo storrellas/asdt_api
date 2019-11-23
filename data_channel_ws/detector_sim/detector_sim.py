@@ -6,6 +6,7 @@ sys.path.append(parentdir)
 
 
 # Python
+import argparse
 import requests
 import json
 import sys
@@ -86,13 +87,12 @@ class DetectorWSClient(object):
     """
     self.id = id
     body = { 'id': id, 'password': password }
-    print("url", API_AUTH)
+    logger.info("Authenticating HTTP {}".format(API_AUTH))
     response = requests.post(API_AUTH, data=body)
     #print(response.content)
     # Get token
     if response.status_code == HTTPStatus.OK:
       response_json = json.loads(response.content.decode()) 
-      print(response_json)
 
       # API /v1/ and /v2/ API versions
       if 'success' in response_json:
@@ -155,6 +155,7 @@ class DetectorWSClient(object):
 
   async def connect(self):
     try:
+      logger.info("Connection WS {}".format(self.url))
       self.ws = await websocket_connect(self.url)
       # After connection first thing is sending token
       self.ws.write_message( self.token )
@@ -248,8 +249,6 @@ def signal_handler(sig, frame):
   sys.exit(0)
 
 
-import argparse
-
 
 if __name__ == "__main__":
   print("MyPython")
@@ -272,7 +271,7 @@ if __name__ == "__main__":
   
   # Looping to create multiple detectors
   for detector in DETECTOR_LIST:
-    logger.info("Launching detector {} with timeout {}".format(detector['sn'], detector['timeout']))
+    logger.info("Launching drone detection {} with timeout {}".format(detector['sn'], detector['timeout']))
     client = DetectorWSClient(WS_HOST, detector['sn'], 
                               detector['lat'], detector['lon'], detector['timeout'], detector['gpx'])    
     # Login detector
