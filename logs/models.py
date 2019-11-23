@@ -43,12 +43,12 @@ class Log(ASDTDocument):
   meta = {'collection': 'logs'}
 
   # timestamps
+  # NOTE: This could be removed and use the createdAt / updatedAt
   dateIni = DateTimeField(default=datetime.datetime.now)
   dateFin = DateTimeField(default=datetime.datetime.now)
   sn = StringField(default='')
 
   detectors = ListField(ReferenceField(Detector, reverse_delete_rule = NULLIFY))
-
   model = StringField(default='')
   productId = IntField(default=-1)
   owner = StringField(default='')
@@ -59,9 +59,12 @@ class Log(ASDTDocument):
   # NOTE: This is bad spelled
   distanceTraveled = FloatField(default=0.0)
   distanceToDetector = FloatField(default=0.0)
+  
+  route = EmbeddedDocumentListField(LogRoute, default=[])
+
+  # NOTE: These two are not filled anywhere
   centerPoint = EmbeddedDocumentField(LogCenterPoint, default=LogCenterPoint())
   boundingBox = EmbeddedDocumentField(LogBoundingBox, default=LogBoundingBox())
-  route = EmbeddedDocumentListField(LogRoute, default=[])
 
   def as_dict(self):
     item = {}

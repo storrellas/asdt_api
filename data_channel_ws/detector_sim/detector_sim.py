@@ -191,7 +191,7 @@ class DetectorWSClient(object):
     Generates the package sent by the detector via WS
     """
     # Configuration of maximum number of detections
-    if self.max_detection >= 0:
+    if self.max_detection > 0:
       if self.current_detection > self.max_detection:
         logger.info("Reached max number of segments/detections")
         return

@@ -317,6 +317,15 @@ if __name__ == "__main__":
   mongo_dummy.setup(settings.MONGO_DB, settings.MONGO_HOST, int(settings.MONGO_PORT))
   mongo_dummy.generate_scenario()
 
+  # # Seeking- for Log
+  # dateFin = datetime.datetime.strptime('2019-10-22T23:00:00.000Z', "%Y-%m-%dT%H:%M:%S.%fZ")
+  # dateFinLower = dateFin - datetime.timedelta(minutes=10)
+  # dateFinHigher = dateFin + datetime.timedelta(minutes=10)
+  # queryset = Log.objects.filter(dateFin__gte=dateFinLower, \
+  #                   dateFin__lte=dateFinHigher)
+  # for item in queryset:
+  #   print( item.as_dict() )
+
   # # Get single zone
   # zone = Zone.objects.get(name='zone2')
   # group_list = Group.objects.filter(name='ADMIN_ASDT')

@@ -37,8 +37,8 @@ logger.propagate = False
 
 
 # Configuration
-API_USER_INFO = 'http://asdtdev.mooo.com/api/user/info'
-#API_USER_INFO = 'http://localhost:8081/api/v3/user/info'
+#API_USER_INFO = 'http://asdtdev.mooo.com/api/user/info'
+#API_USER_INFO = 'http://localhost:8080/api/v3/user/info'
 WS_PORT = 8081
 MONGO_HOST = 'localhost'
 MONGO_PORT = 27017
@@ -229,8 +229,10 @@ class WSHandler(WebSocketHandler):
     # Check whether existing connection
     ws_conn = self.repository.find_by_handler(self)
     if ws_conn is None:
-      response = requests.get(API_USER_INFO, headers={'Authorization': message })
-      if response.status_code == HTTPStatus.OK:
+      # NOTE: This should be corrected as response is always 200
+      #response = requests.get(API_USER_INFO, headers={'Authorization': 'Basic {}'.format(message) })
+      #if response.status_code == HTTPStatus.OK:
+      if True:
         # Decode token
         payload = jwt.decode(message, verify=False)
         instance_id = payload['id']
@@ -266,6 +268,7 @@ class WSHandler(WebSocketHandler):
         self.repository.add( conn )
       else:
         logger.info("Detector login failed")
+        print(response.content)
     else:
       logger.info("Message from peer type='{}' id='{}'".format(ws_conn.type, ws_conn.id) ) 
 

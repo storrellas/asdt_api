@@ -26,6 +26,7 @@ from detectors.models import Detector
 from inhibitors.models import Inhibitor
 from groups.models import Group
 from drones.models import DroneModel, Drone
+from logs.models import Log
 
 # Create logger
 logger = get_logger()
@@ -34,16 +35,17 @@ logger.propagate = False
 class LogStorageDataMessage(LogMessage):
   dateIni = datetime.datetime.now()
   dateFin = datetime.datetime.now()
-  detectors = []
   # Coming from detector
   sn = None
   # Matching with Drone if any
+  detectors = []
   model = None
   owner = None
+  productId = None
 
   # Calculated fields
   maxHeight = None
-  distaceTraveled = None
+  distanceTraveled = None
   distanceToDetector = 0
 
   # Adding successive items
@@ -109,18 +111,47 @@ class WSMessageBroker:
     Update logs in DB
     NOTE: We should move this to the former
     """
-    logger.info("Testing logs ...")
     for sn in self.__log_message_dict.keys():
       log_message = self.__log_message_dict[sn]
       now = datetime.datetime.now()
       delta_time = now - log_message.lastUpdate
-      print(delta_time.total_seconds() * 1000)
       if delta_time.total_seconds() * 1000 > self.maxElapsedTime:
         logger.info("Saving logs automatically as considering flight as finished")
 
         
-  def save_logs(self, data, detector):
+  def save_log(self, log_storage):
     logger.info("Saving log to DB")
+
+    # Seeking for Log
+    dateFinLower = log_storage.data.dateFin - datetime.timedelta(minutes=10)
+    dateFinHigher = log_storage.data.dateFin + datetime.timedelta(minutes=10)
+    queryset = Log.objects.filter(sn=log_storage.data.sn, \
+                                  dateFin__gte=dateFinLower, \
+                                  dateFin__lte=dateFinHigher)
+    if queryset.count() == 0:
+      logger.info("Log does NOT exist. Creating ...")
+      log = Log()
+      log.dateIni = log_storage.data.dateIni
+      log.dateFin = log_storage.data.dateFin
+      log.sn = log_storage.data.sn
+      detector_queryset = Detector.objects.filter(id__in=log_storage.data.detectors)
+      log.detectors = detector_queryset
+      log.model = log_storage.data.model
+      log.productId = log_storage.data.productId
+      log.owner = log_storage.data.owner
+      
+      log.distanceTraveled = log_storage.data.distanceTraveled
+      log.distanceToDetector = log_storage.data.distanceToDetector
+
+      log.save()
+    else:
+      logger.info("Log does exist. Updating ...")
+      log = queryset.first()
+      log.distanceTraveled = log_storage.data.distanceTraveled
+      log.distanceToDetector = log_storage.data.distanceToDetector
+      log.save()
+
+
 
   def treat_message(self, req: WSRequestMessage):
     """
@@ -183,7 +214,7 @@ class WSMessageBroker:
           # distanceToDetector                    
           drone_location = (req.content.droneLocation.lat, req.content.droneLocation.lon)
           current_distanceToDetector = geodesic(detector_current_location, detector_current_location).km * 1000
-          log_storage.distanceToDetector = min(log_storage.distanceToDetector, current_distanceToDetector)
+          log_storage.data.distanceToDetector = min(log_storage.data.distanceToDetector, current_distanceToDetector)
 
           # Append item to route
           log_storage.data.route.append( req.content.droneLocation )
@@ -195,6 +226,8 @@ class WSMessageBroker:
         log_storage = LogStorageMessage()
         log_storage.detectors = [detector.id]
         log_storage.lastDetector = detector
+        if req.content.sn is not None:
+          log_storage.data.sn = req.content.sn
         if req.content.driverLocation is not None:
           log_storage.data.driverLocation = req.content.driverLocation
         if req.content.homeLocation is not None:
@@ -205,7 +238,7 @@ class WSMessageBroker:
           # Getting distance
           drone_location = (req.content.droneLocation.lat, req.content.droneLocation.lon)
           detector_location = (detector.location.lat, detector.location.lon)
-          log_storage.distanceToDetector = geodesic(drone_location, detector_location).km * 1000
+          log_storage.data.distanceToDetector = geodesic(drone_location, detector_location).km * 1000
         if req.content.productId is not None:
           log_storage.data.productId = req.content.productId
           try:
@@ -223,6 +256,7 @@ class WSMessageBroker:
           except Exception as e:
             print(str(e))
             logger.info("Drone with sn '{}' not found. Sending info to user anyway".format(req.content.sn))
+            # NOTE: sendInfo should be named 'processLog'
             log_storage.sendInfo = True
 
         # Increment msgCount
@@ -235,10 +269,15 @@ class WSMessageBroker:
 
         # NOTE: Call logsUpdate (within if)
 
+
       # Send info if requested
       # print(req.content.__dict__)
       # print(log_storage.__dict__)
       if log_storage is not None and log_storage.sendInfo:
+
+        # Store log locally
+        self.save_log(log_storage)
+
         # NOTE: Sending info to users
         logger.info("Sending info to users ...")
         response_list = self.generate_response_list(detector, log_storage, req.content)
