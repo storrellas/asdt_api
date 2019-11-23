@@ -116,7 +116,7 @@ class WSMessageBroker:
       now = datetime.datetime.now()
       delta_time = now - log_message.lastUpdate
       if delta_time.total_seconds() * 1000 > self.maxElapsedTime:
-        logger.info("Saving logs automatically as considering flight as finished")
+        logger.info("Saving logs automatically as considering flight as finished {}" .format(delta_time.total_seconds() * 1000))
 
         
   def save_log(self, log_storage):
@@ -199,7 +199,7 @@ class WSMessageBroker:
 
         if req.content.droneLocation is not None:
           lastLocation = log_storage.data.route[-1] if len(log_storage.data.route) > 0 else None          
-          detector_current_location = (detector.location.lat, detector.location.lon)
+          detector_location = (detector.location.lat, detector.location.lon)
 
           if lastLocation is None:
             logger.info("Last location NOT found")
@@ -208,13 +208,13 @@ class WSMessageBroker:
           else:
             logger.info("Last location found")
             drone_last_location = (lastLocation.lat, lastLocation.lon)
-            current_distanceTraveled = geodesic(detector_current_location, drone_last_location).km * 1000            
+            current_distanceTraveled = geodesic(detector_location, drone_last_location).km * 1000            
             log_storage.data.distanceTraveled = log_storage.data.distanceTraveled + current_distanceTraveled
 
           # distanceToDetector                    
           drone_location = (req.content.droneLocation.lat, req.content.droneLocation.lon)
-          current_distanceToDetector = geodesic(detector_current_location, detector_current_location).km * 1000
-          log_storage.data.distanceToDetector = min(log_storage.data.distanceToDetector, current_distanceToDetector)
+          current_distanceToDetector = geodesic(drone_location, detector_location).km * 1000
+          log_storage.data.distanceToDetector = current_distanceToDetector
 
           # Append item to route
           log_storage.data.route.append( req.content.droneLocation )

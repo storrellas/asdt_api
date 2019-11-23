@@ -104,7 +104,6 @@ class DetectorCoder:
     productId = int(log.productId).to_bytes(1, 'little', signed=False)
     frame[85:85] = productId
 
-    print("productId", frame[85])
     return frame
 
   def encode(self, info):
