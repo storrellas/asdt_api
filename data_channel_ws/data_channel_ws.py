@@ -326,8 +326,8 @@ if __name__ == "__main__":
   # Checks latest activity on every connection
   PeriodicCallback(repository.keep_alive_connection_repository, 
                     KEEP_ALIVE_CONNECTION_PERIOD).start()
-  # PeriodicCallback(broker.logs_update, 
-  #                   LOGS_UPDATE_PERIOD).start()
+  PeriodicCallback(broker.logs_update, 
+                    LOGS_UPDATE_PERIOD).start()
 
   IOLoop.instance().start()
 

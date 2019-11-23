@@ -101,20 +101,23 @@ class WSMessageBroker:
   # repository = LogMessageRepository()
   __log_message_dict = {}
 
+  # Maximum time without detections to consider a flight is finished
+  maxElapsedTime = 5000
+
   def logs_update(self):
     """
     Update logs in DB
     NOTE: We should move this to the former
     """
+    logger.info("Testing logs ...")
     for sn in self.__log_message_dict.keys():
       log_message = self.__log_message_dict[sn]
       now = datetime.datetime.now()
-      if (now - log_message.lastUpdate).total_seconds() * 1000 > self.maxElapsedTime:
-        log_message.data.dateFin = now
-        if log_message.sendInfo:
-          logger.info("Save logs and notify users")
-      else:
-        log_message.data.dateFin = now
+      delta_time = now - log_message.lastUpdate
+      print(delta_time.total_seconds() * 1000)
+      if delta_time.total_seconds() * 1000 > self.maxElapsedTime:
+        logger.info("Saving logs automatically as considering flight as finished")
+
         
   def save_logs(self, data, detector):
     logger.info("Saving log to DB")

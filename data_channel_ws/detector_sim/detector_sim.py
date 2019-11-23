@@ -59,6 +59,11 @@ class DetectorWSClient(object):
   # GPX output
   output_gpx = None
   input_gpx = None
+  current_segment = 0
+  
+  # Count number of detections
+  current_detection = 0
+  max_detection = 0
 
   def __init__(self, url, sn, lat_ini, lon_ini, timeout, gpx_file):
     self.url = url
@@ -180,13 +185,18 @@ class DetectorWSClient(object):
   #   else:
   #     self.ws.write_message("keep alive")
 
-  current_segment = 0
 
   def send_detection(self):
     """
     Generates the package sent by the detector via WS
     """
-    
+    # Configuration of maximum number of detections
+    if self.max_detection >= 0:
+      if self.current_detection > self.max_detection:
+        logger.info("Reached max number of segments/detections")
+        return
+    self.current_detection = self.current_detection + 1
+
     if self.input_gpx is None:
       # Calculate new position
       self.lat = self.lat + random.random()/100
@@ -211,7 +221,8 @@ class DetectorWSClient(object):
     log = LogMessage(sn=self.sn, driverLocation=driverLocation,
                       droneLocation=droneLocation, homeLocation=homeLocation,
                       productId=16)
-    logger.info ("SimulatingDetection - SN:{}/Lat:{}/Lon:{}".format(self.sn, self.lat, self.lon))
+    logger.info ("Detection[{}] - SN:{}/Lat:{}/Lon:{}" \
+                    .format(self.current_detection, self.sn, self.lat, self.lon))
 
     # Output GPX file
     self._gpx_output(self.lat, self.lon)
