@@ -45,6 +45,7 @@ class DroneFlight:
   input_gpx = None
   output_gpx = None
   timeout = None
+  current_segment = 0
 
   # Count number of detections
   current_detection = 0
@@ -134,48 +135,14 @@ class DetectorWSClient:
   # Detector
   id = None
 
-  # Drone status
-  sn = None
-  lat = None
-  lon = None
-  __toDegrees = 174533.0
-
-  # GPX output
-  output_gpx = None
-  input_gpx = None
-  current_segment = 0
-  
-  # Count number of detections
-  current_detection = 0
-  max_detection = 0
-
+  # Drone flight configuration
   drone_flight = None
 
-  def __init__(self, url, sn, lat_ini, lon_ini, timeout, gpx_file):
+  def __init__(self, url, drone_flight):
     self.url = url
-    
-
-
-    self.drone_flight = DroneFlight(sn=sn, lat=lat_ini, lon=lon_ini, 
-                                    timeout=timeout, gpx_file=gpx_file)
-
-    # # Drone detected configuration
-    # self.sn = sn
-    # self.lat = lat_ini
-    # self.lon = lon_ini
-    # self.timeout = timeout
-
-    # # Generate output for GPX
-    # gpx_track = GPXTrack(name=self.sn)
-    # self.output_gpx = gpx_parser.GPX(version="1.0", creator="detector_sim", tracks=[gpx_track])
-
-    # # Load gpx if any
-    # if gpx_file is not None:
-    #   with open(gpx_file, 'r') as gpx_fd:
-    #     self.input_gpx = gpx_parser.parse(gpx_fd)
-    #     logger.info("{} tracks loaded".format(len(self.input_gpx)))
-
-
+   
+    # Drone detected configuration
+    self.drone_flight = drone_flight
     
   def login(self, id, password):
     """
@@ -302,8 +269,11 @@ if __name__ == "__main__":
   # Looping to create multiple detectors
   for detector in DETECTOR_LIST:
     logger.info("Launching drone detection {} with timeout {}".format(detector['sn'], detector['timeout']))
-    client = DetectorWSClient(WS_HOST, detector['sn'], 
-                              detector['lat'], detector['lon'], detector['timeout'], detector['gpx'])    
+
+    # Create drone_flight
+    drone_flight = DroneFlight(detector['sn'], detector['lat'], detector['lon'], 
+                                detector['timeout'], detector['gpx'])
+    client = DetectorWSClient(WS_HOST, drone_flight)    
     # Login detector
     logger.info("Login detector with ({}/{})".format(DETECTOR, PASSWORD))
     result = client.login(detector_id, password)
