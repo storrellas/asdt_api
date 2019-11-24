@@ -107,6 +107,18 @@ class WSMessageBroker:
   # Maximum time without detections to consider a flight is finished
   maxElapsedTime = 5000
 
+  def treat_message(self, req: WSRequestMessage):
+    """
+    treating message
+    """
+    if req.type == WSRequestMessage.DETECTOR:
+      logger.info("Treating detector message")
+      return self.treat_message_detector(req)
+    elif req.type == WSRequestMessage.USER:
+      logger.info("Treating user message")
+    elif req.type == WSRequestMessage.INHIBITOR:
+      logger.info("Treating inhibitor message")
+
   def logs_update(self):
     """
     Update logs in DB
@@ -129,42 +141,24 @@ class WSMessageBroker:
     queryset = Log.objects.filter(sn=log_storage.data.sn, \
                                   dateFin__gte=dateFinLower, \
                                   dateFin__lte=dateFinHigher)
+    log = None
     if queryset.count() == 0:
       logger.info("Log does NOT exist. Creating ...")
       log = Log()
       log.dateIni = log_storage.data.dateIni
       log.dateFin = log_storage.data.dateFin
       log.sn = log_storage.data.sn
-      detector_queryset = Detector.objects.filter(id__in=log_storage.data.detectors)
-      log.detectors = detector_queryset
       log.model = log_storage.data.model
       log.productId = log_storage.data.productId
-      log.owner = log_storage.data.owner
-      
-      log.distanceTraveled = log_storage.data.distanceTraveled
-      log.distanceToDetector = log_storage.data.distanceToDetector
-
-      log.save()
+      log.owner = log_storage.data.owner      
     else:
       logger.info("Log does exist. Updating ...")
       log = queryset.first()
-      log.distanceTraveled = log_storage.data.distanceTraveled
-      log.distanceToDetector = log_storage.data.distanceToDetector
-      log.save()
-
-
-
-  def treat_message(self, req: WSRequestMessage):
-    """
-    treating message
-    """
-    if req.type == WSRequestMessage.DETECTOR:
-      logger.info("Treating detector message")
-      return self.treat_message_detector(req)
-    elif req.type == WSRequestMessage.USER:
-      logger.info("Treating user message")
-    elif req.type == WSRequestMessage.INHIBITOR:
-      logger.info("Treating inhibitor message")
+    
+    log.detectors = log_storage.data.detectors
+    log.distanceTraveled = log_storage.data.distanceTraveled
+    log.distanceToDetector = log_storage.data.distanceToDetector
+    log.save()
   
   def calculate_distance(self, location1, location2):
     location_tuple_1 = (location1.lat, location1.lon)
@@ -195,8 +189,11 @@ class WSMessageBroker:
         # Already existing drone
         logger.info("Drone has been identified '{}'".format(content.sn))
         log_storage = self.__log_message_dict[content.sn]
-        if not str(detector.id) in log_storage.data.detectors:
-          log_storage.data.detectors.append(str(detector.id))
+        # if not str(detector.id) in log_storage.data.detectors:
+        #   log_storage.data.detectors.append(str(detector.id))
+        if not detector in log_storage.data.detectors:
+          log_storage.data.detectors.append(detector)
+
         # Update lastUpdate
         log_storage.update()
 
@@ -225,7 +222,7 @@ class WSMessageBroker:
         # Generate LogStorageMessage
         # NOTE: This model of data is veeery dark
         log_storage = LogStorageMessage()
-        log_storage.detectors = [detector.id]
+        log_storage.detectors = [detector]
         log_storage.lastDetector = detector
         if content.sn is not None:
           log_storage.data.sn = content.sn
