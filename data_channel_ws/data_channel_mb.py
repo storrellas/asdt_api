@@ -5,6 +5,7 @@ parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
 
 # Python imports
+import copy
 import signal
 import json
 import requests
@@ -205,28 +206,19 @@ class WSMessageBroker:
           log_storage.data.driverLocation = content.driverLocation
         if content.homeLocation is not None:
           log_storage.data.homeLocation = content.homeLocation
-
         if content.droneLocation is not None:
-          lastLocation = log_storage.data.route[-1] if len(log_storage.data.route) > 0 else None          
-          detector_location = (detector.location.lat, detector.location.lon)
-
           log_storage.data.maxHeight = max(log_storage.data.maxHeight, content.droneLocation.fHeight)
-          if lastLocation is None:
-            logger.info("Last location NOT found")
-
-            log_storage.data.distanceTraveled = 0            
-          else:
-            logger.info("Last location found")
-            drone_last_location = (lastLocation.lat, lastLocation.lon)
-            current_distanceTraveled = geodesic(content.droneLocation, drone_last_location).km * 1000            
-            log_storage.data.distanceTraveled = log_storage.data.distanceTraveled + current_distanceTraveled
+          if len(log_storage.data.route) > 0:
+            lastLocation = log_storage.data.route[-1]
+            distance = self.calculate_distance(content.droneLocation, lastLocation)            
+            log_storage.data.distanceTraveled = log_storage.data.distanceTraveled + distance
 
           # distanceToDetector                    
           log_storage.data.distanceToDetector = \
             self.calculate_distance(content.droneLocation, detector.location)
 
           # Append item to route
-          log_storage.data.route.append( content.droneLocation )
+          log_storage.data.route.append( copy.deepcopy(content.droneLocation) )
       else:
         # New Drone detected
         logger.info("Drone has been detected '{}'".format(content.sn))
