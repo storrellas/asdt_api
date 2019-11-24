@@ -46,6 +46,7 @@ class DroneFlight:
   output_gpx = None
   timeout = None
   current_segment = 0
+  output_gpx_enable = False
 
   # Count number of detections
   current_detection = 0
@@ -56,6 +57,10 @@ class DroneFlight:
     self.lat = lat
     self.lon = lon
     self.timeout = timeout
+
+    # Generate output path
+    if not os.path.exists(OUTPUT_PATH):
+        os.makedirs(OUTPUT_PATH)
 
     # Generate output for GPX
     gpx_track = GPXTrack(name=self.sn)
@@ -103,7 +108,8 @@ class DroneFlight:
                     .format(self.current_detection, self.sn, self.lat, self.lon))
     
     # Output GPX file
-    self._gpx_output(log.droneLocation.lat, log.droneLocation.lon)
+    if self.output_gpx_enable:
+      self._gpx_output(log.droneLocation.lat, log.droneLocation.lon)
 
     return log
 
@@ -232,6 +238,16 @@ class DetectorWSClient:
     frame = coder.encode(log)    
     self.ws.write_message(bytes(frame), binary=True)
 
+def read_json_configuration(filename):
+  # Configuration parameters
+  config = {}
+  try:
+      with open(filename) as json_file:
+        config = json.load(json_file)
+        return config
+  except FileNotFoundError:
+      logger.error("Config file not found")
+      sys.exit(0)
 
 
 
@@ -250,33 +266,41 @@ def signal_handler(sig, frame):
 
 if __name__ == "__main__":
 
-  # Configure argparse
-  parser = argparse.ArgumentParser(description='Detector sim arguments')
-  parser.add_argument("--detector", default=None, help="detector")
-  parser.add_argument("--password", default=None, help="password")
-
-  # Parse arguments if any
-  args = parser.parse_args()
-  detector_id = args.detector if args.detector is not None else DETECTOR
-  password = args.password if args.password is not None else PASSWORD
-
   # Configure signals
   signal.signal(signal.SIGINT, signal_handler)
 
-  if not os.path.exists(OUTPUT_PATH):
-      os.makedirs(OUTPUT_PATH)
+  # Configure argparse
+  parser = argparse.ArgumentParser(description='Detector sim arguments')
+  parser.add_argument("--config", default=None, help="config file path")
+
+  # Parse arguments if any
+  args = parser.parse_args()
+  config_filename = args.config if args.config is not None else './config.json'
+
+  
+  # Read configuration
+  config = read_json_configuration('./config.json')
+
+  # Get credentials
+  # NOTE: We should make this to be multi drone
+  detector_id = config['detector_list'][0]['id']
+  detector_password = config['detector_list'][0]['password']
+
   
   # Looping to create multiple detectors
-  for detector in DETECTOR_LIST:
-    logger.info("Launching drone detection {} with timeout {}".format(detector['sn'], detector['timeout']))
+  for drone_flight_conf in config['detector_list'][0]['drone_flight_list']:
 
     # Create drone_flight
-    drone_flight = DroneFlight(detector['sn'], detector['lat'], detector['lon'], 
-                                detector['timeout'], detector['gpx'])
+    logger.info("Launching drone flight {} with timeout {}" \
+                  .format(drone_flight_conf['sn'], drone_flight_conf['timeout']))
+    drone_flight = DroneFlight(drone_flight_conf['sn'], 
+                                drone_flight_conf['lat'], drone_flight_conf['lon'], 
+                                drone_flight_conf['timeout'], drone_flight_conf['gpx'])
+    drone_flight.output_gpx_enable = True                                
     client = DetectorWSClient(WS_HOST, drone_flight)    
     # Login detector
-    logger.info("Login detector with ({}/{})".format(DETECTOR, PASSWORD))
-    result = client.login(detector_id, password)
+    logger.info("Login detector with ({}/{})".format(detector_id, detector_password))
+    result = client.login(detector_id, detector_password)
     if not result:
       logger.error("Login Failed. Aborting")
       sys.exit(0)

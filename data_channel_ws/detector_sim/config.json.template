@@ -1,0 +1,16 @@
+{
+  "detector_list" : [
+    {
+      "id" : "5dd99d1d41768b0e5105ceb7",
+      "password": "asdt2019",
+      "drone_flight_list" : [
+        {
+          "sn":  "000000000000001", 
+          "lat": 41.7, "lon": 1.8, 
+          "timeout": 2000, 
+          "gpx": null 
+        }
+      ]
+    }    
+  ]
+}
