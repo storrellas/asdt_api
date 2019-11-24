@@ -45,8 +45,8 @@ class LogStorageDataMessage(LogMessage):
   productId = None
 
   # Calculated fields
-  maxHeight = None
-  distanceTraveled = None
+  maxHeight = 0
+  distanceTraveled = 0
   distanceToDetector = 0
 
   # Adding successive items
@@ -55,7 +55,6 @@ class LogStorageDataMessage(LogMessage):
 class LogStorageMessage:
   lastUpdate = datetime.datetime.now()
   detectors = []
-  lastDetector = None
   sendInfo = False
   msgCount = 0
   data = LogStorageDataMessage()
@@ -155,6 +154,7 @@ class WSMessageBroker:
       logger.info("Log does exist. Updating ...")
       log = queryset.first()
     
+    # Update all common fields
     log.detectors = log_storage.data.detectors
     log.distanceTraveled = log_storage.data.distanceTraveled
     log.distanceToDetector = log_storage.data.distanceToDetector
@@ -165,6 +165,20 @@ class WSMessageBroker:
     location_tuple_2 = (location2.lat, location2.lon)
     return geodesic(location_tuple_1, location_tuple_2).km * 1000            
 
+  def compute_drone_location_stats(self, log_storage, droneLocation, detector):
+    # maxHeight
+    log_storage.data.maxHeight = max(log_storage.data.maxHeight, content.droneLocation.fHeight)
+    # distanceTraveled
+    if len(log_storage.data.route) > 0:
+      lastLocation = log_storage.data.route[-1]
+      distance = self.calculate_distance(content.droneLocation, lastLocation)            
+      log_storage.data.distanceTraveled = log_storage.data.distanceTraveled + distance
+    # distanceToDetector                    
+    log_storage.data.distanceToDetector = \
+      self.calculate_distance(droneLocation, detector.location)
+    
+    return log_storage
+  
   def treat_message_detector(self, req: WSRequestMessage):
     response_list = []
     try:
@@ -189,30 +203,28 @@ class WSMessageBroker:
         # Already existing drone
         logger.info("Drone has been identified '{}'".format(content.sn))
         log_storage = self.__log_message_dict[content.sn]
-        # if not str(detector.id) in log_storage.data.detectors:
-        #   log_storage.data.detectors.append(str(detector.id))
         if not detector in log_storage.data.detectors:
           log_storage.data.detectors.append(detector)
 
         # Update lastUpdate
         log_storage.update()
-
-        log_storage.lastDetector = detector
         
         if content.driverLocation is not None:
           log_storage.data.driverLocation = content.driverLocation
         if content.homeLocation is not None:
           log_storage.data.homeLocation = content.homeLocation
         if content.droneLocation is not None:
-          log_storage.data.maxHeight = max(log_storage.data.maxHeight, content.droneLocation.fHeight)
-          if len(log_storage.data.route) > 0:
-            lastLocation = log_storage.data.route[-1]
-            distance = self.calculate_distance(content.droneLocation, lastLocation)            
-            log_storage.data.distanceTraveled = log_storage.data.distanceTraveled + distance
+          # log_storage.data.maxHeight = max(log_storage.data.maxHeight, content.droneLocation.fHeight)
+          # if len(log_storage.data.route) > 0:
+          #   lastLocation = log_storage.data.route[-1]
+          #   distance = self.calculate_distance(content.droneLocation, lastLocation)            
+          #   log_storage.data.distanceTraveled = log_storage.data.distanceTraveled + distance
 
-          # distanceToDetector                    
-          log_storage.data.distanceToDetector = \
-            self.calculate_distance(content.droneLocation, detector.location)
+          # # distanceToDetector                    
+          # log_storage.data.distanceToDetector = \
+          #   self.calculate_distance(content.droneLocation, detector.location)
+          log_storage = self.compute_drone_location_stats(log_storage, 
+                                                          content.droneLocation, detector)
 
           # Append item to route
           log_storage.data.route.append( copy.deepcopy(content.droneLocation) )
@@ -223,19 +235,22 @@ class WSMessageBroker:
         # NOTE: This model of data is veeery dark
         log_storage = LogStorageMessage()
         log_storage.detectors = [detector]
-        log_storage.lastDetector = detector
         if content.sn is not None:
           log_storage.data.sn = content.sn
         if content.driverLocation is not None:
           log_storage.data.driverLocation = content.driverLocation
         if content.homeLocation is not None:
-          log_storage.data.homeLocation = req.content.homeLocation
+          log_storage.data.homeLocation = content.homeLocation
         if content.droneLocation is not None:
-          log_storage.data.maxHeight = req.content.droneLocation.fHeight
-          log_storage.data.droneLocation = req.content.droneLocation
-          # Getting distance
-          log_storage.data.distanceToDetector = \
-            self.calculate_distance(req.content.droneLocation, detector.location)
+          # log_storage.data.maxHeight = content.droneLocation.fHeight
+          # log_storage.data.droneLocation = content.droneLocation
+          # # Getting distance
+          # log_storage.data.distanceToDetector = \
+          #   self.calculate_distance(content.droneLocation, detector.location)
+          log_storage = self.compute_drone_location_stats(log_storage, 
+                                                          content.droneLocation, detector)
+          # Append item to route
+          log_storage.data.route.append( copy.deepcopy(content.droneLocation) )
         if content.productId is not None:
           log_storage.data.productId = req.content.productId
           try:
@@ -245,16 +260,18 @@ class WSMessageBroker:
             print(str(e))
             logger.error("DroneModel with productId '{}' not found".format(req.content.productId))
 
-          # Compute sendInfo
-          try:
-            drone = Drone.objects.get(sn=req.content.sn)
-            log_storage.data.owner = drone.owner
-            log_storage.sendInfo = not drone.hide
-          except Exception as e:
-            print(str(e))
-            logger.info("Drone with sn '{}' not found. Sending info to user anyway".format(req.content.sn))
-            # NOTE: sendInfo should be named 'processLog'
-            log_storage.sendInfo = True
+        # Compute sendInfo
+        try:
+          drone = Drone.objects.get(sn=req.content.sn)
+          log_storage.data.owner = drone.owner
+          log_storage.sendInfo = not drone.hide
+        except Exception as e:
+          print(str(e))
+          logger.info("Drone with sn '{}' not found. Sending info to user anyway".format(req.content.sn))
+          # NOTE: sendInfo should be named 'processLog'
+          log_storage.sendInfo = True
+
+
 
         # Increment msgCount
         log_storage.msgCount = log_storage.msgCount + 1
