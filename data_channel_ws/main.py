@@ -29,7 +29,7 @@ from detectors.models import Detector
 from inhibitors.models import Inhibitor
 from groups.models import Group
 
-from data_channel_mb import WSRequestMessage, WSResponseMessage, WSMessageBroker
+from message_broker import WSRequestMessage, WSResponseMessage, WSMessageBroker
 
 # Create logger
 logger = get_logger()
