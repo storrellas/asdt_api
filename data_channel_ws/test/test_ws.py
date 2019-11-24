@@ -19,6 +19,12 @@ import json
 from common import DetectorCoder, LogMessage, LogLocationMessage
 from common.utils import get_logger
 
+# Websocket
+import websocket as websocket_client
+
+import mongoengine
+
+
 # Tornado imports
 import asyncio
 import tornado
@@ -32,13 +38,19 @@ from mongo_dummy import MongoDummy
 from django.conf import settings
 from message_broker import WSMessageBroker
 from server import WSHandler, WSConnectionReposirory
+from detector_sim import DetectorWSClient
+from common import DetectorCoder, LogMessage, LogLocationMessage
 
+# Import models
+from detectors.models import Detector
 
 logger = get_logger()
 
-
 # Configuration - server
 WS_PORT = 8081
+MONGO_HOST = 'localhost'
+MONGO_PORT = 27017
+MONGO_DB = 'asdt'
 # Configuration - client
 API_AUTH_URL = 'http://localhost:8080/api/v3/detectors/authenticate/'
 WS_URL = 'ws://localhost:8081/api'
@@ -51,11 +63,17 @@ class WSServerThread(threading.Thread):
   ready_request = None  
   ioloop = None
 
+  
   def __init__(self):
     super().__init__()
     self.ready_request = threading.Event()
 
   def run(self):
+    # #############
+    # mongoengine.connect('asdt_test', host='localhost', port=27017)
+    # logger.info("Connected MONGODB against mongodb://{}:{}/{}".format(settings.MONGO_HOST, settings.MONGO_PORT, settings.MONGO_DB))
+    # #############
+
     # Create web application
     repository = WSConnectionReposirory()
     broker = WSMessageBroker()
@@ -88,7 +106,8 @@ class WSServerThread(threading.Thread):
     """
     while self.ready_request.isSet() == False:
       logger.info("WS Server is now ready")
-      sleep(0.05)
+      #sleep(0.05)
+      sleep(0.5)
 
   def request_terminate(self):
     """
@@ -106,7 +125,7 @@ class WSServerThread(threading.Thread):
     self.ioloop.stop()
     logger.info('DONE!')
 
-from websocket import create_connection
+
 
 
 class TestCase(unittest.TestCase):
@@ -119,15 +138,19 @@ class TestCase(unittest.TestCase):
     Called once in every suite
     """
     super().setUpClass()
-    logger.info("----------------------------")
-    logger.info("--- Generating scenario  ---")
-    logger.info("----------------------------")    
-    settings.MONGO_DB = 'asdt_test'
-    logger.info("DB Generated: {}".format(settings.MONGO_DB))
+    # logger.info("----------------------------")
+    # logger.info("--- Generating scenario  ---")
+    # logger.info("----------------------------")    
+    # settings.MONGO_DB = 'asdt_test'
+    # logger.info("DB Generated: {}".format(settings.MONGO_DB))
 
-    mongo_dummy = MongoDummy()
-    mongo_dummy.setup(settings.MONGO_DB, settings.MONGO_HOST, int(settings.MONGO_PORT))
-    mongo_dummy.generate_scenario()
+    # mongo_dummy = MongoDummy()
+    # mongo_dummy.setup(settings.MONGO_DB, settings.MONGO_HOST, int(settings.MONGO_PORT))
+    # mongo_dummy.generate_scenario()
+
+    # Open mongo connection
+    mongoengine.connect(MONGO_DB, host=MONGO_HOST, port=int(MONGO_PORT))
+    logger.info("Connected MONGODB against mongodb://{}:{}/{}".format(MONGO_HOST, MONGO_PORT, MONGO_DB))
 
     # See http://www.tornadoweb.org/en/stable/asyncio.html#tornado.platform.asyncio.AnyThreadEventLoopPolicy
     asyncio.set_event_loop_policy(AnyThreadEventLoopPolicy())
@@ -149,39 +172,29 @@ class TestCase(unittest.TestCase):
     cls.ws_thread.join()
 
 
-  def login(self, id, password):
-    """
-    Logs detector in and stores token
-    """
-    body = { 'id': id, 'password': password }
-    logger.info("Authenticating HTTP {}".format(API_AUTH))
-    response = requests.post(API_AUTH, data=body)
-    #print(response.content)
-    # Get token
-    if response.status_code == HTTPStatus.OK:
-      response_json = json.loads(response.content.decode()) 
-
-      # API /v1/ and /v2/ API versions
-      if 'success' in response_json:
-        if response_json['success']:
-          self.token = response_json['data']['token']
-          return True      
-      else:
-        # API v3
-        self.token = response_json['token']
-        return True
-    return False
 
   def test_detector_message(self):
     print("MyTestsAreRunning")
     self.assertTrue(True)
+    
+    # Login
+    detector = Detector.objects.get(name='detector2')
+    detector.set_password('asdt2019')
+    result, token = DetectorWSClient.login_request(API_AUTH_URL, str(detector.id), 'asdt2019')
 
-    success = self.login('5dcf217f1f386df1f5c48144', 'asdt2019')
-    self.assertTrue(success)
+    # Create WS connection
+    ws = websocket_client.create_connection(WS_URL)
+    print("CONNECTED", ws.connected)
+    print("Sending <token> ...")
+    ws.send(token)
+    print("Sent")
 
-    """
-    ws = create_connection("ws://localhost:8081/")
 
+    print("Receiving...")
+    result =  ws.recv()
+    print("Received '%s'" % result)
+
+    
     # Create log
     driverLocation = LogLocationMessage(lat=41.2, lon=2.3)
     droneLocation = LogLocationMessage(lat=41.2, lon=2.3, fHeight=8.8)
@@ -191,10 +204,75 @@ class TestCase(unittest.TestCase):
                       productId=16)
 
     # Encode frame
+    coder = DetectorCoder()
     encoded = coder.encode( log ) 
 
-    ws.send()
-    """
+    # Sedni
+    print("Sending <log> ...")
+    ws.send(encoded)
+    print("Sent")
+
+    # Wait for ok
+    print("Receiving...")
+    result =  ws.recv()
+    print("Received '%s'" % result)
+    
+
+
+
+# if __name__ == "__main__":
+#     # See http://www.tornadoweb.org/en/stable/asyncio.html#tornado.platform.asyncio.AnyThreadEventLoopPolicy
+#     asyncio.set_event_loop_policy(AnyThreadEventLoopPolicy())
+
+#     # logger.info("----------------------------")
+#     # logger.info("--- Generating scenario  ---")
+#     # logger.info("----------------------------")    
+#     # #settings.MONGO_DB = 'asdt_test'
+#     # logger.info("DB Generated: {}".format(settings.MONGO_DB))
+
+#     # mongo_dummy = MongoDummy()
+#     # mongo_dummy.setup(settings.MONGO_DB, settings.MONGO_HOST, int(settings.MONGO_PORT))
+#     # mongo_dummy.generate_scenario()
+
+#     mongoengine.connect(MONGO_DB, host=MONGO_HOST, port=int(MONGO_PORT))
+#     logger.info("Connected MONGODB against mongodb://{}:{}/{}".format(MONGO_HOST, MONGO_PORT, MONGO_DB))
+
+#     # Start thread
+#     ws_thread = WSServerThread()
+#     ws_thread.start()
+
+#     # Wait until WS Server is running
+#     ws_thread.wait_for_ready()
+
+#     ##################################
+#     ##################################
+#     ##################################
+
+
+#     result, token = DetectorWSClient.login_request(API_AUTH_URL, '5dda8c7ff161a4bdd05f98f7', 'asdt2019')
+#     print(token)
+
+
+    
+#     ws = websocket_client.create_connection(WS_URL)
+#     print("CONNECTED", ws.connected)
+#     print("Sending <token> ...")
+#     ws.send(token)
+#     print("Sent")
+
+
+#     print("Receiving...")
+#     result =  ws.recv()
+#     print("Received '%s'" % result)
+
+
+#     ##################################
+#     ##################################
+#     ##################################
+
+#     # Request for termination
+#     ws_thread.request_terminate()
+#     ws_thread.join()
 
 
 

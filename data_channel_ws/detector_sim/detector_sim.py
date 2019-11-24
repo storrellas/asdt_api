@@ -146,17 +146,17 @@ class DetectorWSClient:
   # Drone flight configuration
   drone_flight = None
 
-  def __init__(self, ws_url, drone_flight):
+  def __init__(self, ws_url = None, drone_flight = None):
     self.ws_url = ws_url
    
     # Drone detected configuration
     self.drone_flight = drone_flight
-    
-  def login(self, url, id, password):
+  
+  @staticmethod
+  def login_request(url, id, password):
     """
     Logs detector in and stores token
     """
-    self.id = id
     body = { 'id': id, 'password': password }
     logger.info("Authenticating HTTP {}".format(url))
     response = requests.post(url, data=body)
@@ -168,18 +168,23 @@ class DetectorWSClient:
       # API /v1/ and /v2/ API versions
       if 'success' in response_json:
         if response_json['success']:
-          self.token = response_json['data']['token']
+          token = response_json['data']['token']
           return True      
       else:
         # API v3
-        self.token = response_json['token']
-        return (True, self.token)
+        token = response_json['token']
+        return (True, token)
     return (False, None)
     
     # # Hacking
     # self.token = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiZGV0ZWN0b3IiLCJpZCI6IjVkYjFiMDVmZWRkNjg1MTkwNzE5ZjkyNCIsImlhdCI6MTU3NDI1NDU3MywiZXhwIjoxNTc0Mjc2MTczLCJpc3MiOiJBU0RUIn0.XCjIUaCQIbZRGyB9T4UAXkolTCcRVEnWMzhcHLCOYppsB4KfFrkTc5rQEktw_Tc26pXh868PjxrZ4uZGTW7q8Q'
     # return True
 
+  def login(self, url, id, password):
+    self.id = id    
+    (result, token) =  DetectorWSClient.login_request(url, id, password)
+    self.token = token
+    return (result, token)
 
   def configure_ioloop(self):
     """
@@ -270,8 +275,6 @@ def signal_handler(sig, frame):
 
 
 if __name__ == "__main__":
-
-
 
   # Configure signals
   signal.signal(signal.SIGINT, signal_handler)

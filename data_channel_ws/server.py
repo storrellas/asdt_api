@@ -185,31 +185,31 @@ class WSHandler(WebSocketHandler):
     """
     Shortcut functions
     """
-    connection_log = ConnectionLog.objects.create(type=type, detector=id,
+    connection_log = ConnectionLog.objects.create(type=type, 
                                                   action=ConnectionLog.CONNECTION)
-    model = self.get_model(type)
-    if type == ConnectionLog.DETECTOR:    
-      connection_log.detector = Detector.objects.get(id=id)
-    elif type == ConnectionLog.USER: 
-      connection_log.user = User.objects.get(id=id)
-    elif type == ConnectionLog.INHIBITOR:
-      connection_log.inhibitor = Inhibitor.objects.get(id=id)
-    connection_log.save()
+    # model = self.get_model(type)
+    # if type == ConnectionLog.DETECTOR:    
+    #   connection_log.detector = Detector.objects.get(id=id)
+    # elif type == ConnectionLog.USER: 
+    #   connection_log.user = User.objects.get(id=id)
+    # elif type == ConnectionLog.INHIBITOR:
+    #   connection_log.inhibitor = Inhibitor.objects.get(id=id)
+    # connection_log.save()
     
   def create_disconnection_log(self, type, id, reason):
     """
     Shortcut functions
     """
-    connection_log = ConnectionLog.objects.create(type=type, detector=id,
+    connection_log = ConnectionLog.objects.create(type=type,
                                                   action=ConnectionLog.DISCONNECTION, 
                                                   reason=reason)
-    if type == ConnectionLog.DETECTOR:    
-      connection_log.detector = Detector.objects.get(id=id)
-    elif type == ConnectionLog.USER: 
-      connection_log.user = User.objects.get(id=id)
-    elif type == ConnectionLog.INHIBITOR:
-      connection_log.inhibitor = Inhibitor.objects.get(id=id)
-    connection_log.save()
+    # if type == ConnectionLog.DETECTOR:    
+    #   connection_log.detector = Detector.objects.get(id=id)
+    # elif type == ConnectionLog.USER: 
+    #   connection_log.user = User.objects.get(id=id)
+    # elif type == ConnectionLog.INHIBITOR:
+    #   connection_log.inhibitor = Inhibitor.objects.get(id=id)
+    # connection_log.save()
 
 
   def initialize(self, repository : WSConnectionReposirory, broker : WSMessageBroker):
@@ -224,7 +224,7 @@ class WSHandler(WebSocketHandler):
     pass
     
   def on_message(self, message):
-    #print('message received {}'.format(message) )
+    print('message received {}'.format(message) )
 
     # Check whether existing connection
     ws_conn = self.repository.find_by_handler(self)
@@ -266,6 +266,10 @@ class WSHandler(WebSocketHandler):
         conn = WSConnection(ws_handler=self, host=self.request.host, 
                             id=instance_id, type=type_id.upper())
         self.repository.add( conn )
+
+        # Reply login
+        self.write_message("OK")
+
       else:
         logger.info("Detector login failed")
         print(response.content)
@@ -273,7 +277,6 @@ class WSHandler(WebSocketHandler):
       logger.info("Message from peer type='{}' id='{}'".format(ws_conn.type, ws_conn.id) ) 
 
       # Treat message
-
       request = WSRequestMessage(source_id=ws_conn.id, type=ws_conn.type, 
                             encoded=message)
       response_list = self.broker.treat_message(request)
