@@ -36,8 +36,12 @@ from server import WSHandler, WSConnectionReposirory
 
 logger = get_logger()
 
-API_AUTH = 'http://localhost:8080/api/v3/detectors/authenticate/'
+
+# Configuration - server
 WS_PORT = 8081
+# Configuration - client
+API_AUTH_URL = 'http://localhost:8080/api/v3/detectors/authenticate/'
+WS_URL = 'ws://localhost:8081/api'
 
 class WSServerThread(threading.Thread):
   """

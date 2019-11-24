@@ -137,7 +137,6 @@ class DetectorWSClient:
   """
   token = None
   ws_url = None
-  api_auth_url = None
   ioloop = None
   ws = None
 
@@ -147,21 +146,20 @@ class DetectorWSClient:
   # Drone flight configuration
   drone_flight = None
 
-  def __init__(self, ws_url, api_auth_url, drone_flight):
+  def __init__(self, ws_url, drone_flight):
     self.ws_url = ws_url
-    self.api_auth_url = api_auth_url
    
     # Drone detected configuration
     self.drone_flight = drone_flight
     
-  def login(self, id, password):
+  def login(self, url, id, password):
     """
     Logs detector in and stores token
     """
     self.id = id
     body = { 'id': id, 'password': password }
-    logger.info("Authenticating HTTP {}".format(self.api_auth_url))
-    response = requests.post(self.api_auth_url, data=body)
+    logger.info("Authenticating HTTP {}".format(url))
+    response = requests.post(url, data=body)
     #print(response.content)
     # Get token
     if response.status_code == HTTPStatus.OK:
@@ -175,8 +173,8 @@ class DetectorWSClient:
       else:
         # API v3
         self.token = response_json['token']
-        return True
-    return False
+        return (True, self.token)
+    return (False, None)
     
     # # Hacking
     # self.token = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiZGV0ZWN0b3IiLCJpZCI6IjVkYjFiMDVmZWRkNjg1MTkwNzE5ZjkyNCIsImlhdCI6MTU3NDI1NDU3MywiZXhwIjoxNTc0Mjc2MTczLCJpc3MiOiJBU0RUIn0.XCjIUaCQIbZRGyB9T4UAXkolTCcRVEnWMzhcHLCOYppsB4KfFrkTc5rQEktw_Tc26pXh868PjxrZ4uZGTW7q8Q'
@@ -242,6 +240,9 @@ class DetectorWSClient:
     frame = coder.encode(log)    
     self.ws.write_message(bytes(frame), binary=True)
 
+# END: DetectorWSClient
+
+
 def read_json_configuration(filename):
   # Configuration parameters
   config = {}
@@ -303,10 +304,10 @@ if __name__ == "__main__":
                                 drone_flight_conf['lat'], drone_flight_conf['lon'], 
                                 drone_flight_conf['timeout'], drone_flight_conf['gpx'])
     drone_flight.output_gpx_enable = True                                
-    client = DetectorWSClient(WS_URL, API_AUTH_URL, drone_flight)    
+    client = DetectorWSClient(WS_URL, drone_flight)    
     # Login detector
     logger.info("Login detector with ({}/{})".format(detector_id, detector_password))
-    result = client.login(detector_id, detector_password)
+    result, token = client.login(API_AUTH_URL, detector_id, detector_password)
     if not result:
       logger.error("Login Failed. Aborting")
       sys.exit(0)
