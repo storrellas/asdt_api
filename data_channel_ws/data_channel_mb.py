@@ -39,11 +39,12 @@ class LogStorageDataMessage(LogMessage):
   # Coming from detector
   sn = None
   # Matching with Drone if any
-  detectors = []
   model = None
   owner = None
   productId = None
 
+  # Dynamic fields
+  detectors = []
   # Calculated fields
   maxHeight = 0
   distanceTraveled = 0
@@ -54,7 +55,6 @@ class LogStorageDataMessage(LogMessage):
 
 class LogStorageMessage:
   lastUpdate = datetime.datetime.now()
-  detectors = []
   sendInfo = False
   msgCount = 0
   data = LogStorageDataMessage()
@@ -145,7 +145,6 @@ class WSMessageBroker:
       logger.info("Log does NOT exist. Creating ...")
       log = Log()
       log.dateIni = log_storage.data.dateIni
-      log.dateFin = log_storage.data.dateFin
       log.sn = log_storage.data.sn
       log.model = log_storage.data.model
       log.productId = log_storage.data.productId
@@ -153,8 +152,10 @@ class WSMessageBroker:
     else:
       logger.info("Log does exist. Updating ...")
       log = queryset.first()
+      
     
     # Update all common fields
+    log.dateFin = log_storage.data.dateFin
     log.detectors = log_storage.data.detectors
     log.distanceTraveled = log_storage.data.distanceTraveled
     log.distanceToDetector = log_storage.data.distanceToDetector
