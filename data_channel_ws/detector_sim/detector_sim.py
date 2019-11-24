@@ -34,8 +34,10 @@ from common import DetectorCoder, LogMessage, LogLocationMessage
 logger = get_logger()
 logger.propagate = False
 
-# Loads configuration
-from detector_sim_config import *
+# Configuration parameters
+API_AUTH = 'http://localhost:8080/api/v3/detectors/authenticate/'
+WS_HOST = 'ws://localhost:8081/api'
+OUTPUT_PATH = './output'
 
 class DroneFlight:
 
