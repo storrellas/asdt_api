@@ -35,7 +35,10 @@ from server import WSHandler, WSConnectionReposirory
 logger = get_logger()
 
 class WSServerThread(threading.Thread):
-  
+  """
+  Runs WS Server in a separated thread
+  """
+
   ready_request = None  
   ioloop = None
 
@@ -63,15 +66,19 @@ class WSServerThread(threading.Thread):
     # PeriodicCallback(broker.logs_update, 
     #                   LOGS_UPDATE_PERIOD).start()
 
+    # Used to signal others we are ready
     self.ready_request.set()
+
+    # Store ioloop instance
     self.ioloop = IOLoop.instance()
+    # Start instance
     self.ioloop.start()
 
   def wait_for_ready(self):
     """
     Blocking function to test whether WS Server is ready
     """
-    while ws_thread.ready_request.isSet() == False:
+    while self.ready_request.isSet() == False:
       logger.info("WS Server is now ready")
       sleep(0.05)
 
@@ -93,6 +100,8 @@ class WSServerThread(threading.Thread):
 
 class TestCase(unittest.TestCase):
 
+  ws_thread = None
+
   @classmethod
   def setUpClass(cls):
     """
@@ -109,21 +118,28 @@ class TestCase(unittest.TestCase):
     mongo_dummy.setup(settings.MONGO_DB, settings.MONGO_HOST, int(settings.MONGO_PORT))
     mongo_dummy.generate_scenario()
 
-  def test_coder_decoder(self):
-
     # See http://www.tornadoweb.org/en/stable/asyncio.html#tornado.platform.asyncio.AnyThreadEventLoopPolicy
     asyncio.set_event_loop_policy(AnyThreadEventLoopPolicy())
 
-    ws_thread = WSServerThread()
-    ws_thread.start()
+    # Start thread
+    cls.ws_thread = WSServerThread()
+    cls.ws_thread.start()
 
-    while ws_thread.ready_request.isSet() == False:
-      logger.info("WSReady")
-      sleep(0.5)
+    # Wait until WS Server is running
+    cls.ws_thread.wait_for_ready()
 
-    logger.info("Set")
-    ws_thread.request_terminate()
-    ws_thread.join()
+  @classmethod
+  def tearDownClass(cls):
+    """
+    Called once in every suite
+    """
+    # Request for termination
+    cls.ws_thread.request_terminate()
+    cls.ws_thread.join()
+
+  def test_coder_decoder(self):
+    print("MyTestsAreRunning")
+    self.assertTrue(True)
 
 
 
