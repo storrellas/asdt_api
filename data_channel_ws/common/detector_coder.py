@@ -82,8 +82,8 @@ class DetectorCoder:
     # aHeight = int(log.droneLocation.aHeight * self.__toDegrees).to_bytes(2, 'little', signed=True)
     # frame[49:49+2] = aHeight
     # 51 -> + 2 bytes [floor height]
-    # fHeight = int(log.droneLocation.fHeight * 10).to_bytes(2, 'little', signed=True)
-    # frame[51:51+2] = fHeight
+    fHeight = int(log.droneLocation.fHeight * 10).to_bytes(2, 'little', signed=True)
+    frame[51:51+2] = fHeight
 
     # NOTE: WATCH OUT THIS ONE IS LAT first, LON second
     # 69 -> + 4 bytes [lat driver] 
