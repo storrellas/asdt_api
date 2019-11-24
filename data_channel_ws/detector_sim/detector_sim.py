@@ -35,8 +35,8 @@ logger = get_logger()
 logger.propagate = False
 
 # Configuration parameters
-API_AUTH = 'http://localhost:8080/api/v3/detectors/authenticate/'
-WS_HOST = 'ws://localhost:8081/api'
+WS_URL = 'ws://localhost:8081/api'
+API_AUTH_URL = 'http://localhost:8080/api/v3/detectors/authenticate/'
 OUTPUT_PATH = './output'
 
 class DroneFlight:
@@ -136,7 +136,8 @@ class DetectorWSClient:
   by detector localising drones
   """
   token = None
-  url = None
+  ws_url = None
+  api_auth_url = None
   ioloop = None
   ws = None
 
@@ -146,8 +147,9 @@ class DetectorWSClient:
   # Drone flight configuration
   drone_flight = None
 
-  def __init__(self, url, drone_flight):
-    self.url = url
+  def __init__(self, ws_url, api_auth_url, drone_flight):
+    self.ws_url = ws_url
+    self.api_auth_url = api_auth_url
    
     # Drone detected configuration
     self.drone_flight = drone_flight
@@ -158,8 +160,8 @@ class DetectorWSClient:
     """
     self.id = id
     body = { 'id': id, 'password': password }
-    logger.info("Authenticating HTTP {}".format(API_AUTH))
-    response = requests.post(API_AUTH, data=body)
+    logger.info("Authenticating HTTP {}".format(self.api_auth_url))
+    response = requests.post(self.api_auth_url, data=body)
     #print(response.content)
     # Get token
     if response.status_code == HTTPStatus.OK:
@@ -202,8 +204,8 @@ class DetectorWSClient:
 
   async def connect(self):
     try:
-      logger.info("Connection WS {}".format(self.url))
-      self.ws = await websocket_connect(self.url)
+      logger.info("Connection WS {}".format(self.ws_url))
+      self.ws = await websocket_connect(self.ws_url)
       # After connection first thing is sending token
       self.ws.write_message( self.token )
     except Exception as e:
@@ -268,6 +270,8 @@ def signal_handler(sig, frame):
 
 if __name__ == "__main__":
 
+
+
   # Configure signals
   signal.signal(signal.SIGINT, signal_handler)
 
@@ -299,7 +303,7 @@ if __name__ == "__main__":
                                 drone_flight_conf['lat'], drone_flight_conf['lon'], 
                                 drone_flight_conf['timeout'], drone_flight_conf['gpx'])
     drone_flight.output_gpx_enable = True                                
-    client = DetectorWSClient(WS_HOST, drone_flight)    
+    client = DetectorWSClient(WS_URL, API_AUTH_URL, drone_flight)    
     # Login detector
     logger.info("Login detector with ({}/{})".format(detector_id, detector_password))
     result = client.login(detector_id, detector_password)
