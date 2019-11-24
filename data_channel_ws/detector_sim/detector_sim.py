@@ -37,7 +37,91 @@ logger.propagate = False
 # Loads configuration
 from detector_sim_config import *
 
-class DetectorWSClient(object):
+class DroneFlight:
+
+  sn = None
+  lat = None
+  lon = None
+  input_gpx = None
+  output_gpx = None
+  timeout = None
+
+  # Count number of detections
+  current_detection = 0
+  max_detection = 0
+  
+  def __init__(self, sn, lat, lon, timeout, gpx_file):
+    self.sn = sn
+    self.lat = lat
+    self.lon = lon
+    self.timeout = timeout
+
+    # Generate output for GPX
+    gpx_track = GPXTrack(name=self.sn)
+    self.output_gpx = gpx_parser.GPX(version="1.0", creator="detector_sim", tracks=[gpx_track])
+
+    # Load gpx if any
+    if gpx_file is not None:
+      with open(gpx_file, 'r') as gpx_fd:
+        self.input_gpx = gpx_parser.parse(gpx_fd)
+        logger.info("{} tracks loaded".format(len(self.input_gpx)))
+
+  def get_detection_log(self):
+    # Configuration of maximum number of detections
+    if self.max_detection > 0:
+      if self.current_detection >= self.max_detection:
+        logger.info("Reached max number of segments/detections")
+        return
+    self.current_detection = self.current_detection + 1
+
+    if self.input_gpx is None:
+      # Calculate new position
+      self.lat = self.lat + random.random()/100
+      self.lon = self.lon + random.random()/100
+    else:
+      #logger.info("Loading new position from from GPX File")
+      gpx_track_segment = self.input_gpx[0].segments[self.current_segment]
+      gps_track_point = gpx_track_segment[0]
+      # print(gps_track_point)
+      # print(gps_track_point.lat)
+      self.lat = gps_track_point.latitude
+      self.lon = gps_track_point.longitude
+      # Check for next segment
+      self.current_segment = self.current_segment + 1
+      if self.current_segment >= len(self.input_gpx[0].segments):
+        self.current_segment = 0
+
+    # Generate package
+    driverLocation = LogLocationMessage(lat=self.lat, lon=self.lon, fHeight=random.random()*10)
+    droneLocation = LogLocationMessage(lat=self.lat, lon=self.lon, fHeight=random.random()*10)
+    homeLocation = LogLocationMessage(lat=self.lat, lon=self.lon)
+    log = LogMessage(sn=self.sn, driverLocation=driverLocation,
+                      droneLocation=droneLocation, homeLocation=homeLocation,
+                      productId=16)
+    logger.info ("Detection[{}] - SN:{}/Lat:{}/Lon:{}" \
+                    .format(self.current_detection, self.sn, self.lat, self.lon))
+    
+    # Output GPX file
+    self._gpx_output(log.droneLocation.lat, log.droneLocation.lon)
+
+    return log
+
+  def _gpx_output(self, lat, lon):
+    # A Track Segment holds a list of Track Points which are logically connected in order. 
+    # To represent a single GPS track where GPS reception was lost, or the GPS receiver was turned off, 
+    # start a new Track Segment for each continuous span of track data.
+    # See: http://www.topografix.com/GPX/1/1/#type_trksegType
+    
+    # Append point
+    gpx_track_segment = GPXTrackSegment(points=[GPXTrackPoint(lat=str(lat),lon=str(lon))] )
+    self.output_gpx.tracks[0].segments.append(gpx_track_segment)
+
+    # Output to file
+    filename = self.sn + '.gpx'
+    with open(OUTPUT_PATH + '/' + filename, 'w') as output_file:
+      output_file.write(self.output_gpx.to_xml())
+
+class DetectorWSClient:
   """
   Client to connect to Websocket simulating logs generated 
   by detector localising drones
@@ -65,24 +149,31 @@ class DetectorWSClient(object):
   current_detection = 0
   max_detection = 0
 
+  drone_flight = None
+
   def __init__(self, url, sn, lat_ini, lon_ini, timeout, gpx_file):
     self.url = url
-    self.timeout = timeout
+    
 
-    # Drone detected configuration
-    self.sn = sn
-    self.lat = lat_ini
-    self.lon = lon_ini
 
-    # Generate output for GPX
-    gpx_track = GPXTrack(name=self.sn)
-    self.output_gpx = gpx_parser.GPX(version="1.0", creator="detector_sim", tracks=[gpx_track])
+    self.drone_flight = DroneFlight(sn=sn, lat=lat_ini, lon=lon_ini, 
+                                    timeout=timeout, gpx_file=gpx_file)
 
-    # Load gpx if any
-    if gpx_file is not None:
-      with open(gpx_file, 'r') as gpx_fd:
-        self.input_gpx = gpx_parser.parse(gpx_fd)
-        logger.info("{} tracks loaded".format(len(self.input_gpx)))
+    # # Drone detected configuration
+    # self.sn = sn
+    # self.lat = lat_ini
+    # self.lon = lon_ini
+    # self.timeout = timeout
+
+    # # Generate output for GPX
+    # gpx_track = GPXTrack(name=self.sn)
+    # self.output_gpx = gpx_parser.GPX(version="1.0", creator="detector_sim", tracks=[gpx_track])
+
+    # # Load gpx if any
+    # if gpx_file is not None:
+    #   with open(gpx_file, 'r') as gpx_fd:
+    #     self.input_gpx = gpx_parser.parse(gpx_fd)
+    #     logger.info("{} tracks loaded".format(len(self.input_gpx)))
 
 
     
@@ -120,7 +211,7 @@ class DetectorWSClient(object):
     Configures ioloop to be running
     """
     #PeriodicCallback(self.keep_alive, 20000).start()
-    PeriodicCallback(self.send_detection, self.timeout).start()
+    PeriodicCallback(self.send_detection, self.drone_flight.timeout).start()
     
     # Create IOLoop
     self.ioloop = IOLoop.instance()
@@ -133,30 +224,6 @@ class DetectorWSClient(object):
 
     # print("Starting IOLoop")
     # self.ioloop.start()
-
-  # NOTE: This is kept here for reference
-  # @gen.coroutine
-  # def connect(self):    
-  #   logger.info("Attempting to connect")
-  #   try:
-  #     self.ws = yield websocket_connect(self.url)
-  #     # After connection first thing is sending token
-  #     self.ws.write_message( self.token )
-  #   except Exception as e:
-  #     logger.error("connection error")
-  #   else:
-  #     logger.info("connected")
-  #     self.run()
-
-  # @gen.coroutine
-  # def run(self):
-  #   while True:
-  #     msg = yield self.ws.read_message()
-  #     logger.info("message received:{}".format(msg))
-  #     if msg is None:
-  #       logger.info("connection closed")
-  #       self.ws = None
-  #       break
 
   async def connect(self):
     try:
@@ -190,62 +257,15 @@ class DetectorWSClient(object):
     """
     Generates the package sent by the detector via WS
     """
-    # Configuration of maximum number of detections
-    if self.max_detection > 0:
-      if self.current_detection >= self.max_detection:
-        logger.info("Reached max number of segments/detections")
-        return
-    self.current_detection = self.current_detection + 1
-
-    if self.input_gpx is None:
-      # Calculate new position
-      self.lat = self.lat + random.random()/100
-      self.lon = self.lon + random.random()/100
-    else:
-      #logger.info("Loading new position from from GPX File")
-      gpx_track_segment = self.input_gpx[0].segments[self.current_segment]
-      gps_track_point = gpx_track_segment[0]
-      # print(gps_track_point)
-      # print(gps_track_point.lat)
-      self.lat = gps_track_point.latitude
-      self.lon = gps_track_point.longitude
-      # Check for next segment
-      self.current_segment = self.current_segment + 1
-      if self.current_segment >= len(self.input_gpx[0].segments):
-        self.current_segment = 0
-
-    # Generate package
-    driverLocation = LogLocationMessage(lat=self.lat, lon=self.lon, fHeight=random.random()*10)
-    droneLocation = LogLocationMessage(lat=self.lat, lon=self.lon, fHeight=random.random()*10)
-    homeLocation = LogLocationMessage(lat=self.lat, lon=self.lon)
-    log = LogMessage(sn=self.sn, driverLocation=driverLocation,
-                      droneLocation=droneLocation, homeLocation=homeLocation,
-                      productId=16)
-    logger.info ("Detection[{}] - SN:{}/Lat:{}/Lon:{}" \
-                    .format(self.current_detection, self.sn, self.lat, self.lon))
-
-    # Output GPX file
-    self._gpx_output(self.lat, self.lon)
+    # Generate next detection log
+    log = self.drone_flight.get_detection_log()
 
     # Encode package
     coder = DetectorCoder()
     frame = coder.encode(log)    
     self.ws.write_message(bytes(frame), binary=True)
 
-  def _gpx_output(self, lat, lon):
-    # A Track Segment holds a list of Track Points which are logically connected in order. 
-    # To represent a single GPS track where GPS reception was lost, or the GPS receiver was turned off, 
-    # start a new Track Segment for each continuous span of track data.
-    # See: http://www.topografix.com/GPX/1/1/#type_trksegType
-    
-    # Append point
-    gpx_track_segment = GPXTrackSegment(points=[GPXTrackPoint(lat=str(lat),lon=str(lon))] )
-    self.output_gpx.tracks[0].segments.append(gpx_track_segment)
 
-    # Output to file
-    filename = self.sn + '.gpx'
-    with open(OUTPUT_PATH + '/' + filename, 'w') as output_file:
-      output_file.write(self.output_gpx.to_xml())
 
 
 ###########################
