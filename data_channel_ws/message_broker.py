@@ -101,7 +101,7 @@ class WSResponseMessage(WSMessage):
 class WSMessageBroker:
   
   # repository = LogMessageRepository()
-  __log_message_dict = {}
+  log_message_dict = {}
 
   # Maximum time without detections to consider a flight is finished
   maxElapsedTime = 100000
@@ -123,8 +123,8 @@ class WSMessageBroker:
     Update logs in DB
     NOTE: We should move this to the former
     """
-    for sn in self.__log_message_dict.keys():
-      log_message = self.__log_message_dict[sn]
+    for sn in self.log_message_dict.keys():
+      log_message = self.log_message_dict[sn]
       now = datetime.datetime.now()
       delta_time = now - log_message.lastUpdate
       if delta_time.total_seconds() * 1000 > self.maxElapsedTime:
@@ -228,11 +228,11 @@ class WSMessageBroker:
       # Log Storage
       log_storage = None
       content = req.content
-      if content.sn in self.__log_message_dict:
+      if content.sn in self.log_message_dict:
         # Existing DroneDetection
         ########################
         logger.info("Drone has been identified '{}'".format(req.content.sn))
-        log_storage = self.__log_message_dict[req.content.sn]
+        log_storage = self.log_message_dict[req.content.sn]
         log_storage = self.log_storage_update(content, detector, log_storage)
       else:
         # New DroneDetection
@@ -265,7 +265,7 @@ class WSMessageBroker:
           log_storage.sendInfo = True
 
         # Add log_storage to dict
-        self.__log_message_dict[req.content.sn] = log_storage
+        self.log_message_dict[req.content.sn] = log_storage
 
       
       # Store log locally
