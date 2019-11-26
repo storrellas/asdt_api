@@ -20,8 +20,6 @@ from common import DetectorCoder, LogMessage, LogLocationMessage
 from common.utils import get_logger
 
 # Websocket
-import websocket as websocket_client
-
 import mongoengine
 
 
@@ -37,9 +35,11 @@ from tornado.websocket import WebSocketHandler
 from mongo_dummy import MongoDummy
 from django.conf import settings
 from message_broker import WSMessageBroker
-from server import WSHandler, WSConnectionReposirory
-from detector_sim import DetectorWSClient
 from common import DetectorCoder, LogMessage, LogLocationMessage
+
+# Detector client/server
+from detector_sim import DetectorWSClient, DroneFlight
+from server import WSHandler, WSConnectionReposirory
 
 # Import models
 from detectors.models import Detector
@@ -104,10 +104,7 @@ class WSServerThread(threading.Thread):
     """
     Blocking function to test whether WS Server is ready
     """
-    while self.ready_request.isSet() == False:
-      logger.info("WS Server is now ready")
-      #sleep(0.05)
-      sleep(0.5)
+    self.ready_request.wait()
 
   def request_terminate(self):
     """
@@ -124,7 +121,6 @@ class WSServerThread(threading.Thread):
     logger.info("Terminated ioloop")
     self.ioloop.stop()
     logger.info('DONE!')
-
 
 
 
@@ -180,42 +176,48 @@ class TestCase(unittest.TestCase):
     # Login
     detector = Detector.objects.get(name='detector2')
     detector.set_password('asdt2019')
-    result, token = DetectorWSClient.login_request(API_AUTH_URL, str(detector.id), 'asdt2019')
 
-    # Create WS connection
-    ws = websocket_client.create_connection(WS_URL)
-    print("CONNECTED", ws.connected)
-    print("Sending <token> ...")
-    ws.send(token)
-    print("Sent")
+    sn = '000000000000001'
+    lat = 41.7
+    lon = 1.8
+    drone_flight = DroneFlight(sn, lat, lon)
+    client = DetectorWSClient(WS_URL, drone_flight)
+    result, token = client.login(API_AUTH_URL, str(detector.id), 'asdt2019')
+
+    # # Create WS connection
+    # ws = websocket_client.create_connection(WS_URL)
+    # print("CONNECTED", ws.connected)
+    # print("Sending <token> ...")
+    # ws.send(token)
+    # print("Sent")
 
 
-    print("Receiving...")
-    result =  ws.recv()
-    print("Received '%s'" % result)
+    # print("Receiving...")
+    # result =  ws.recv()
+    # print("Received '%s'" % result)
 
     
-    # Create log
-    driverLocation = LogLocationMessage(lat=41.2, lon=2.3)
-    droneLocation = LogLocationMessage(lat=41.2, lon=2.3, fHeight=8.8)
-    homeLocation = LogLocationMessage(lat=41.2, lon=2.3)
-    log = LogMessage(sn='111BBBBBBBBB16', driverLocation=driverLocation,
-                      droneLocation=droneLocation, homeLocation=homeLocation,
-                      productId=16)
+    # # Create log
+    # driverLocation = LogLocationMessage(lat=41.2, lon=2.3)
+    # droneLocation = LogLocationMessage(lat=41.2, lon=2.3, fHeight=8.8)
+    # homeLocation = LogLocationMessage(lat=41.2, lon=2.3)
+    # log = LogMessage(sn='111BBBBBBBBB16', driverLocation=driverLocation,
+    #                   droneLocation=droneLocation, homeLocation=homeLocation,
+    #                   productId=16)
 
-    # Encode frame
-    coder = DetectorCoder()
-    encoded = coder.encode( log ) 
+    # # Encode frame
+    # coder = DetectorCoder()
+    # encoded = coder.encode( log ) 
 
-    # Sedni
-    print("Sending <log> ...")
-    ws.send(encoded)
-    print("Sent")
+    # # Sedni
+    # print("Sending <log> ...")
+    # ws.send(encoded)
+    # print("Sent")
 
-    # Wait for ok
-    print("Receiving...")
-    result =  ws.recv()
-    print("Received '%s'" % result)
+    # # Wait for ok
+    # print("Receiving...")
+    # result =  ws.recv()
+    # print("Received '%s'" % result)
     
 
 

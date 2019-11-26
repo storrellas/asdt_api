@@ -54,7 +54,7 @@ class DroneFlight:
   current_detection = 0
   max_detection = 0
   
-  def __init__(self, sn, lat, lon, timeout, gpx_file):
+  def __init__(self, sn, lat, lon, timeout = 0, gpx_file = None):
     self.sn = sn
     self.lat = lat
     self.lon = lon
@@ -186,24 +186,26 @@ class DetectorWSClient:
     self.token = token
     return (result, token)
 
-  def configure_ioloop(self):
-    """
-    Configures ioloop to be running
-    """
-    #PeriodicCallback(self.keep_alive, 20000).start()
-    PeriodicCallback(self.send_detection, self.drone_flight.timeout).start()
-    
-    # Create IOLoop
-    self.ioloop = IOLoop.instance()
-    
-    # Add to the ioloop 
-    self.ioloop.spawn_callback(self.connect)
+  # def configure_ioloop(self):
+  #   """
+  #   Configures ioloop to be running
+  #   """
+  #   #PeriodicCallback(self.keep_alive, 20000).start()
+  #   if self.drone_flight.timeout > 0:
+  #     logger.info("Launching periodic task")
+  #     PeriodicCallback(self.send_detection, self.drone_flight.timeout).start()
 
-    # # Runs single task
-    # self.ioloop.run_sync(self.connect)
+  #   # Create IOLoop
+  #   self.ioloop = IOLoop.instance()
+    
+  #   # Add to the ioloop 
+  #   self.ioloop.spawn_callback(self.connect)
 
-    # print("Starting IOLoop")
-    # self.ioloop.start()
+  #   # # Runs single task
+  #   # self.ioloop.run_sync(self.connect)
+
+  #   # print("Starting IOLoop")
+  #   # self.ioloop.start()
 
   async def connect(self):
     try:
@@ -314,8 +316,14 @@ if __name__ == "__main__":
     if not result:
       logger.error("Login Failed. Aborting")
       sys.exit(0)
-    # Infinite loop
-    client.configure_ioloop()
+    
+    # Configure IOLoop
+    if drone_flight.timeout > 0:
+      logger.info("Launching periodic task")
+      PeriodicCallback(client.send_detection, drone_flight.timeout).start()
+   
+    # Add to the ioloop 
+    IOLoop.instance().spawn_callback(client.connect)
 
   
   # Create IOLoop
