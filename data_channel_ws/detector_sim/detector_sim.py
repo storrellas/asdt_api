@@ -233,9 +233,11 @@ class DetectorWSClient:
     logger.info("message received:{}".format(msg))
     if msg is None:
       self.ws_connected = False
-      logger.info("connection closed")
-      self.ws.close()
-      self.ws = None
+      logger.info("connection closed {}".format(self.ws_connected))
+      # Close if its not done
+      if self.ws is not None:
+        self.ws.close()
+        self.ws = None
 
 
 

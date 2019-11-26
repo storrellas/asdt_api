@@ -219,6 +219,10 @@ class TestCase(unittest.TestCase):
     cls.ioloop_thread.request_terminate()
     cls.ioloop_thread.join()
 
+  def setUp(self):
+    # Reset event
+    self.ioloop_thread.client.client_idle.clear()
+    self.ioloop_thread.server_idle.clear()
 
   def check_range(self, target, candidate):
     return target - 1 < candidate < target + 1
@@ -301,60 +305,77 @@ class TestCase(unittest.TestCase):
     self.ioloop_thread.wait_for_client()
 
     # Check client is closed
+    sleep(0.01) # NOTE: The time while client checks that socket is closed
+                # Not very elegant
     self.assertFalse( self.ioloop_thread.client.is_ws_connected() )
     
-  # def test_detector_send_detection(self):
+  def test_detector_send_detection(self):
 
-  #   # Login
-  #   detector = Detector.objects.get(name='detector2')
-  #   detector.set_password('asdt2019')
-  #   result, token = self.ioloop_thread.login_client(API_AUTH_URL, str(detector.id), 'asdt2019')
-  #   self.assertTrue(result)
+    # Login
+    detector = Detector.objects.get(name='detector2')
+    detector.set_password('asdt2019')
+    result, token = self.ioloop_thread.login_client(API_AUTH_URL, str(detector.id), 'asdt2019')
+    self.assertTrue(result)
 
-  #   # Launch client
-  #   self.ioloop_thread.launch_client()
-  #   self.assertTrue( self.ioloop_thread.client.is_ws_connected() )
+    # Launch client
+    self.ioloop_thread.launch_client()
+    self.assertTrue( self.ioloop_thread.client.is_ws_connected() )
 
-  #   # Wait for server to process client
-  #   self.ioloop_thread.wait_for_server()
+    # Wait for server to process client
+    self.ioloop_thread.wait_for_server()
 
-  #   # Send detection
-  #   sn = '000000000000001'
-  #   lat = 41.7
-  #   lon = 1.8
-  #   drone_flight = DroneFlight(sn, lat, lon)
-  #   detection_log = drone_flight.get_detection_log()
-
-  #   # Remove all Logs with sn for testing
-  #   Log.objects.filter(sn=sn).delete()
-
-  #   # Send message
-  #   self.ioloop_thread.client.send_detection_log(detection_log)
-  #   # Wait for server to process message
-  #   self.ioloop_thread.wait_for_server()
-
-  #   # Check whether log has been created    
-  #   self.assertEqual(Log.objects.filter(sn=sn).count(), 1)
-  #   log = Log.objects.get(sn=sn)
-  #   self.assertTrue( log.distanceToDetector > 0 )
-  #   self.assertTrue( log.distanceTraveled == 0 )
-  #   self.assertTrue( log.maxHeight > 0 )
-
-  #   # Check route
-  #   self.assertEqual(len(log.route), 1)
-  #   target = LogRoute(lat=lat,lon=lon)
-  #   self.assertTrue(self.check_location(target, log.route[0]) )
+    # Send detection
+    sn = '000000000000001'
+    lat = 41.7
+    lon = 1.8
+    drone_flight = DroneFlight(sn, lat, lon)
 
 
-  #   # Close client
-  #   self.ioloop_thread.client.close()
+    # Remove all Logs with sn for testing
+    Log.objects.filter(sn=sn).delete()
+    self.assertEqual(Log.objects.filter(sn=sn).count(), 0)
+
+    # Send FIRST message
+    ########################
+    detection_log = drone_flight.get_detection_log()
+    self.ioloop_thread.client.send_detection_log(detection_log)
+    # Wait for server to process message
+    self.ioloop_thread.wait_for_server()
+
+    # Check whether log has been created  
+    self.assertEqual(Log.objects.filter(sn=sn).count(), 1)
+    log = Log.objects.get(sn=sn)
+    self.assertTrue( log.distanceToDetector > 0 )
+    self.assertTrue( log.distanceTraveled == 0 )
+    self.assertTrue( log.maxHeight > 0 )
+
+    # Check route
+    self.assertEqual(len(log.route), 1)
+    target = LogRoute(lat=lat,lon=lon)
+    self.assertTrue(self.check_location(target, log.route[0]) )
+
+    # Send SECOND message
+    ########################
+    detection_log = drone_flight.get_detection_log()
+    self.ioloop_thread.client.send_detection_log(detection_log)
+    # Wait for server to process message
+    self.ioloop_thread.wait_for_server()
+
+    # Check whether log has been created  
+    self.assertEqual(Log.objects.filter(sn=sn).count(), 1)
+    log = Log.objects.get(sn=sn)
+    self.assertTrue( log.distanceToDetector > 0 )
+    self.assertTrue( log.distanceTraveled > 0 )
+    self.assertTrue( log.maxHeight > 0 )
+
+    # Check route
+    self.assertEqual(len(log.route), 2)
+    target = LogRoute(lat=lat,lon=lon)
+    self.assertTrue(self.check_location(target, log.route[1]) )
 
 
-   
-
-
-
-
+    # Close client
+    self.ioloop_thread.client.close()
 
 
 
