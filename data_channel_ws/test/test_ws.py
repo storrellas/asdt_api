@@ -56,25 +56,55 @@ API_AUTH_URL = 'http://localhost:8080/api/v3/detectors/authenticate/'
 WS_URL = 'ws://localhost:8081/api'
 
 class WSHandlerMockup(WSHandler):
-    
-  def on_message(self, message):
+  
+  server_idle = None
+
+  def initialize(self, repository, broker, server_idle):
+    super().initialize(repository, broker)
+    self.server_idle = server_idle
+
+  def on_message(self, message):    
     super().on_message(message)
+    self.server_idle.set()
 
   def on_close(self):    
     super().on_close(message)
+    self.server_idle.set()
+
+class DetectorWSClientMockup(DetectorWSClient):
+  
+  client_idle = None
+
+  def __init__(self, ws_url = None, drone_flight = None, client_idle = None):
+    super().__init__(ws_url, drone_flight)
+    self.client_idle = client_idle
+
+  async def connect(self):
+    await super().connect()
+    # Signal client is ready
+    self.client_idle.set()
+
+  def on_close(self):    
+    super().on_close(message)
+    self.client_idle.set()
 
 class WSServerThread(threading.Thread):
   """
   Runs WS Server in a separated thread
   """
 
-  server_ready = None  
-  ioloop = None
+  # Thread synchro
+  server_idle = None
+  client_idle = None  
 
-  
+  # Tornado
+  ioloop = None
+  client = None
+
   def __init__(self):
     super().__init__()
-    self.server_ready = threading.Event()
+    self.server_idle = threading.Event()
+    self.client_idle = threading.Event()
 
   def run(self):
     # Store ioloop instance
@@ -85,7 +115,7 @@ class WSServerThread(threading.Thread):
     repository = WSConnectionReposirory()
     broker = WSMessageBroker()
     application = tornado.web.Application([
-      (r'/api', WSHandlerMockup, dict(repository=repository, broker=broker)),
+      (r'/api', WSHandlerMockup, dict(repository=repository, broker=broker, server_idle=self.server_idle)),
     ])
 
     # Starting WS Server
@@ -93,19 +123,36 @@ class WSServerThread(threading.Thread):
     http_server = tornado.httpserver.HTTPServer(application)
     http_server.listen(WS_PORT)
 
+    # Create client
+    self.client = DetectorWSClientMockup(WS_URL, None, self.client_idle)
 
-    # Used to signal others we are ready
-    self.server_ready.set()
+    # Used to signal server is ready
+    self.server_idle.set()
 
     # Start instance
     self.ioloop.start()
 
-  def wait_for_ready(self):
+  def wait_for_server(self):
     """
     Blocking function to test whether WS Server is ready
     """
-    self.server_ready.wait()
-    self.server_ready.clear()
+    self.server_idle.wait()
+    self.server_idle.clear()
+
+  def wait_for_client(self):
+    """
+    Blocking function to test whether WS Server is ready
+    """
+    self.client_idle.wait()
+    self.client_idle.clear()
+
+  def launch_client(self):
+    """
+    Launches client
+    """
+    #self.ioloop.run_sync(self.client.connect)
+    #self.ioloop.spawn_callback(self.client.connect)
+    self.ioloop.spawn_callback(self.client.connect)
 
   def request_terminate(self):
     """
@@ -127,7 +174,7 @@ class WSServerThread(threading.Thread):
 
 class TestCase(unittest.TestCase):
 
-  ws_thread = None
+  ioloop_thread = None
 
   @classmethod
   def setUpClass(cls):
@@ -153,11 +200,19 @@ class TestCase(unittest.TestCase):
     asyncio.set_event_loop_policy(AnyThreadEventLoopPolicy())
 
     # Start thread
-    cls.ws_thread = WSServerThread()
-    cls.ws_thread.start()
+    cls.ioloop_thread = WSServerThread()
+    cls.ioloop_thread.start()
 
     # Wait until WS Server is running
-    cls.ws_thread.wait_for_ready()
+    cls.ioloop_thread.wait_for_server()
+    logger.info("Server ready!")
+
+    # Launches client
+    cls.ioloop_thread.launch_client()
+
+    # Wait until WS Server is running
+    cls.ioloop_thread.wait_for_client()
+    logger.info("Client ready!")
 
   @classmethod
   def tearDownClass(cls):
@@ -165,13 +220,12 @@ class TestCase(unittest.TestCase):
     Called once in every suite
     """
     # Request for termination
-    cls.ws_thread.request_terminate()
-    cls.ws_thread.join()
+    cls.ioloop_thread.request_terminate()
+    cls.ioloop_thread.join()
 
 
 
   def test_detector_message(self):
-    print("MyTestsAreRunning")
     self.assertTrue(True)
     
     # Login

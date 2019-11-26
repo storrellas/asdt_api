@@ -217,11 +217,12 @@ class WSHandler(WebSocketHandler):
     self.broker = broker
 
   def open(self):
-    #print('new connection')
+    print('new connection')
     # print(self.request.remote_ip)
     # print(self.request)
     # self.write_message("Hello World")
     pass
+    
     
   def on_message(self, message):
     print('message received {}'.format(message) )
