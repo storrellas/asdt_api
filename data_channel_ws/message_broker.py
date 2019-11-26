@@ -104,7 +104,7 @@ class WSMessageBroker:
   __log_message_dict = {}
 
   # Maximum time without detections to consider a flight is finished
-  maxElapsedTime = 5000
+  maxElapsedTime = 100000
 
   def treat_message(self, req: WSRequestMessage):
     """
@@ -129,6 +129,7 @@ class WSMessageBroker:
       delta_time = now - log_message.lastUpdate
       if delta_time.total_seconds() * 1000 > self.maxElapsedTime:
         logger.info("Saving logs automatically as considering flight as finished {}" .format(delta_time.total_seconds() * 1000))
+        self.save_log(log_storage)
 
         
   def save_log(self, log_storage):

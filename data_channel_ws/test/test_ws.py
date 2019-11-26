@@ -373,6 +373,12 @@ class TestCase(unittest.TestCase):
     target = LogRoute(lat=lat,lon=lon)
     self.assertTrue(self.check_location(target, log.route[1]) )
 
+    # # Check DroneFlight is marked as finished
+    # ########################
+    # broker = self.ioloop_thread.broker
+    # log_message = broker.__log_message_dict[sn]
+    # print(log_message.__dict__)
+
 
     # Close client
     self.ioloop_thread.client.close()
