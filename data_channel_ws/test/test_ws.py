@@ -390,9 +390,9 @@ class TestCase(unittest.TestCase):
     # Simulate logs update
     self.ioloop_thread.broker.logs_update()
 
-
+    # Check logs_update
     log = Log.objects.get(sn=sn)
-    # self.assertNotEqual( log.dateFin, lastUpdate)
+    self.assertNotEqual( log.dateFin, lastUpdate)
 
 
     # Close client
