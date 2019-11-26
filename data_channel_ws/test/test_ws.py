@@ -81,6 +81,9 @@ class DetectorWSClientMockup(DetectorWSClient):
 
   async def connect(self):
     await super().connect()
+
+
+    print("Mytest")
     # Signal client is ready
     self.client_idle.set()
 
@@ -156,7 +159,12 @@ class WSServerThread(threading.Thread):
     """
     #self.ioloop.run_sync(self.client.connect)
     self.ioloop.spawn_callback(self.client.connect)
-    #self.ioloop.add_callback(self.client.connect)
+    self.wait_for_client()
+
+    # Check if client was connected and if so launch run thread
+    if self.client.is_ws_connected():
+      logger.info("Client connected successfully")
+      self.ioloop.spawn_callback(self.client.run)
 
   def request_terminate(self):
     """
@@ -218,18 +226,11 @@ class TestCase(unittest.TestCase):
     """
     Called once in every suite
     """
+    print("TearDown")
     # Request for termination
     cls.ioloop_thread.request_terminate()
     cls.ioloop_thread.join()
 
-
-  def launch_client(self):
-    # Launches client
-    self.ioloop_thread.launch_client()
-
-    # Wait until WS Server is running
-    self.ioloop_thread.wait_for_client()
-    logger.info("Client ready!")
 
   def test_detector_message(self):
     self.assertTrue(True)
@@ -242,7 +243,7 @@ class TestCase(unittest.TestCase):
     logger.info("Client logged in successful!!")
 
     # Launches client
-    self.launch_client()
+    self.ioloop_thread.launch_client()
     
     # sn = '000000000000001'
     # lat = 41.7

@@ -187,14 +187,14 @@ class WSHandler(WebSocketHandler):
     """
     connection_log = ConnectionLog.objects.create(type=type, 
                                                   action=ConnectionLog.CONNECTION)
-    # model = self.get_model(type)
-    # if type == ConnectionLog.DETECTOR:    
-    #   connection_log.detector = Detector.objects.get(id=id)
-    # elif type == ConnectionLog.USER: 
-    #   connection_log.user = User.objects.get(id=id)
-    # elif type == ConnectionLog.INHIBITOR:
-    #   connection_log.inhibitor = Inhibitor.objects.get(id=id)
-    # connection_log.save()
+    model = self.get_model(type)
+    if type == ConnectionLog.DETECTOR:    
+      connection_log.detector = Detector.objects.get(id=id)
+    elif type == ConnectionLog.USER: 
+      connection_log.user = User.objects.get(id=id)
+    elif type == ConnectionLog.INHIBITOR:
+      connection_log.inhibitor = Inhibitor.objects.get(id=id)
+    connection_log.save()
     
   def create_disconnection_log(self, type, id, reason):
     """
@@ -203,13 +203,13 @@ class WSHandler(WebSocketHandler):
     connection_log = ConnectionLog.objects.create(type=type,
                                                   action=ConnectionLog.DISCONNECTION, 
                                                   reason=reason)
-    # if type == ConnectionLog.DETECTOR:    
-    #   connection_log.detector = Detector.objects.get(id=id)
-    # elif type == ConnectionLog.USER: 
-    #   connection_log.user = User.objects.get(id=id)
-    # elif type == ConnectionLog.INHIBITOR:
-    #   connection_log.inhibitor = Inhibitor.objects.get(id=id)
-    # connection_log.save()
+    if type == ConnectionLog.DETECTOR:    
+      connection_log.detector = Detector.objects.get(id=id)
+    elif type == ConnectionLog.USER: 
+      connection_log.user = User.objects.get(id=id)
+    elif type == ConnectionLog.INHIBITOR:
+      connection_log.inhibitor = Inhibitor.objects.get(id=id)
+    connection_log.save()
 
 
   def initialize(self, repository : WSConnectionReposirory, broker : WSMessageBroker):
