@@ -55,6 +55,8 @@ MONGO_DB = 'asdt'
 API_AUTH_URL = 'http://localhost:8080/api/v3/detectors/authenticate/'
 WS_URL = 'ws://localhost:8081/api'
 
+EVENT_WAIT_TIMEOUT = 10 # Number of seconds before continue
+
 class WSHandlerMockup(WSHandler):
   
   server_idle = None
@@ -139,14 +141,18 @@ class WSServerThread(threading.Thread):
     """
     Blocking function to test whether WS Server is ready
     """
-    self.server_idle.wait()
+    self.server_idle.wait(EVENT_WAIT_TIMEOUT)
+    if self.server_idle.isSet() == False:
+      raise Exception("Wait for server failed")
     self.server_idle.clear()
 
   def wait_for_client(self):
     """
     Blocking function to test whether WS Server is ready
     """
-    self.client_idle.wait()
+    self.client_idle.wait(EVENT_WAIT_TIMEOUT)
+    if self.client_idle.isSet() == False:
+      raise Exception("Wait for client failed")
     self.client_idle.clear()
 
   def login_client(self, url, detector_id, password):
@@ -157,7 +163,6 @@ class WSServerThread(threading.Thread):
     """
     Launches client
     """
-    #self.ioloop.run_sync(self.client.connect)
     self.ioloop.spawn_callback(self.client.connect)
     self.wait_for_client()
 
@@ -194,15 +199,6 @@ class TestCase(unittest.TestCase):
     Called once in every suite
     """
     super().setUpClass()
-    # logger.info("----------------------------")
-    # logger.info("--- Generating scenario  ---")
-    # logger.info("----------------------------")    
-    # settings.MONGO_DB = 'asdt_test'
-    # logger.info("DB Generated: {}".format(settings.MONGO_DB))
-
-    # mongo_dummy = MongoDummy()
-    # mongo_dummy.setup(settings.MONGO_DB, settings.MONGO_HOST, int(settings.MONGO_PORT))
-    # mongo_dummy.generate_scenario()
 
     # Open mongo connection
     mongoengine.connect(MONGO_DB, host=MONGO_HOST, port=int(MONGO_PORT))
