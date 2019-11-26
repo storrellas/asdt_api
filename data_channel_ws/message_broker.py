@@ -137,6 +137,9 @@ class WSMessageBroker:
       if delta_time.total_seconds() * 1000 > self.maxElapsedTime:
         logger.info("Saving logs automatically as considering flight as finished {}" .format(delta_time.total_seconds() * 1000))
         self.save_log(log_message)
+        # Remove from dictionary
+        self.__log_message_dict.pop(sn, None)
+        
 
   def save_log(self, log_storage):
     logger.info("Saving log to DB")
