@@ -187,27 +187,6 @@ class DetectorWSClient:
     self.token = token
     return (result, token)
 
-  # def configure_ioloop(self):
-  #   """
-  #   Configures ioloop to be running
-  #   """
-  #   #PeriodicCallback(self.keep_alive, 20000).start()
-  #   if self.drone_flight.timeout > 0:
-  #     logger.info("Launching periodic task")
-  #     PeriodicCallback(self.send_detection, self.drone_flight.timeout).start()
-
-  #   # Create IOLoop
-  #   self.ioloop = IOLoop.instance()
-    
-  #   # Add to the ioloop 
-  #   self.ioloop.spawn_callback(self.connect)
-
-  #   # # Runs single task
-  #   # self.ioloop.run_sync(self.connect)
-
-  #   # print("Starting IOLoop")
-  #   # self.ioloop.start()
-
   def is_ws_connected(self):
     return self.ws_connected
 

@@ -39,7 +39,7 @@ from message_broker import WSMessageBroker
 from common import DetectorCoder, LogMessage, LogLocationMessage
 
 # Detector client/server
-from detector_sim import DetectorWSClient, DroneFlight
+from client import DetectorWSClient, DroneFlight
 from server import WSHandler, WSConnectionRepository
 
 # Import models
@@ -393,7 +393,6 @@ class TestCase(unittest.TestCase):
     # Check logs_update
     log = Log.objects.get(sn=sn)
     self.assertNotEqual( log.dateFin, lastUpdate)
-
 
     # Close client
     self.ioloop_thread.client.close()
