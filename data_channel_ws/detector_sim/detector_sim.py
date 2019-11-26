@@ -139,6 +139,7 @@ class DetectorWSClient:
   ws_url = None
   ioloop = None
   ws = None
+  ws_connected = False
 
   # Detector
   id = None
@@ -207,6 +208,9 @@ class DetectorWSClient:
   #   # print("Starting IOLoop")
   #   # self.ioloop.start()
 
+  def is_ws_connected(self):
+    return self.ws_connected
+
   async def connect(self):
     #print("Calling connect", self.token)
     try:
@@ -217,11 +221,13 @@ class DetectorWSClient:
     except Exception as e:
       print(str(e))
       logger.error("connection error")
+      self.ws_connected = False
     else:
       logger.info("Detector '{}' connected".format(self.id))
+      self.ws_connected = True
       # NOTE: This makes it blocking
       #await self.run()
-      IOLoop.instance().spawn_callback(self.run)
+      #IOLoop.instance().spawn_callback(self.run)
 
   async def run(self):
     while True:
@@ -333,7 +339,12 @@ if __name__ == "__main__":
       PeriodicCallback(client.send_detection_log_periodic, drone_flight.timeout).start()
    
     # Add to the ioloop 
-    IOLoop.instance().spawn_callback(client.connect)
+    IOLoop.instance().run_sync(client.connect)
+    if client.is_ws_connected():
+      logger.info("Client connected successfully")
+      IOLoop.instance().spawn_callback(client.run)
+
+
 
   
   # Create IOLoop
