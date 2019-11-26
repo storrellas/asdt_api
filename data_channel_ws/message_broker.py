@@ -174,7 +174,6 @@ class WSMessageBroker:
     return geodesic(location_tuple_1, location_tuple_2).km * 1000            
 
   def compute_drone_location_stats(self, content, detector, log_storage):
-    print("fHeight", content.droneLocation.fHeight)
     # maxHeight
     log_storage.data.maxHeight = max(log_storage.data.maxHeight, content.droneLocation.fHeight)
     # distanceTraveled
