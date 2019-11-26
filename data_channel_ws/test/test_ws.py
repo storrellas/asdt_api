@@ -143,8 +143,9 @@ class WSServerThread(threading.Thread):
     """
     self.server_idle.wait(EVENT_WAIT_TIMEOUT)
     if self.server_idle.isSet() == False:
-      raise Exception("Wait for server failed")
+      return False
     self.server_idle.clear()
+    return True
 
   def wait_for_client(self):
     """
@@ -152,8 +153,9 @@ class WSServerThread(threading.Thread):
     """
     self.client_idle.wait(EVENT_WAIT_TIMEOUT)
     if self.client_idle.isSet() == False:
-      raise Exception("Wait for client failed")
+      return False
     self.client_idle.clear()
+    return True
 
   def login_client(self, url, detector_id, password):
     return self.client.login(url, detector_id, password)
