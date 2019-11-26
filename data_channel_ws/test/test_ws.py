@@ -146,13 +146,17 @@ class WSServerThread(threading.Thread):
     self.client_idle.wait()
     self.client_idle.clear()
 
+  def login_client(self, url, detector_id, password):
+    return self.client.login(url, detector_id, password)
+    
+
   def launch_client(self):
     """
     Launches client
     """
     #self.ioloop.run_sync(self.client.connect)
-    #self.ioloop.spawn_callback(self.client.connect)
     self.ioloop.spawn_callback(self.client.connect)
+    #self.ioloop.add_callback(self.client.connect)
 
   def request_terminate(self):
     """
@@ -207,12 +211,7 @@ class TestCase(unittest.TestCase):
     cls.ioloop_thread.wait_for_server()
     logger.info("Server ready!")
 
-    # Launches client
-    cls.ioloop_thread.launch_client()
 
-    # Wait until WS Server is running
-    cls.ioloop_thread.wait_for_client()
-    logger.info("Client ready!")
 
   @classmethod
   def tearDownClass(cls):
@@ -224,6 +223,13 @@ class TestCase(unittest.TestCase):
     cls.ioloop_thread.join()
 
 
+  def launch_client(self):
+    # Launches client
+    self.ioloop_thread.launch_client()
+
+    # Wait until WS Server is running
+    self.ioloop_thread.wait_for_client()
+    logger.info("Client ready!")
 
   def test_detector_message(self):
     self.assertTrue(True)
@@ -231,49 +237,22 @@ class TestCase(unittest.TestCase):
     # Login
     detector = Detector.objects.get(name='detector2')
     detector.set_password('asdt2019')
+    result, token = self.ioloop_thread.login_client(API_AUTH_URL, str(detector.id), 'asdt2019')
+    self.assertTrue(result)
+    logger.info("Client logged in successful!!")
 
-    sn = '000000000000001'
-    lat = 41.7
-    lon = 1.8
-    drone_flight = DroneFlight(sn, lat, lon)
-    client = DetectorWSClient(WS_URL, drone_flight)
-    result, token = client.login(API_AUTH_URL, str(detector.id), 'asdt2019')
-
-    # # Create WS connection
-    # ws = websocket_client.create_connection(WS_URL)
-    # print("CONNECTED", ws.connected)
-    # print("Sending <token> ...")
-    # ws.send(token)
-    # print("Sent")
-
-
-    # print("Receiving...")
-    # result =  ws.recv()
-    # print("Received '%s'" % result)
-
+    # Launches client
+    self.launch_client()
     
-    # # Create log
-    # driverLocation = LogLocationMessage(lat=41.2, lon=2.3)
-    # droneLocation = LogLocationMessage(lat=41.2, lon=2.3, fHeight=8.8)
-    # homeLocation = LogLocationMessage(lat=41.2, lon=2.3)
-    # log = LogMessage(sn='111BBBBBBBBB16', driverLocation=driverLocation,
-    #                   droneLocation=droneLocation, homeLocation=homeLocation,
-    #                   productId=16)
+    # sn = '000000000000001'
+    # lat = 41.7
+    # lon = 1.8
+    # drone_flight = DroneFlight(sn, lat, lon)
+    # client = DetectorWSClient(WS_URL, drone_flight)
+    # result, token = client.login(API_AUTH_URL, str(detector.id), 'asdt2019')
 
-    # # Encode frame
-    # coder = DetectorCoder()
-    # encoded = coder.encode( log ) 
 
-    # # Sedni
-    # print("Sending <log> ...")
-    # ws.send(encoded)
-    # print("Sent")
-
-    # # Wait for ok
-    # print("Receiving...")
-    # result =  ws.recv()
-    # print("Received '%s'" % result)
-    
+   
 
 
 

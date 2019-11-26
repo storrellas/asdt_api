@@ -208,16 +208,20 @@ class DetectorWSClient:
   #   # self.ioloop.start()
 
   async def connect(self):
+    #print("Calling connect", self.token)
     try:
       logger.info("Connection WS {}".format(self.ws_url))
       self.ws = await websocket_connect(self.ws_url)
       # After connection first thing is sending token
       self.ws.write_message( self.token )
     except Exception as e:
+      print(str(e))
       logger.error("connection error")
     else:
       logger.info("Detector '{}' connected".format(self.id))
-      await self.run()
+      # NOTE: This makes it blocking
+      #await self.run()
+      IOLoop.instance().spawn_callback(self.run)
 
   async def run(self):
     while True:

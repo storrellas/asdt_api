@@ -217,15 +217,15 @@ class WSHandler(WebSocketHandler):
     self.broker = broker
 
   def open(self):
-    print('new connection')
+    logger.info('new connection')
     # print(self.request.remote_ip)
     # print(self.request)
     # self.write_message("Hello World")
-    pass
+    
     
     
   def on_message(self, message):
-    print('message received {}'.format(message) )
+    logger.info('message received {}'.format(message) )
 
     # Check whether existing connection
     ws_conn = self.repository.find_by_handler(self)
