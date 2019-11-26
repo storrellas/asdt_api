@@ -61,8 +61,8 @@ class WSHandlerMockup(WSHandler):
   
   server_idle = None
 
-  def initialize(self, repository, broker, server_idle):
-    super().initialize(repository, broker)
+  def initialize(self, repository, broker, secret_key, server_idle):
+    super().initialize(repository, broker, secret_key)
     self.server_idle = server_idle
 
   def on_message(self, message):    
@@ -117,7 +117,8 @@ class WSServerThread(threading.Thread):
     repository = WSConnectionReposirory()
     broker = WSMessageBroker()
     application = tornado.web.Application([
-      (r'/api', WSHandlerMockup, dict(repository=repository, broker=broker, server_idle=self.server_idle)),
+      (r'/api', WSHandlerMockup, dict(repository=repository, broker=broker, 
+                                      secret_key=settings.SECRET_KEY, server_idle=self.server_idle)),
     ])
 
     # Starting WS Server
@@ -234,7 +235,6 @@ class TestCase(unittest.TestCase):
     detector.set_password('asdt2019')
     result, token = self.ioloop_thread.login_client(API_AUTH_URL, str(detector.id), 'asdt2019')
     self.assertTrue(result)
-    logger.info("Client logged in successful!!")
 
   def test_detector_login_fail(self):
     self.assertTrue(True)
@@ -244,7 +244,19 @@ class TestCase(unittest.TestCase):
     detector.set_password('asdt2019')
     result, token = self.ioloop_thread.login_client(API_AUTH_URL, str(detector.id), 'asdt201')
     self.assertFalse(result)
-    logger.info("Client logged in successful!!")
+
+  def test_detector_login_token(self):
+    self.assertTrue(True)
+    
+    # Login
+    detector = Detector.objects.get(name='detector2')
+    detector.set_password('asdt2019')
+    result, token = self.ioloop_thread.login_client(API_AUTH_URL, str(detector.id), 'asdt2019')
+    self.assertTrue(result)
+
+    # Launches client
+    self.ioloop_thread.launch_client()
+    self.assertTrue( self.ioloop_thread.client.is_ws_connected() )
 
    
   def test_detector_login_token_fails(self):
@@ -255,19 +267,32 @@ class TestCase(unittest.TestCase):
     detector.set_password('asdt2019')
     result, token = self.ioloop_thread.login_client(API_AUTH_URL, str(detector.id), 'asdt2019')
     self.assertTrue(result)
-    logger.info("Client logged in successful!!")
 
     # Launches client
     self.ioloop_thread.client.token = '123'
     self.ioloop_thread.launch_client()
     self.assertFalse( self.ioloop_thread.client.is_ws_connected() )
     
-    # sn = '000000000000001'
-    # lat = 41.7
-    # lon = 1.8
-    # drone_flight = DroneFlight(sn, lat, lon)
-    # client = DetectorWSClient(WS_URL, drone_flight)
-    # result, token = client.login(API_AUTH_URL, str(detector.id), 'asdt2019')
+
+  # def test_detector_send_message(self):
+  #   self.assertTrue(True)
+    
+  #   # Login
+  #   detector = Detector.objects.get(name='detector2')
+  #   detector.set_password('asdt2019')
+  #   result, token = self.ioloop_thread.login_client(API_AUTH_URL, str(detector.id), 'asdt2019')
+  #   self.assertTrue(result)
+  #   logger.info("Client logged in successful!!")
+
+  #   # Launches client
+  #   self.ioloop_thread.launch_client()
+  #   self.assertTrue( self.ioloop_thread.client.is_ws_connected() )
+  #   # sn = '000000000000001'
+  #   # lat = 41.7
+  #   # lon = 1.8
+  #   # drone_flight = DroneFlight(sn, lat, lon)
+  #   # client = DetectorWSClient(WS_URL, drone_flight)
+  #   # result, token = client.login(API_AUTH_URL, str(detector.id), 'asdt2019')
 
 
 

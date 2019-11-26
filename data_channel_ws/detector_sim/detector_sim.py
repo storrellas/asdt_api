@@ -216,6 +216,7 @@ class DetectorWSClient:
     try:
       logger.info("Connection WS {}".format(self.ws_url))
       self.ws = await websocket_connect(self.ws_url)
+      #self.ws = await websocket_connect(self.ws_url, on_message_callback=self.on_message_callback)
       # After connection first thing is sending token
       self.ws.write_message( self.token )
     except Exception as e:
@@ -228,6 +229,9 @@ class DetectorWSClient:
       # NOTE: This makes it blocking
       #await self.run()
       #IOLoop.instance().spawn_callback(self.run)
+
+  def on_message_callback(self, msg):
+    print("Received on callback")
 
   async def run(self):
     while True:
@@ -262,6 +266,14 @@ class DetectorWSClient:
     coder = DetectorCoder()
     frame = coder.encode(detection_log)    
     self.ws.write_message(bytes(frame), binary=True)
+
+  def close(self):
+    """
+    Closes client
+    """
+    # Encode package
+    self.ws.close()
+    self.ws_connected = False
 
 # END: DetectorWSClient
 
