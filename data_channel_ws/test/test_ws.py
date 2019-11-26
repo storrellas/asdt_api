@@ -55,30 +55,37 @@ MONGO_DB = 'asdt'
 API_AUTH_URL = 'http://localhost:8080/api/v3/detectors/authenticate/'
 WS_URL = 'ws://localhost:8081/api'
 
+class WSHandlerMockup(WSHandler):
+    
+  def on_message(self, message):
+    super().on_message(message)
+
+  def on_close(self):    
+    super().on_close(message)
+
 class WSServerThread(threading.Thread):
   """
   Runs WS Server in a separated thread
   """
 
-  ready_request = None  
+  server_ready = None  
   ioloop = None
 
   
   def __init__(self):
     super().__init__()
-    self.ready_request = threading.Event()
+    self.server_ready = threading.Event()
 
   def run(self):
-    # #############
-    # mongoengine.connect('asdt_test', host='localhost', port=27017)
-    # logger.info("Connected MONGODB against mongodb://{}:{}/{}".format(settings.MONGO_HOST, settings.MONGO_PORT, settings.MONGO_DB))
-    # #############
+    # Store ioloop instance
+    self.ioloop = IOLoop.instance()
+
 
     # Create web application
     repository = WSConnectionReposirory()
     broker = WSMessageBroker()
     application = tornado.web.Application([
-      (r'/api', WSHandler, dict(repository=repository, broker=broker)),
+      (r'/api', WSHandlerMockup, dict(repository=repository, broker=broker)),
     ])
 
     # Starting WS Server
@@ -86,17 +93,10 @@ class WSServerThread(threading.Thread):
     http_server = tornado.httpserver.HTTPServer(application)
     http_server.listen(WS_PORT)
 
-    # # Checks latest activity on every connection
-    # PeriodicCallback(repository.keep_alive_connection_repository, 
-    #                   KEEP_ALIVE_CONNECTION_PERIOD).start()
-    # PeriodicCallback(broker.logs_update, 
-    #                   LOGS_UPDATE_PERIOD).start()
 
     # Used to signal others we are ready
-    self.ready_request.set()
+    self.server_ready.set()
 
-    # Store ioloop instance
-    self.ioloop = IOLoop.instance()
     # Start instance
     self.ioloop.start()
 
@@ -104,7 +104,8 @@ class WSServerThread(threading.Thread):
     """
     Blocking function to test whether WS Server is ready
     """
-    self.ready_request.wait()
+    self.server_ready.wait()
+    self.server_ready.clear()
 
   def request_terminate(self):
     """

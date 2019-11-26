@@ -235,16 +235,22 @@ class DetectorWSClient:
   #     self.ws.write_message("keep alive")
 
 
-  def send_detection(self):
+  def send_detection_log_periodic(self):
     """
     Generates the package sent by the detector via WS
     """
     # Generate next detection log
-    log = self.drone_flight.get_detection_log()
+    detection_log = self.drone_flight.get_detection_log()
+    # Send detection
+    self.send_detection_log(detection_log)
 
+  def send_detection_log(self, detection_log):
+    """
+    Generates the package sent by the detector via WS
+    """
     # Encode package
     coder = DetectorCoder()
-    frame = coder.encode(log)    
+    frame = coder.encode(detection_log)    
     self.ws.write_message(bytes(frame), binary=True)
 
 # END: DetectorWSClient
@@ -320,7 +326,7 @@ if __name__ == "__main__":
     # Configure IOLoop
     if drone_flight.timeout > 0:
       logger.info("Launching periodic task")
-      PeriodicCallback(client.send_detection, drone_flight.timeout).start()
+      PeriodicCallback(client.send_detection_log_periodic, drone_flight.timeout).start()
    
     # Add to the ioloop 
     IOLoop.instance().spawn_callback(client.connect)
