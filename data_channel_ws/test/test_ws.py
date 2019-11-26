@@ -230,7 +230,28 @@ class TestCase(unittest.TestCase):
     cls.ioloop_thread.join()
 
 
-  def test_detector_message(self):
+  def test_detector_login(self):
+    self.assertTrue(True)
+    
+    # Login
+    detector = Detector.objects.get(name='detector2')
+    detector.set_password('asdt2019')
+    result, token = self.ioloop_thread.login_client(API_AUTH_URL, str(detector.id), 'asdt2019')
+    self.assertTrue(result)
+    logger.info("Client logged in successful!!")
+
+  def test_detector_login_fail(self):
+    self.assertTrue(True)
+    
+    # Login
+    detector = Detector.objects.get(name='detector2')
+    detector.set_password('asdt2019')
+    result, token = self.ioloop_thread.login_client(API_AUTH_URL, str(detector.id), 'asdt201')
+    self.assertFalse(result)
+    logger.info("Client logged in successful!!")
+
+   
+  def test_detector_send(self):
     self.assertTrue(True)
     
     # Login
@@ -250,8 +271,6 @@ class TestCase(unittest.TestCase):
     # client = DetectorWSClient(WS_URL, drone_flight)
     # result, token = client.login(API_AUTH_URL, str(detector.id), 'asdt2019')
 
-
-   
 
 
 
