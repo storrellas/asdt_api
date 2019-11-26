@@ -13,6 +13,7 @@ import sys
 import random
 import signal
 import os
+import datetime
 from http import HTTPStatus
 
 # Tornado imports
@@ -49,6 +50,7 @@ class DroneFlight:
   timeout = None
   current_segment = 0
   output_gpx_enable = False
+  last_detection_timestamp = None
 
   # Count number of detections
   current_detection = 0
@@ -59,6 +61,7 @@ class DroneFlight:
     self.lat = lat
     self.lon = lon
     self.timeout = timeout
+    self.last_detection_timestamp = datetime.datetime.now()
 
     # Generate output path
     if not os.path.exists(OUTPUT_PATH):
@@ -243,9 +246,12 @@ class WSClient:
     """
     # Generate next detection log
     for drone_flight in self.drone_flight_list:
-      detection_log = drone_flight.get_detection_log()
-      # Send detection
-      self.send_detection_log(detection_log)
+      now = datetime.datetime.now()
+      if (now - drone_flight.last_detection_timestamp).total_seconds() * 1000 > drone_flight.timeout:
+        detection_log = drone_flight.get_detection_log()
+        # Send detection
+        self.send_detection_log(detection_log)
+        drone_flight.last_detection_timestamp = now
 
   def send_detection_log(self, detection_log):
     """
@@ -298,7 +304,7 @@ def generate_drone_flight_list(config):
   Generates drone flight list from configuration
   """
   drone_flight_list = []
-  for drone_flight in config['detector_list'][0]['drone_flight_list']:
+  for idx, drone_flight in enumerate(config['detector_list'][0]['drone_flight_list']):
     logger.info("Launching drone flight {} with timeout {}" \
                   .format(drone_flight['sn'], drone_flight['timeout']))
     drone_flight = DroneFlight(drone_flight['sn'], 
@@ -306,6 +312,7 @@ def generate_drone_flight_list(config):
                                 drone_flight['timeout'], drone_flight['gpx'])
     drone_flight.output_gpx_enable = True
     drone_flight_list.append(drone_flight)
+
   return drone_flight_list
 
 if __name__ == "__main__":
@@ -326,53 +333,15 @@ if __name__ == "__main__":
   config = read_json_configuration('./config.json')
 
 
-  # Get credentials
-  # NOTE: We should make this to be multi drone
-  detector_id = config['detector_list'][0]['id']
-  detector_password = config['detector_list'][0]['password']
+  for detector in config['detector_list']:
+    # Get credentials
+    # NOTE: We should make this to be multi drone
+    detector_id = detector['id']
+    detector_password = detector['password']
 
-
-
-    
-  # Create client
-  drone_flight_list = generate_drone_flight_list(config)
-  client = WSClient(WS_URL, drone_flight_list)    
-  # Login detector
-  logger.info("Login detector with ({}/{})".format(detector_id, detector_password))
-  result, token = client.login(API_AUTH_URL, detector_id, detector_password)
-  if not result:
-    logger.error("Login Failed. Aborting")
-    sys.exit(0)
-  
-  # Configure IOLoop
-  if drone_flight_list[0].timeout > 0:
-    logger.info("Launching periodic task")
-    PeriodicCallback(client.send_detection_log_periodic, drone_flight_list[0].timeout).start()
-  
-  # Add to the ioloop 
-  IOLoop.instance().spawn_callback(client.connect)
-  # IOLoop.instance().run_sync(client.connect)
-  # if client.is_ws_connected():
-  #   logger.info("Client connected successfully")
-  #   IOLoop.instance().spawn_callback(client.run)
-
-  """
-  # Get credentials
-  # NOTE: We should make this to be multi drone
-  detector_id = config['detector_list'][0]['id']
-  detector_password = config['detector_list'][0]['password']
-
-  # Looping to create multiple detectors
-  for drone_flight_conf in config['detector_list'][0]['drone_flight_list']:
-
-    # Create drone_flight
-    logger.info("Launching drone flight {} with timeout {}" \
-                  .format(drone_flight_conf['sn'], drone_flight_conf['timeout']))
-    drone_flight = DroneFlight(drone_flight_conf['sn'], 
-                                drone_flight_conf['lat'], drone_flight_conf['lon'], 
-                                drone_flight_conf['timeout'], drone_flight_conf['gpx'])
-    drone_flight.output_gpx_enable = True                                
-    client = WSClient(WS_URL, drone_flight)    
+    # Create client
+    drone_flight_list = generate_drone_flight_list(config)
+    client = WSClient(WS_URL, drone_flight_list)    
     # Login detector
     logger.info("Login detector with ({}/{})".format(detector_id, detector_password))
     result, token = client.login(API_AUTH_URL, detector_id, detector_password)
@@ -381,18 +350,10 @@ if __name__ == "__main__":
       sys.exit(0)
     
     # Configure IOLoop
-    if drone_flight.timeout > 0:
-      logger.info("Launching periodic task")
-      PeriodicCallback(client.send_detection_log_periodic, drone_flight.timeout).start()
-   
+    PeriodicCallback(client.send_detection_log_periodic, 10).start()
+    
     # Add to the ioloop 
     IOLoop.instance().spawn_callback(client.connect)
-    # IOLoop.instance().run_sync(client.connect)
-    # if client.is_ws_connected():
-    #   logger.info("Client connected successfully")
-    #   IOLoop.instance().spawn_callback(client.run)
-  """
-
 
   
   # Create IOLoop
