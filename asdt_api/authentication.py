@@ -29,7 +29,7 @@ class ASDTAuthentication(authentication.BaseAuthentication):
         authorization_header = request.META.get('HTTP_AUTHORIZATION')
         encoded_jwt = authorization_header.split(' ')[1]
 
-        decoded_jwt = jwt.decode(encoded_jwt, settings.SECRET_KEY, algorithms=['HS256'])       
+        decoded_jwt = jwt.decode(encoded_jwt, settings.SECRET_KEY, algorithms=['HS256'])
         user = User.objects.get(id=decoded_jwt['id'])
         return(user, None)
       except Exception as e:

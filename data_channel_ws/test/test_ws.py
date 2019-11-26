@@ -83,9 +83,6 @@ class DetectorWSClientMockup(DetectorWSClient):
 
   async def connect(self):
     await super().connect()
-
-
-    print("Mytest")
     # Signal client is ready
     self.client_idle.set()
 
@@ -224,7 +221,6 @@ class TestCase(unittest.TestCase):
     """
     Called once in every suite
     """
-    print("TearDown")
     # Request for termination
     cls.ioloop_thread.request_terminate()
     cls.ioloop_thread.join()
@@ -251,7 +247,7 @@ class TestCase(unittest.TestCase):
     logger.info("Client logged in successful!!")
 
    
-  def test_detector_send(self):
+  def test_detector_login_token_fails(self):
     self.assertTrue(True)
     
     # Login
@@ -262,7 +258,9 @@ class TestCase(unittest.TestCase):
     logger.info("Client logged in successful!!")
 
     # Launches client
+    self.ioloop_thread.client.token = '123'
     self.ioloop_thread.launch_client()
+    self.assertFalse( self.ioloop_thread.client.is_ws_connected() )
     
     # sn = '000000000000001'
     # lat = 41.7
