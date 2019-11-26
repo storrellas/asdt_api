@@ -145,13 +145,13 @@ class WSClient:
   id = None
 
   # Drone flight configuration
-  drone_flight = None
+  drone_flight_list = None
 
-  def __init__(self, ws_url = None, drone_flight = None):
+  def __init__(self, ws_url = None, drone_flight_list = None):
     self.ws_url = ws_url
    
     # Drone detected configuration
-    self.drone_flight = drone_flight
+    self.drone_flight_list = drone_flight_list
   
   @staticmethod
   def login_request(url, id, password):
@@ -242,9 +242,10 @@ class WSClient:
     Generates the package sent by the detector via WS
     """
     # Generate next detection log
-    detection_log = self.drone_flight.get_detection_log()
-    # Send detection
-    self.send_detection_log(detection_log)
+    for drone_flight in self.drone_flight_list:
+      detection_log = drone_flight.get_detection_log()
+      # Send detection
+      self.send_detection_log(detection_log)
 
   def send_detection_log(self, detection_log):
     """
@@ -292,6 +293,20 @@ def signal_handler(sig, frame):
   sys.exit(0)
 
 
+def generate_drone_flight_list(config):
+  """
+  Generates drone flight list from configuration
+  """
+  drone_flight_list = []
+  for drone_flight in config['detector_list'][0]['drone_flight_list']:
+    logger.info("Launching drone flight {} with timeout {}" \
+                  .format(drone_flight['sn'], drone_flight['timeout']))
+    drone_flight = DroneFlight(drone_flight['sn'], 
+                                drone_flight['lat'], drone_flight['lon'], 
+                                drone_flight['timeout'], drone_flight['gpx'])
+    drone_flight.output_gpx_enable = True
+    drone_flight_list.append(drone_flight)
+  return drone_flight_list
 
 if __name__ == "__main__":
 
@@ -310,12 +325,43 @@ if __name__ == "__main__":
   # Read configuration
   config = read_json_configuration('./config.json')
 
+
   # Get credentials
   # NOTE: We should make this to be multi drone
   detector_id = config['detector_list'][0]['id']
   detector_password = config['detector_list'][0]['password']
 
+
+
+    
+  # Create client
+  drone_flight_list = generate_drone_flight_list(config)
+  client = WSClient(WS_URL, drone_flight_list)    
+  # Login detector
+  logger.info("Login detector with ({}/{})".format(detector_id, detector_password))
+  result, token = client.login(API_AUTH_URL, detector_id, detector_password)
+  if not result:
+    logger.error("Login Failed. Aborting")
+    sys.exit(0)
   
+  # Configure IOLoop
+  if drone_flight_list[0].timeout > 0:
+    logger.info("Launching periodic task")
+    PeriodicCallback(client.send_detection_log_periodic, drone_flight_list[0].timeout).start()
+  
+  # Add to the ioloop 
+  IOLoop.instance().spawn_callback(client.connect)
+  # IOLoop.instance().run_sync(client.connect)
+  # if client.is_ws_connected():
+  #   logger.info("Client connected successfully")
+  #   IOLoop.instance().spawn_callback(client.run)
+
+  """
+  # Get credentials
+  # NOTE: We should make this to be multi drone
+  detector_id = config['detector_list'][0]['id']
+  detector_password = config['detector_list'][0]['password']
+
   # Looping to create multiple detectors
   for drone_flight_conf in config['detector_list'][0]['drone_flight_list']:
 
@@ -345,7 +391,7 @@ if __name__ == "__main__":
     # if client.is_ws_connected():
     #   logger.info("Client connected successfully")
     #   IOLoop.instance().spawn_callback(client.run)
-
+  """
 
 
   
