@@ -101,10 +101,17 @@ class WSResponseMessage(WSMessage):
 class WSMessageBroker:
   
   # repository = LogMessageRepository()
-  log_message_dict = {}
+  __log_message_dict = {}
 
   # Maximum time without detections to consider a flight is finished
   maxElapsedTime = 100000
+
+  def get_log(self, sn):
+    return self.__log_message_dict[sn] if sn in self.__log_message_dict else None
+
+  def set_log(self, sn, log_message):
+    self.__log_message_dict[sn] = log_message
+
 
   def treat_message(self, req: WSRequestMessage):
     """
@@ -123,15 +130,15 @@ class WSMessageBroker:
     Update logs in DB
     NOTE: We should move this to the former
     """
-    for sn in self.log_message_dict.keys():
-      log_message = self.log_message_dict[sn]
+    print("Logs update")
+    for sn in self.__log_message_dict.keys():
+      log_message = self.__log_message_dict[sn]
       now = datetime.datetime.now()
       delta_time = now - log_message.lastUpdate
       if delta_time.total_seconds() * 1000 > self.maxElapsedTime:
         logger.info("Saving logs automatically as considering flight as finished {}" .format(delta_time.total_seconds() * 1000))
-        self.save_log(log_storage)
+        self.save_log(log_message)
 
-        
   def save_log(self, log_storage):
     logger.info("Saving log to DB")
 
@@ -228,11 +235,11 @@ class WSMessageBroker:
       # Log Storage
       log_storage = None
       content = req.content
-      if content.sn in self.log_message_dict:
+      if content.sn in self.__log_message_dict:
         # Existing DroneDetection
         ########################
         logger.info("Drone has been identified '{}'".format(req.content.sn))
-        log_storage = self.log_message_dict[req.content.sn]
+        log_storage = self.__log_message_dict[req.content.sn]
         log_storage = self.log_storage_update(content, detector, log_storage)
       else:
         # New DroneDetection
@@ -265,7 +272,7 @@ class WSMessageBroker:
           log_storage.sendInfo = True
 
         # Add log_storage to dict
-        self.log_message_dict[req.content.sn] = log_storage
+        self.__log_message_dict[req.content.sn] = log_storage
 
       
       # Store log locally

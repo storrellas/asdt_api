@@ -11,6 +11,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "asdt_api.settings")
 # Python imports
 import unittest
 import threading
+import datetime
 from time import sleep
 from http import HTTPStatus
 import json
@@ -375,72 +376,25 @@ class TestCase(unittest.TestCase):
 
     # Check DroneFlight is marked as finished
     ########################
-    broker = self.ioloop_thread.broker
-    log_message = broker.log_message_dict[sn]
-    print(log_message.__dict__)
+    dateFin = datetime.datetime.now() - datetime.timedelta(minutes=1)
+    log = Log.objects.get(sn=sn)
+    log.dateFin = dateFin
+    log.save()
+    self.assertEqual( log.dateFin, dateFin)
+
+    log_message = self.ioloop_thread.broker.get_log(sn)
+    lastUpdate = dateFin
+    log_message.lastUpdate = lastUpdate
+
+
+    # Simulate logs update
+    self.ioloop_thread.broker.logs_update()
+
+
+    log = Log.objects.get(sn=sn)
+    # self.assertNotEqual( log.dateFin, lastUpdate)
 
 
     # Close client
     self.ioloop_thread.client.close()
-
-
-
-# if __name__ == "__main__":
-#     # See http://www.tornadoweb.org/en/stable/asyncio.html#tornado.platform.asyncio.AnyThreadEventLoopPolicy
-#     asyncio.set_event_loop_policy(AnyThreadEventLoopPolicy())
-
-#     # logger.info("----------------------------")
-#     # logger.info("--- Generating scenario  ---")
-#     # logger.info("----------------------------")    
-#     # #settings.MONGO_DB = 'asdt_test'
-#     # logger.info("DB Generated: {}".format(settings.MONGO_DB))
-
-#     # mongo_dummy = MongoDummy()
-#     # mongo_dummy.setup(settings.MONGO_DB, settings.MONGO_HOST, int(settings.MONGO_PORT))
-#     # mongo_dummy.generate_scenario()
-
-#     mongoengine.connect(MONGO_DB, host=MONGO_HOST, port=int(MONGO_PORT))
-#     logger.info("Connected MONGODB against mongodb://{}:{}/{}".format(MONGO_HOST, MONGO_PORT, MONGO_DB))
-
-#     # Start thread
-#     ws_thread = WSServerThread()
-#     ws_thread.start()
-
-#     # Wait until WS Server is running
-#     ws_thread.wait_for_ready()
-
-#     ##################################
-#     ##################################
-#     ##################################
-
-
-#     result, token = DetectorWSClient.login_request(API_AUTH_URL, '5dda8c7ff161a4bdd05f98f7', 'asdt2019')
-#     print(token)
-
-
-    
-#     ws = websocket_client.create_connection(WS_URL)
-#     print("CONNECTED", ws.connected)
-#     print("Sending <token> ...")
-#     ws.send(token)
-#     print("Sent")
-
-
-#     print("Receiving...")
-#     result =  ws.recv()
-#     print("Received '%s'" % result)
-
-
-#     ##################################
-#     ##################################
-#     ##################################
-
-#     # Request for termination
-#     ws_thread.request_terminate()
-#     ws_thread.join()
-
-
-
-
-
 
