@@ -27,7 +27,7 @@ from detectors.models import Detector
 from inhibitors.models import Inhibitor
 from groups.models import Group
 from drones.models import DroneModel, Drone
-from logs.models import Log
+from logs.models import Log, LogRoute
 
 # Create logger
 logger = get_logger()
@@ -159,6 +159,13 @@ class WSMessageBroker:
     log.detectors = log_storage.data.detectors
     log.distanceTraveled = log_storage.data.distanceTraveled
     log.distanceToDetector = log_storage.data.distanceToDetector
+    log.maxHeight = log_storage.data.maxHeight
+    # Refresh route
+    log.route = []
+    for item in log_storage.data.route:
+      route_item = LogRoute(lat=item.lat, lon=item.lon, 
+                            fHeight=item.fHeight, aHeight=item.aHeight)
+      log.route.append( route_item )
     log.save()
   
   def calculate_distance(self, location1, location2):
@@ -167,6 +174,7 @@ class WSMessageBroker:
     return geodesic(location_tuple_1, location_tuple_2).km * 1000            
 
   def compute_drone_location_stats(self, content, detector, log_storage):
+    print("fHeight", content.droneLocation.fHeight)
     # maxHeight
     log_storage.data.maxHeight = max(log_storage.data.maxHeight, content.droneLocation.fHeight)
     # distanceTraveled

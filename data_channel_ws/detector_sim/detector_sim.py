@@ -211,12 +211,11 @@ class DetectorWSClient:
   def is_ws_connected(self):
     return self.ws_connected
 
-  async def connect(self):
-    #print("Calling connect", self.token)
+  async def connect(self):    
     try:
       logger.info("Connection WS {}".format(self.ws_url))
-      self.ws = await websocket_connect(self.ws_url)
-      #self.ws = await websocket_connect(self.ws_url, on_message_callback=self.on_message_callback)
+      #self.ws = await websocket_connect(self.ws_url)
+      self.ws = await websocket_connect(self.ws_url, on_message_callback=self.on_message_callback)
       # After connection first thing is sending token
       self.ws.write_message( self.token )
     except Exception as e:
@@ -231,16 +230,24 @@ class DetectorWSClient:
       #IOLoop.instance().spawn_callback(self.run)
 
   def on_message_callback(self, msg):
-    print("Received on callback")
+    logger.info("message received:{}".format(msg))
+    if msg is None:
+      self.ws_connected = False
+      logger.info("connection closed")
+      self.ws.close()
+      self.ws = None
 
-  async def run(self):
-    while True:
-      msg = await self.ws.read_message()
-      logger.info("message received:{}".format(msg))
-      if msg is None:
-        logger.info("connection closed")
-        self.ws = None
-        break
+
+
+  # async def run(self):
+  #   print("Running")
+  #   while True:
+  #     msg = await self.ws.read_message()
+  #     logger.info("message received:{}".format(msg))
+  #     if msg is None:
+  #       logger.info("connection closed")
+  #       self.ws = None
+  #       break
 
   # def keep_alive(self):
   #   if self.ws is None:
@@ -273,6 +280,7 @@ class DetectorWSClient:
     """
     # Encode package
     self.ws.close()
+    self.ws = None
     self.ws_connected = False
 
 # END: DetectorWSClient
@@ -351,10 +359,11 @@ if __name__ == "__main__":
       PeriodicCallback(client.send_detection_log_periodic, drone_flight.timeout).start()
    
     # Add to the ioloop 
-    IOLoop.instance().run_sync(client.connect)
-    if client.is_ws_connected():
-      logger.info("Client connected successfully")
-      IOLoop.instance().spawn_callback(client.run)
+    IOLoop.instance().spawn_callback(client.connect)
+    # IOLoop.instance().run_sync(client.connect)
+    # if client.is_ws_connected():
+    #   logger.info("Client connected successfully")
+    #   IOLoop.instance().spawn_callback(client.run)
 
 
 

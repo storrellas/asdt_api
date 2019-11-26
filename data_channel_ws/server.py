@@ -73,7 +73,7 @@ class WSConnection:
     self.type = type
     self.last_msg = datetime.datetime.now()
 
-class WSConnectionReposirory:
+class WSConnectionRepository:
   """
   Repository of the connections
   """
@@ -110,7 +110,7 @@ class WSConnectionReposirory:
     Finds client connection by its handler
     """    
     for idx, ws_conn in enumerate(self.__ws_conn_list):
-      #logger.info("Checking conn {}".format(detector_conn.id))      
+      #logger.info("Checking conn {} against {}".format(ws_conn.id, id))
       if id == ws_conn.id:
         return ws_conn
     return None
@@ -171,7 +171,7 @@ class WSConnectionReposirory:
 class WSHandler(WebSocketHandler):
 
   broker : WSMessageBroker = None
-  repository : WSConnectionReposirory = None
+  repository : WSConnectionRepository = None
   secret_key : str = None
 
   def get_model(self, type_id):
@@ -216,7 +216,7 @@ class WSHandler(WebSocketHandler):
     connection_log.save()
 
 
-  def initialize(self, repository : WSConnectionReposirory, 
+  def initialize(self, repository : WSConnectionRepository, 
                   broker : WSMessageBroker, secret_key: str):
     self.repository = repository
     self.broker = broker
@@ -230,11 +230,10 @@ class WSHandler(WebSocketHandler):
     pass
     
   def on_message(self, message):
-    logger.info('message received {}'.format(message) )
+    #logger.info('message received {}'.format(message) )
 
     # Check whether existing connection
-    ws_conn = self.repository.find_by_handler(self)
-        
+    ws_conn = self.repository.find_by_handler(self)        
     if ws_conn is None:
       # NOTE: This should be corrected as response is always 200
       #response = requests.get(API_USER_INFO, headers={'Authorization': 'Basic {}'.format(message) })
@@ -252,6 +251,7 @@ class WSHandler(WebSocketHandler):
           logger.error("Logging in duplicate detector with id '{}'".format(instance_id))
           ws_conn.ws_handler.close()
           self.repository.remove(ws_conn)
+          self.close()
           self.create_disconnection_log( type_id, instance_id, reason='DUPLICATED_CONNECTION' )
 
         # Check whether instance in DB
@@ -280,53 +280,11 @@ class WSHandler(WebSocketHandler):
       except Exception as e:
         logger.error("Detector token decode failed")
         logger.info("Exception " + str(e))
-        return (None, None)
+        self.close()
       except jwt.ExpiredSignatureError as e:
         logger.error("Detector token expired")
         logger.info("Expired " + str(e))
-        return (None, None)
-      # decoded_jwt = jwt.decode(message, self.secret_key, algorithms=['HS256'])
-      # if True:
-      #   # Decode token
-      #   payload = jwt.decode(message, verify=False)
-      #   instance_id = payload['id']
-      #   type_id = payload['type'].upper()
-      #   self.create_connection_log( type_id, instance_id )
-
-      #   # Check if another connection for this detector and close the former
-      #   # NOTE: For me (ST) its simpler to reject new connection
-      #   ws_conn = self.repository.find_by_id(payload['id'])
-      #   if ws_conn is not None:
-      #     logger.error("Logging in duplicate detector with id '{}'".format(payload['id']))
-      #     ws_conn.ws_handler.close()
-      #     self.repository.remove(ws_conn)
-      #     self.create_disconnection_log( type_id, instance_id, reason='DUPLICATED_CONNECTION' )
-
-      #   # Check whether instance in DB
-      #   # NOTE: This would be removed when logging in comes through WS
-      #   model = self.get_model(type_id)
-      #   if model is None:
-      #     logger.error("Type {} not identified".format(type_id))
-      #     self.close()
-      #     return        
-      #   # Check if exists
-      #   if model.objects.filter(id=instance_id).count() == 0:
-      #     logger.error("Instance type='{}' id='{}' not found".format(type_id, instance_id))
-      #     self.create_disconnection_log( type_id, instance_id, reason='NOT_FOUND_IN_DATABASE' )
-
-
-      #   # Append new connection to repository
-      #   logger.info("Client type='{}' id='{}' login ok!".format(type_id, instance_id))
-      #   conn = WSConnection(ws_handler=self, host=self.request.host, 
-      #                       id=instance_id, type=type_id.upper())
-      #   self.repository.add( conn )
-
-      #   # Reply login
-      #   self.write_message("OK")
-
-      # else:
-      #   logger.info("Detector login failed")
-      #   print(message)
+        self.close()
     else:
       logger.info("Message from peer type='{}' id='{}'".format(ws_conn.type, ws_conn.id) ) 
 
@@ -342,8 +300,7 @@ class WSHandler(WebSocketHandler):
 
 
   def on_close(self):    
-    ws_conn = self.repository.find_by_handler(self)
-    
+    ws_conn = self.repository.find_by_handler(self)    
     if ws_conn is not None:
       logger.info("Closed connection. Removing type='{}' id='{}' host={}".format(ws_conn.id, ws_conn.type, ws_conn.host))
       self.repository.remove(ws_conn)
@@ -371,7 +328,7 @@ if __name__ == "__main__":
   logger.info("Connected MONGODB against mongodb://{}:{}/{}".format(MONGO_HOST, MONGO_PORT, MONGO_DB))
 
   # Create web application
-  repository = WSConnectionReposirory()
+  repository = WSConnectionRepository()
   broker = WSMessageBroker()
   application = tornado.web.Application([
     (r'/api', WSHandler, dict(repository=repository, broker=broker, secret_key=settings.SECRET_KEY)),
