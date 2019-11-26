@@ -130,7 +130,7 @@ class DroneFlight:
     with open(OUTPUT_PATH + '/' + filename, 'w') as output_file:
       output_file.write(self.output_gpx.to_xml())
 
-class DetectorWSClient:
+class WSClient:
   """
   Client to connect to Websocket simulating logs generated 
   by detector localising drones
@@ -183,7 +183,7 @@ class DetectorWSClient:
 
   def login(self, url, id, password):
     self.id = id    
-    (result, token) =  DetectorWSClient.login_request(url, id, password)
+    (result, token) =  WSClient.login_request(url, id, password)
     self.token = token
     return (result, token)
 
@@ -264,7 +264,7 @@ class DetectorWSClient:
     self.ws = None
     self.ws_connected = False
 
-# END: DetectorWSClient
+# END: WSClient
 
 
 def read_json_configuration(filename):
@@ -326,7 +326,7 @@ if __name__ == "__main__":
                                 drone_flight_conf['lat'], drone_flight_conf['lon'], 
                                 drone_flight_conf['timeout'], drone_flight_conf['gpx'])
     drone_flight.output_gpx_enable = True                                
-    client = DetectorWSClient(WS_URL, drone_flight)    
+    client = WSClient(WS_URL, drone_flight)    
     # Login detector
     logger.info("Login detector with ({}/{})".format(detector_id, detector_password))
     result, token = client.login(API_AUTH_URL, detector_id, detector_password)

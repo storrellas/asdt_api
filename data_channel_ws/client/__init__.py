@@ -1,1 +1,1 @@
-from .client import DetectorWSClient, DroneFlight
+from .client import WSClient, DroneFlight

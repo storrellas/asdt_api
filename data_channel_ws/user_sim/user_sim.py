@@ -273,7 +273,7 @@ if __name__ == "__main__":
   # Looping to create multiple detectors
   for detector in DETECTOR_LIST:
     logger.info("Launching detector {} with timeout {}".format(detector['sn'], detector['timeout']))
-    client = DetectorWSClient(WS_HOST, detector['sn'], 
+    client = WSClient(WS_HOST, detector['sn'], 
                               detector['lat'], detector['lon'], detector['timeout'], detector['gpx'])    
     # Login detector
     logger.info("Login detector with ({}/{})".format(DETECTOR, PASSWORD))

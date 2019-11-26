@@ -130,7 +130,6 @@ class WSMessageBroker:
     Update logs in DB
     NOTE: We should move this to the former
     """
-    print("Logs update")
     for sn in self.__log_message_dict.keys():
       log_message = self.__log_message_dict[sn]
       now = datetime.datetime.now()
