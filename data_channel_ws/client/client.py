@@ -281,7 +281,12 @@ class WSUserClient(WSClient):
   """
 
   name = 'User'
+  message_list = []
 
+  def on_message_callback(self, msg):
+    logger.info("Added message to received list")
+    self.message_list.append( msg )
+    super().on_message_callback( msg )
 
 
 # END: WSUserClient
