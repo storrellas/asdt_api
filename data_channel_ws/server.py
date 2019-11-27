@@ -32,7 +32,7 @@ from inhibitors.models import Inhibitor
 from groups.models import Group
 from django.conf import settings
 
-from message_broker import WSRequestMessage, WSResponseMessage, WSMessageDetectionBroker
+from message_broker_detection import WSRequestMessage, WSResponseMessage, WSMessageDetectionBroker
 
 # Create logger
 logger = get_logger()

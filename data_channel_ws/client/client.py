@@ -388,13 +388,10 @@ if __name__ == "__main__":
     if not result:
       logger.error("Login Failed. Aborting")
       sys.exit(0)
-    
-   
+       
     # Add to the ioloop 
     IOLoop.instance().spawn_callback(client.connect)
 
-
-  
   # Create IOLoop
   ioloop = IOLoop.instance()
   logger.info("Starting IOLoop")
