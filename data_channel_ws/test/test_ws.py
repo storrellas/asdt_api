@@ -35,7 +35,7 @@ from tornado.websocket import WebSocketHandler
 # Project import
 from mongo_dummy import MongoDummy
 from django.conf import settings
-from message_broker import WSMessageBroker
+from message_broker_detection import WSMessageDetectionBroker
 from common import DetectorCoder, LogMessage, LogLocationMessage
 
 # Detector client/server
@@ -63,8 +63,8 @@ class WSHandlerMockup(WSHandler):
   
   server_idle = None
 
-  def initialize(self, repository, broker, secret_key, server_idle):
-    super().initialize(repository, broker, secret_key)
+  def initialize(self, repository, broker_detection, secret_key, server_idle):
+    super().initialize(repository, broker_detection, secret_key)
     self.server_idle = server_idle
 
   def on_message(self, message):    
@@ -104,7 +104,7 @@ class WSServerThread(threading.Thread):
   ioloop = None
   client = None
   repository = None
-  broker = None
+  broker_detection = None
 
   def __init__(self):
     super().__init__()
@@ -117,9 +117,9 @@ class WSServerThread(threading.Thread):
 
     # Create web application
     self.repository = WSConnectionRepository()
-    self.broker = WSMessageBroker()
+    self.broker_detection = WSMessageDetectionBroker()
     application = tornado.web.Application([
-      (r'/api', WSHandlerMockup, dict(repository=self.repository, broker=self.broker, 
+      (r'/api', WSHandlerMockup, dict(repository=self.repository, broker_detection=self.broker_detection, 
                                       secret_key=settings.SECRET_KEY, server_idle=self.server_idle)),
     ])
 
@@ -158,7 +158,7 @@ class WSServerThread(threading.Thread):
     return True
 
   def login_client(self, url, detector_id, password):
-    return self.client.login(url, detector_id, password)
+    return self.client.login(url, {'id': detector_id, 'password': password})
 
   def launch_client(self):
     """
@@ -382,13 +382,13 @@ class TestCase(unittest.TestCase):
     log.save()
     self.assertEqual( log.dateFin, dateFin)
 
-    log_message = self.ioloop_thread.broker.get_log(sn)
+    log_message = self.ioloop_thread.broker_detection.get_log(sn)
     lastUpdate = dateFin
     log_message.lastUpdate = lastUpdate
 
 
     # Simulate logs update
-    self.ioloop_thread.broker.logs_update()
+    self.ioloop_thread.broker_detection.logs_update()
 
     # Check logs_update
     log = Log.objects.get(sn=sn)
