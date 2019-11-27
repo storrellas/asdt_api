@@ -44,6 +44,7 @@ from server import WSHandler, WSConnectionRepository
 
 # Import models
 from detectors.models import Detector
+from user.models import User
 from logs.models import Log, LogRoute
 
 logger = get_logger()
@@ -54,7 +55,8 @@ MONGO_HOST = 'localhost'
 MONGO_PORT = 27017
 MONGO_DB = 'asdt'
 # Configuration - client
-API_AUTH_URL = 'http://localhost:8080/api/v3/detectors/authenticate/'
+API_DETECTOR_AUTH_URL = 'http://localhost:8080/api/v3/detectors/authenticate/'
+API_USER_AUTH_URL = 'http://localhost:8080/api/v3/user/authenticate/'
 WS_URL = 'ws://localhost:8081/api'
 
 EVENT_WAIT_TIMEOUT = 10 # Number of seconds before continue
@@ -103,6 +105,7 @@ class WSServerThread(threading.Thread):
   # Tornado
   ioloop = None
   detector_client = None
+  user_client = None
   repository = None
   broker_detection = None
 
@@ -130,6 +133,7 @@ class WSServerThread(threading.Thread):
 
     # Create client
     self.detector_client = WSDetectorClientMockup(WS_URL)
+    self.user_client = WSDetectorClientMockup(WS_URL)
 
     # Used to signal server is ready
     self.server_idle.set()
@@ -157,8 +161,21 @@ class WSServerThread(threading.Thread):
     self.detector_client.client_idle.clear()
     return True
 
+  def wait_for_user_client(self):
+    """
+    Blocking function to test whether WS Server is ready
+    """
+    self.user_client.client_idle.wait(EVENT_WAIT_TIMEOUT)
+    if self.user_client.client_idle.isSet() == False:
+      return False
+    self.user_client.client_idle.clear()
+    return True
+
   def login_detector_client(self, url, detector_id, password):
     return self.detector_client.login(url, {'id': detector_id, 'password': password})
+
+  def login_user_client(self, url, email, password):
+    return self.user_client.login(url, {'email': email, 'password': password})
 
   def launch_detector_client(self):
     """
@@ -166,6 +183,13 @@ class WSServerThread(threading.Thread):
     """
     self.ioloop.spawn_callback(self.detector_client.connect)
     self.wait_for_detector_client()
+
+  def launch_user_client(self):
+    """
+    Launches client
+    """
+    self.ioloop.spawn_callback(self.user_client.connect)
+    self.wait_for_user_client()
 
   def request_terminate(self):
     """
@@ -238,7 +262,7 @@ class TestCase(unittest.TestCase):
     # Login
     detector = Detector.objects.get(name='detector2')
     detector.set_password('asdt2019')
-    result, token = self.ioloop_thread.login_detector_client(API_AUTH_URL, str(detector.id), 'asdt2019')
+    result, token = self.ioloop_thread.login_detector_client(API_DETECTOR_AUTH_URL, str(detector.id), 'asdt2019')
     self.assertTrue(result)
 
   def test_detector_login_fail(self):
@@ -246,7 +270,7 @@ class TestCase(unittest.TestCase):
     # Login
     detector = Detector.objects.get(name='detector2')
     detector.set_password('asdt2019')
-    result, token = self.ioloop_thread.login_detector_client(API_AUTH_URL, str(detector.id), 'asdt201')
+    result, token = self.ioloop_thread.login_detector_client(API_DETECTOR_AUTH_URL, str(detector.id), 'asdt201')
     self.assertFalse(result)
 
   def test_detector_login_token(self):
@@ -254,18 +278,16 @@ class TestCase(unittest.TestCase):
     # Login
     detector = Detector.objects.get(name='detector2')
     detector.set_password('asdt2019')
-    result, token = self.ioloop_thread.login_detector_client(API_AUTH_URL, str(detector.id), 'asdt2019')
+    result, token = self.ioloop_thread.login_detector_client(API_DETECTOR_AUTH_URL, str(detector.id), 'asdt2019')
     self.assertTrue(result)
 
     # Launches detector client
     self.ioloop_thread.launch_detector_client()
+    self.ioloop_thread.wait_for_detector_client()
     self.assertTrue( self.ioloop_thread.detector_client.is_ws_connected() )
 
     # Wait for server to reject client
     self.ioloop_thread.wait_for_server()
-
-    # Wait for detector client to close connection
-    self.ioloop_thread.wait_for_detector_client()
 
     # Check detector client is connected
     self.assertTrue( self.ioloop_thread.detector_client.is_ws_connected() )
@@ -292,18 +314,16 @@ class TestCase(unittest.TestCase):
     # Login
     detector = Detector.objects.get(name='detector2')
     detector.set_password('asdt2019')
-    result, token = self.ioloop_thread.login_detector_client(API_AUTH_URL, str(detector.id), 'asdt2019')
+    result, token = self.ioloop_thread.login_detector_client(API_DETECTOR_AUTH_URL, str(detector.id), 'asdt2019')
     self.assertTrue(result)
 
     # Launches detector client - Sends token to server to authenticate
     self.ioloop_thread.detector_client.token = '123'
     self.ioloop_thread.launch_detector_client()
+    self.ioloop_thread.wait_for_detector_client()
 
     # Wait for server to reject client
     self.ioloop_thread.wait_for_server()
-
-    # Wait for detector client to close connection
-    self.ioloop_thread.wait_for_detector_client()
 
     # Check detector client is closed
     sleep(0.01) # NOTE: The time while client checks that socket is closed
@@ -315,11 +335,12 @@ class TestCase(unittest.TestCase):
     # Login
     detector = Detector.objects.get(name='detector2')
     detector.set_password('asdt2019')
-    result, token = self.ioloop_thread.login_detector_client(API_AUTH_URL, str(detector.id), 'asdt2019')
+    result, token = self.ioloop_thread.login_detector_client(API_DETECTOR_AUTH_URL, str(detector.id), 'asdt2019')
     self.assertTrue(result)
 
     # Launch detector client
     self.ioloop_thread.launch_detector_client()
+    self.ioloop_thread.wait_for_detector_client()
     self.assertTrue( self.ioloop_thread.detector_client.is_ws_connected() )
 
     # Wait for server to process client
@@ -396,4 +417,60 @@ class TestCase(unittest.TestCase):
 
     # Close detector client
     self.ioloop_thread.detector_client.close()
+
+
+  def test_detector_login_user_and_detector(self):
+    
+    # Login Detector
+    detector = Detector.objects.get(name='detector2')
+    detector.set_password('asdt2019')
+    result, token = self.ioloop_thread.login_detector_client(API_DETECTOR_AUTH_URL, str(detector.id), 'asdt2019')
+    self.assertTrue(result)
+
+    # Login user
+    user = User.objects.get(email='admin@asdt.eu')
+    user.set_password('asdt2019')
+    result, token = self.ioloop_thread.login_user_client(API_USER_AUTH_URL, user.email, 'asdt2019')
+    self.assertTrue(result)
+
+    # Launches detector client
+    self.ioloop_thread.launch_detector_client()
+    self.ioloop_thread.wait_for_detector_client()
+    self.assertTrue( self.ioloop_thread.detector_client.is_ws_connected() )
+
+    # Launches user client
+    self.ioloop_thread.launch_user_client()
+    self.ioloop_thread.wait_for_user_client()
+    self.assertTrue( self.ioloop_thread.user_client.is_ws_connected() )
+
+    # Wait for server to reject client
+    self.ioloop_thread.wait_for_server()
+
+    ###################################
+    # SEND DETECTION HERE
+    ###################################
+
+    # Check connections present in server
+    ws_conn = self.ioloop_thread.repository.find_by_id(str(detector.id))
+    self.assertTrue( ws_conn is not None )
+    ws_conn = self.ioloop_thread.repository.find_by_id(str(user.id))
+    self.assertTrue( ws_conn is not None )
+
+    # Close detector client
+    self.ioloop_thread.detector_client.close()
+    self.ioloop_thread.wait_for_server()
+    self.assertFalse( self.ioloop_thread.detector_client.is_ws_connected() )
+
+    # Close user client
+    self.ioloop_thread.user_client.close()
+    self.ioloop_thread.wait_for_server()
+    self.assertFalse( self.ioloop_thread.user_client.is_ws_connected() )
+
+    # Check connection NOT present in server
+    ws_conn = self.ioloop_thread.repository.find_by_id(str(detector.id))
+    self.assertTrue( ws_conn is None )
+    ws_conn = self.ioloop_thread.repository.find_by_id(str(user.id))
+    self.assertTrue( ws_conn is None )
+
+
 

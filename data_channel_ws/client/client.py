@@ -156,6 +156,14 @@ class WSClient:
     self.ws_connected = ws_connected
 
   def login(self, url, body):
+    # Capture id from body
+    if 'id' in body:
+      self.id = body['id']
+    elif 'email' in body:
+      self.id = body['email']
+    else:
+      self.id = 'unknown'
+
     logger.info("Authenticating HTTP {}".format(url))
     response = requests.post(url, data=body)
     #print(response.content)
@@ -199,7 +207,7 @@ class WSClient:
     logger.info("message received:{}".format(msg))
     if msg is None:
       self.set_ws_connected( False )
-      logger.info("connection closed {}".format( self.is_ws_connected() ) )
+      logger.info("connection closed {} id={}".format( self.is_ws_connected(), self.id ) )
       # Close if its not done
       if self.ws is not None:
         self.ws.close()
