@@ -112,19 +112,6 @@ class WSMessageDetectionBroker:
   def set_log(self, sn, log_message):
     self.__log_message_dict[sn] = log_message
 
-
-  # def treat_message(self, req: WSRequestMessage):
-  #   """
-  #   treating message
-  #   """
-  #   if req.type == WSRequestMessage.DETECTOR:
-  #     logger.info("Treating detector message")
-  #     return self.treat_message_detector(req)
-  #   elif req.type == WSRequestMessage.USER:
-  #     logger.info("Treating user message")
-  #   elif req.type == WSRequestMessage.INHIBITOR:
-  #     logger.info("Treating inhibitor message")
-
   def logs_update(self):
     """
     Update logs in DB
@@ -306,6 +293,11 @@ class WSMessageDetectionBroker:
     # Users related to detectors
     user_related_list = User.objects.filter(group__in=groups_related_list)
     user_related_list = [ str(user.id) for user in user_related_list ]
+
+    print("List email ...")
+    for user in user_related_list:
+      print(User.objects.get(id=user).email)
+    print("List email ...")
 
     # Potential 
     for user_id in user_related_list:

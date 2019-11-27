@@ -72,6 +72,9 @@ class WSConnection:
     self.id = id
     self.type = type
     self.last_msg = datetime.datetime.now()
+  
+  def write_message(self, message):
+    self.ws_handler.write_message(message)
 
 class WSConnectionRepository:
   """
@@ -287,9 +290,8 @@ class WSHandler(WebSocketHandler):
     """
     logger.info("Message from peer type='{}' id='{}'".format(ws_conn.type, ws_conn.id) ) 
 
-    response_list = []
-
     # Treat message
+    response_list = []
     request = WSRequestMessage(source_id=ws_conn.id, 
                                 type=ws_conn.type, encoded=message)
     if request.type == WSRequestMessage.DETECTOR:
@@ -300,10 +302,12 @@ class WSHandler(WebSocketHandler):
     elif request.type == WSRequestMessage.INHIBITOR:
       logger.info("Treating inhibitor message")
 
-
     # NOTE: Reply to peers (myself and other indicated by response)
     for response in response_list:
       logger.info("Generating response to type={}, id={}".format(response.type, response.destination_id))
+      ws_conn = self.repository.find_by_id(response.destination_id)
+      if ws_conn is not None:
+        ws_conn.write_message(response.content)
 
   def on_message(self, message):
     """
