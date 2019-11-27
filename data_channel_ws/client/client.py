@@ -133,7 +133,7 @@ class DroneFlight:
     with open(OUTPUT_PATH + '/' + filename, 'w') as output_file:
       output_file.write(self.output_gpx.to_xml())
 
-class WSClient:
+class WSDetectorClient:
   """
   Client to connect to Websocket simulating logs generated 
   by detector localising drones
@@ -156,11 +156,38 @@ class WSClient:
     # Drone detected configuration
     self.drone_flight_list = drone_flight_list
   
-  @staticmethod
-  def login_request(url, id, password):
-    """
-    Logs detector in and stores token
-    """
+  # @staticmethod
+  # def login_request(url, id, password):
+  #   """
+  #   Logs detector in and stores token
+  #   """
+  #   body = { 'id': id, 'password': password }
+  #   logger.info("Authenticating HTTP {}".format(url))
+  #   response = requests.post(url, data=body)
+  #   #print(response.content)
+  #   # Get token
+  #   if response.status_code == HTTPStatus.OK:
+  #     response_json = json.loads(response.content.decode()) 
+
+  #     # API /v1/ and /v2/ API versions
+  #     if 'success' in response_json:
+  #       if response_json['success']:
+  #         token = response_json['data']['token']
+  #         return True      
+  #     else:
+  #       # API v3
+  #       token = response_json['token']
+  #       return (True, token)
+  #   return (False, None)
+    
+    # # Hacking
+    # self.token = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiZGV0ZWN0b3IiLCJpZCI6IjVkYjFiMDVmZWRkNjg1MTkwNzE5ZjkyNCIsImlhdCI6MTU3NDI1NDU3MywiZXhwIjoxNTc0Mjc2MTczLCJpc3MiOiJBU0RUIn0.XCjIUaCQIbZRGyB9T4UAXkolTCcRVEnWMzhcHLCOYppsB4KfFrkTc5rQEktw_Tc26pXh868PjxrZ4uZGTW7q8Q'
+    # return True
+
+  def login(self, url, id, password):
+    self.id = id    
+    #(result, token) =  WSClient.login_request(url, id, password)
+    #self.token = token
     body = { 'id': id, 'password': password }
     logger.info("Authenticating HTTP {}".format(url))
     response = requests.post(url, data=body)
@@ -172,23 +199,13 @@ class WSClient:
       # API /v1/ and /v2/ API versions
       if 'success' in response_json:
         if response_json['success']:
-          token = response_json['data']['token']
-          return True      
+          self.token = response_json['data']['token']
+          return (True, self.token)
       else:
         # API v3
-        token = response_json['token']
-        return (True, token)
-    return (False, None)
-    
-    # # Hacking
-    # self.token = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiZGV0ZWN0b3IiLCJpZCI6IjVkYjFiMDVmZWRkNjg1MTkwNzE5ZjkyNCIsImlhdCI6MTU3NDI1NDU3MywiZXhwIjoxNTc0Mjc2MTczLCJpc3MiOiJBU0RUIn0.XCjIUaCQIbZRGyB9T4UAXkolTCcRVEnWMzhcHLCOYppsB4KfFrkTc5rQEktw_Tc26pXh868PjxrZ4uZGTW7q8Q'
-    # return True
-
-  def login(self, url, id, password):
-    self.id = id    
-    (result, token) =  WSClient.login_request(url, id, password)
-    self.token = token
-    return (result, token)
+        self.token = response_json['token']
+        return (True, self.token)
+    return (False, self.token)
 
   def is_ws_connected(self):
     return self.ws_connected
@@ -341,7 +358,7 @@ if __name__ == "__main__":
 
     # Create client
     drone_flight_list = generate_drone_flight_list(config)
-    client = WSClient(WS_URL, drone_flight_list)    
+    client = WSDetectorClient(WS_URL, drone_flight_list)    
     # Login detector
     logger.info("Login detector with ({}/{})".format(detector_id, detector_password))
     result, token = client.login(API_AUTH_URL, detector_id, detector_password)

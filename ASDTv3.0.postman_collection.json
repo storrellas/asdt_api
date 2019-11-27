@@ -596,7 +596,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"TEST_GROUP\"\n}"
+							"raw": "{\n    \"name\": \"TEST_GROUP\",\n    \"parent\": \"123\"\n}"
 						},
 						"url": {
 							"raw": "{{url}}/api/v3/groups/12345/",
@@ -1512,6 +1512,51 @@
 			"name": "detectors",
 			"item": [
 				{
+					"name": "GetToken Detector",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "cb4e2690-22bc-425b-8b11-3fa81e5eab1d",
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"postman.setEnvironmentVariable(\"token\", jsonData.token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"id\": \"5dcf217f1f386df1f5c48143\",\n\t\"password\": \"asdt2019\"\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v3/detectors/authenticate/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v3",
+								"detectors",
+								"authenticate",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "List Detector",
 					"request": {
 						"method": "GET",
@@ -1913,6 +1958,374 @@
 								"api",
 								"v3",
 								"drones",
+								"123",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "inhibitors",
+			"item": [
+				{
+					"name": "List Inhibitors",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Basic {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/v3/inhibitors/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v3",
+								"inhibitors",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Inhibitors",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Basic {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"name\" : \"myname\",\r\n\t\"password\": \"mypassword\",\r\n\t\"location\" : {\"lat\": 12.3, \"lon\": 3.2 },\r\n\t\"frequencies\" : [\"abc\", \"cde\"],\r\n\t\"groups\": [ \"123\" ]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v3/inhibitors/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v3",
+								"inhibitors",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve Inhibitors",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Basic {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/v3/inhibitors/123/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v3",
+								"inhibitors",
+								"123",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Inhibitors",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Basic {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"name\" : \"myname\",\r\n\t\"password\": \"mypassword\",\r\n\t\"location\" : {\"lat\": 12.3, \"lon\": 3.2 },\r\n\t\"frequencies\" : [\"abc\", \"cde\"],\r\n\t\"groups\": [ \"123\" ]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v3/inhibitors/123/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v3",
+								"inhibitors",
+								"123",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Inhibitors",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Basic {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v3/inhibitors/123/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v3",
+								"inhibitors",
+								"123",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "zones",
+			"item": [
+				{
+					"name": "List Zones",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Basic {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/v3/zones/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v3",
+								"zones",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Zones",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Basic {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"name\" : \"myname\",\r\n\t\"center\" : {\"lat\": 12.3, \"lon\": 3.2 },\r\n\t\"radius\" : 2,\r\n\t\"perimiter\" : [{\"lat\": 12.3, \"lon\": 3.2 }],\r\n\t\"maxLat\" : 2,\r\n\t\"maxLon\" : 2,\r\n\t\"minLat\" : 2,\r\n\t\"minLon\" : 2,\r\n\t\"groups\": [ \"123\" ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v3/zones/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v3",
+								"zones",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve Zones",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Basic {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/v3/zones/123/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v3",
+								"zones",
+								"123",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Zones",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Basic {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"name\" : \"myname\",\r\n\t\"center\" : {\"lat\": 12.3, \"lon\": 3.2 },\r\n\t\"radius\" : 2,\r\n\t\"perimiter\" : [{\"lat\": 12.3, \"lon\": 3.2 }],\r\n\t\"maxLat\" : 2,\r\n\t\"maxLon\" : 2,\r\n\t\"minLat\" : 2,\r\n\t\"minLon\" : 2,\r\n\t\"groups\": [ \"123\" ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v3/zones/123/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v3",
+								"zones",
+								"123",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Zones",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Basic {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v3/zones/123/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v3",
+								"zones",
 								"123",
 								""
 							]

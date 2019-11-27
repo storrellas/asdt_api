@@ -39,7 +39,7 @@ from message_broker import WSMessageBroker
 from common import DetectorCoder, LogMessage, LogLocationMessage
 
 # Detector client/server
-from client import WSClient, DroneFlight
+from client import WSDetectorClient, DroneFlight
 from server import WSHandler, WSConnectionRepository
 
 # Import models
@@ -75,7 +75,7 @@ class WSHandlerMockup(WSHandler):
     super().on_close()
     self.server_idle.set()
 
-class WSClientMockup(WSClient):
+class WSDetectorClientMockup(WSDetectorClient):
   
   client_idle = None
 
@@ -129,7 +129,7 @@ class WSServerThread(threading.Thread):
     http_server.listen(WS_PORT)
 
     # Create client
-    self.client = WSClientMockup(WS_URL)
+    self.client = WSDetectorClientMockup(WS_URL)
 
     # Used to signal server is ready
     self.server_idle.set()
