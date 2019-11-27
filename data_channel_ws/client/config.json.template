@@ -12,5 +12,11 @@
         }
       ]
     }    
+  ],
+  "user_list": [
+    {
+      "email" : "a@a.com",
+      "password": "asdt2019"
+    }
   ]
 }

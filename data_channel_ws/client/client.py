@@ -37,7 +37,8 @@ logger.propagate = False
 
 # Configuration parameters
 WS_URL = 'ws://localhost:8081/api'
-API_AUTH_URL = 'http://localhost:8080/api/v3/detectors/authenticate/'
+API_DETECTOR_AUTH_URL = 'http://localhost:8080/api/v3/detectors/authenticate/'
+API_USER_AUTH_URL = 'http://localhost:8080/api/v3/user/authenticate/'
 OUTPUT_PATH = './output'
 
 class DroneFlight:
@@ -133,62 +134,28 @@ class DroneFlight:
     with open(OUTPUT_PATH + '/' + filename, 'w') as output_file:
       output_file.write(self.output_gpx.to_xml())
 
-class WSDetectorClient:
-  """
-  Client to connect to Websocket simulating logs generated 
-  by detector localising drones
-  """
+class WSClient:
+  # WS Management
   token = None
   ws_url = None
   ioloop = None
   ws = None
   ws_connected = False
 
-  # Detector
-  id = None
+  # Instance Type
+  name = 'Undefined'
 
-  # Drone flight configuration
-  drone_flight_list = None
-
-  def __init__(self, ws_url = None, drone_flight_list = None):
+  def __init__(self, ws_url = None, id = None):
     self.ws_url = ws_url
-   
-    # Drone detected configuration
-    self.drone_flight_list = drone_flight_list
+    self.id = id
+
+  def is_ws_connected(self):
+    return self.ws_connected
   
-  # @staticmethod
-  # def login_request(url, id, password):
-  #   """
-  #   Logs detector in and stores token
-  #   """
-  #   body = { 'id': id, 'password': password }
-  #   logger.info("Authenticating HTTP {}".format(url))
-  #   response = requests.post(url, data=body)
-  #   #print(response.content)
-  #   # Get token
-  #   if response.status_code == HTTPStatus.OK:
-  #     response_json = json.loads(response.content.decode()) 
+  def set_ws_connected(self, ws_connected):
+    self.ws_connected = ws_connected
 
-  #     # API /v1/ and /v2/ API versions
-  #     if 'success' in response_json:
-  #       if response_json['success']:
-  #         token = response_json['data']['token']
-  #         return True      
-  #     else:
-  #       # API v3
-  #       token = response_json['token']
-  #       return (True, token)
-  #   return (False, None)
-    
-    # # Hacking
-    # self.token = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiZGV0ZWN0b3IiLCJpZCI6IjVkYjFiMDVmZWRkNjg1MTkwNzE5ZjkyNCIsImlhdCI6MTU3NDI1NDU3MywiZXhwIjoxNTc0Mjc2MTczLCJpc3MiOiJBU0RUIn0.XCjIUaCQIbZRGyB9T4UAXkolTCcRVEnWMzhcHLCOYppsB4KfFrkTc5rQEktw_Tc26pXh868PjxrZ4uZGTW7q8Q'
-    # return True
-
-  def login(self, url, id, password):
-    self.id = id    
-    #(result, token) =  WSClient.login_request(url, id, password)
-    #self.token = token
-    body = { 'id': id, 'password': password }
+  def login(self, url, body):
     logger.info("Authenticating HTTP {}".format(url))
     response = requests.post(url, data=body)
     #print(response.content)
@@ -206,9 +173,9 @@ class WSDetectorClient:
         self.token = response_json['token']
         return (True, self.token)
     return (False, self.token)
-
-  def is_ws_connected(self):
-    return self.ws_connected
+    # # Hacking
+    # self.token = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiZGV0ZWN0b3IiLCJpZCI6IjVkYjFiMDVmZWRkNjg1MTkwNzE5ZjkyNCIsImlhdCI6MTU3NDI1NDU3MywiZXhwIjoxNTc0Mjc2MTczLCJpc3MiOiJBU0RUIn0.XCjIUaCQIbZRGyB9T4UAXkolTCcRVEnWMzhcHLCOYppsB4KfFrkTc5rQEktw_Tc26pXh868PjxrZ4uZGTW7q8Q'
+    # return True
 
   async def connect(self):    
     try:
@@ -220,10 +187,10 @@ class WSDetectorClient:
     except Exception as e:
       print(str(e))
       logger.error("connection error")
-      self.ws_connected = False
+      self.set_ws_connected( False )
     else:
-      logger.info("Detector '{}' connected".format(self.id))
-      self.ws_connected = True
+      logger.info("{} '{}' connected".format(self.name, self.id))
+      self.set_ws_connected( True )
       # NOTE: This makes it blocking
       #await self.run()
       #IOLoop.instance().spawn_callback(self.run)
@@ -231,14 +198,12 @@ class WSDetectorClient:
   def on_message_callback(self, msg):
     logger.info("message received:{}".format(msg))
     if msg is None:
-      self.ws_connected = False
-      logger.info("connection closed {}".format(self.ws_connected))
+      self.set_ws_connected( False )
+      logger.info("connection closed {}".format( self.is_ws_connected() ) )
       # Close if its not done
       if self.ws is not None:
         self.ws.close()
         self.ws = None
-
-
 
   # async def run(self):
   #   print("Running")
@@ -255,6 +220,34 @@ class WSDetectorClient:
   #     self.connect()
   #   else:
   #     self.ws.write_message("keep alive")
+
+  def close(self):
+    """
+    Closes client
+    """
+    # Encode package
+    self.ws.close()
+    self.ws = None
+    self.set_ws_connected( False )
+
+class WSDetectorClient(WSClient):
+  """
+  Client to connect to Websocket simulating logs generated 
+  by detector localising drones
+  """
+  # Instance type
+  id = None
+  name = 'Detector'
+
+  # Drone flight configuration
+  drone_flight_list = None
+
+  def __init__(self, ws_url = None, id = None, drone_flight_list = None):
+    super().__init__(ws_url, id)
+   
+    # Drone detected configuration
+    self.drone_flight_list = drone_flight_list
+    
 
 
   def send_detection_log_periodic(self):
@@ -279,16 +272,19 @@ class WSDetectorClient:
     frame = coder.encode(detection_log)    
     self.ws.write_message(bytes(frame), binary=True)
 
-  def close(self):
-    """
-    Closes client
-    """
-    # Encode package
-    self.ws.close()
-    self.ws = None
-    self.ws_connected = False
+# END: WSDetectorClient
 
-# END: WSClient
+class WSUserClient(WSClient):
+  """
+  Client to connect to Websocket simulating logs generated 
+  by detector localising drones
+  """
+
+  name = 'User'
+
+
+
+# END: WSUserClient
 
 
 def read_json_configuration(filename):
@@ -350,19 +346,21 @@ if __name__ == "__main__":
   logger.info("Loading configuration from '{}' ".format(config_filename))
   config = read_json_configuration( config_filename )
 
-
+  ## LAUCHING DETECTORS
+  #####################
   for detector in config['detector_list']:
     # Get credentials
     # NOTE: We should make this to be multi drone
     detector_id = detector['id']
-    detector_password = detector['password']
+    password = detector['password']
 
     # Create client
     drone_flight_list = generate_drone_flight_list(config)
-    client = WSDetectorClient(WS_URL, drone_flight_list)    
+    client = WSDetectorClient(WS_URL, detector_id, drone_flight_list)    
     # Login detector
-    logger.info("Login detector with ({}/{})".format(detector_id, detector_password))
-    result, token = client.login(API_AUTH_URL, detector_id, detector_password)
+    logger.info("Login detector with ({}/{})".format(detector_id, password))
+    body = { 'id': detector_id, 'password': password }
+    result, token = client.login(API_DETECTOR_AUTH_URL, body)
     if not result:
       logger.error("Login Failed. Aborting")
       sys.exit(0)
@@ -372,6 +370,29 @@ if __name__ == "__main__":
     
     # Add to the ioloop 
     IOLoop.instance().spawn_callback(client.connect)
+
+  ## LAUCHING USERS
+  #####################
+  for user in config['user_list']:
+    # Get credentials
+    # NOTE: We should make this to be multi drone
+    email = user['email']
+    password = user['password']
+
+    # Create client
+    client = WSUserClient(WS_URL, email)    
+    # Login detector
+    logger.info("Login user with ({}/{})".format(email, password))
+    body = { 'email': email, 'password': password }
+    result, token = client.login(API_USER_AUTH_URL, body)
+    if not result:
+      logger.error("Login Failed. Aborting")
+      sys.exit(0)
+    
+   
+    # Add to the ioloop 
+    IOLoop.instance().spawn_callback(client.connect)
+
 
   
   # Create IOLoop

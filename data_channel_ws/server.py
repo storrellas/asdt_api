@@ -32,7 +32,7 @@ from inhibitors.models import Inhibitor
 from groups.models import Group
 from django.conf import settings
 
-from message_broker import WSRequestMessage, WSResponseMessage, WSMessageBroker
+from message_broker import WSRequestMessage, WSResponseMessage, WSMessageDetectionBroker
 
 # Create logger
 logger = get_logger()
@@ -170,7 +170,7 @@ class WSConnectionRepository:
 
 class WSHandler(WebSocketHandler):
 
-  broker : WSMessageBroker = None
+  broker_detection : WSMessageDetectionBroker = None
   repository : WSConnectionRepository = None
   secret_key : str = None
 
@@ -217,9 +217,9 @@ class WSHandler(WebSocketHandler):
 
 
   def initialize(self, repository : WSConnectionRepository, 
-                  broker : WSMessageBroker, secret_key: str):
+                  broker_detection : WSMessageDetectionBroker, secret_key: str):
     self.repository = repository
-    self.broker = broker
+    self.broker_detection = broker_detection
     self.secret_key = secret_key
 
   def open(self):
@@ -228,74 +228,95 @@ class WSHandler(WebSocketHandler):
     # print(self.request)
     # self.write_message("Hello World")
     pass
-    
+  
+  def on_message_register_client(self, ws_conn, message):
+    """
+    Treat message to register client
+    """
+    try:
+      decoded_jwt = jwt.decode(message, self.secret_key, algorithms=['HS256'])
+      instance_id = decoded_jwt['id']
+      type_id = decoded_jwt['type'].upper()
+      self.create_connection_log( type_id, instance_id )
+
+      # Check if another connection for this detector and close the former
+      # NOTE: For me (ST) its simpler to reject new connection
+      ws_conn = self.repository.find_by_id(instance_id)
+      if ws_conn is not None:
+        logger.error("Logging in duplicate detector with id '{}'".format(instance_id))
+        ws_conn.ws_handler.close()
+        self.repository.remove(ws_conn)
+        self.close()
+        self.create_disconnection_log( type_id, instance_id, reason='DUPLICATED_CONNECTION' )
+
+      # Check whether instance in DB
+      # NOTE: This would be removed when logging in comes through WS
+      model = self.get_model(type_id)
+      if model is None:
+        logger.error("Type '{}' not identified".format(type_id))
+        self.close()
+        return        
+      # Check if exists
+      if model.objects.filter(id=instance_id).count() == 0:
+        logger.error("Instance type='{}' id='{}' not found".format(type_id, instance_id))
+        self.create_disconnection_log( type_id, instance_id, reason='NOT_FOUND_IN_DATABASE' )
+
+
+      # Append new connection to repository
+      logger.info("Client type='{}' id='{}' login ok!".format(type_id, instance_id))
+      ws_conn = WSConnection(ws_handler=self, host=self.request.host, 
+                          id=instance_id, type=type_id.upper())
+      self.repository.add( ws_conn )
+
+      # Reply login
+      self.write_message("OK")
+
+
+    except Exception as e:
+      logger.error("Detector token decode failed")
+      logger.info("Exception " + str(e))
+      self.close()
+    except jwt.ExpiredSignatureError as e:
+      logger.error("Detector token expired")
+      logger.info("Expired " + str(e))
+      self.close()
+
+  def on_message_treat(self, ws_conn, message):
+    """
+    Treat a message coming from peer
+    """
+    logger.info("Message from peer type='{}' id='{}'".format(ws_conn.type, ws_conn.id) ) 
+
+    response_list = []
+
+    # Treat message
+    request = WSRequestMessage(source_id=ws_conn.id, 
+                                type=ws_conn.type, encoded=message)
+    if request.type == WSRequestMessage.DETECTOR:
+      logger.info("Treating detector message")
+      response_list = self.broker_detection.treat_message_detector(request)
+    elif request.type == WSRequestMessage.USER:
+      logger.info("Treating user message")
+    elif request.type == WSRequestMessage.INHIBITOR:
+      logger.info("Treating inhibitor message")
+
+
+    # NOTE: Reply to peers (myself and other indicated by response)
+    for response in response_list:
+      logger.info("Generating response to type={}, id={}".format(response.type, response.destination_id))
+
   def on_message(self, message):
+    """
+    Handler to receive message
+    """
     #logger.info('message received {}'.format(message) )
 
     # Check whether existing connection
     ws_conn = self.repository.find_by_handler(self)        
     if ws_conn is None:
-      # NOTE: This should be corrected as response is always 200
-      #response = requests.get(API_USER_INFO, headers={'Authorization': 'Basic {}'.format(message) })
-      #if response.status_code == HTTPStatus.OK:
-      try:
-        decoded_jwt = jwt.decode(message, self.secret_key, algorithms=['HS256'])
-        instance_id = decoded_jwt['id']
-        type_id = decoded_jwt['type'].upper()
-        self.create_connection_log( type_id, instance_id )
-
-        # Check if another connection for this detector and close the former
-        # NOTE: For me (ST) its simpler to reject new connection
-        ws_conn = self.repository.find_by_id(instance_id)
-        if ws_conn is not None:
-          logger.error("Logging in duplicate detector with id '{}'".format(instance_id))
-          ws_conn.ws_handler.close()
-          self.repository.remove(ws_conn)
-          self.close()
-          self.create_disconnection_log( type_id, instance_id, reason='DUPLICATED_CONNECTION' )
-
-        # Check whether instance in DB
-        # NOTE: This would be removed when logging in comes through WS
-        model = self.get_model(type_id)
-        if model is None:
-          logger.error("Type {} not identified".format(type_id))
-          self.close()
-          return        
-        # Check if exists
-        if model.objects.filter(id=instance_id).count() == 0:
-          logger.error("Instance type='{}' id='{}' not found".format(type_id, instance_id))
-          self.create_disconnection_log( type_id, instance_id, reason='NOT_FOUND_IN_DATABASE' )
-
-
-        # Append new connection to repository
-        logger.info("Client type='{}' id='{}' login ok!".format(type_id, instance_id))
-        conn = WSConnection(ws_handler=self, host=self.request.host, 
-                            id=instance_id, type=type_id.upper())
-        self.repository.add( conn )
-
-        # Reply login
-        self.write_message("OK")
-
-
-      except Exception as e:
-        logger.error("Detector token decode failed")
-        logger.info("Exception " + str(e))
-        self.close()
-      except jwt.ExpiredSignatureError as e:
-        logger.error("Detector token expired")
-        logger.info("Expired " + str(e))
-        self.close()
+      self.on_message_register_client(ws_conn, message)
     else:
-      logger.info("Message from peer type='{}' id='{}'".format(ws_conn.type, ws_conn.id) ) 
-
-      # Treat message
-      request = WSRequestMessage(source_id=ws_conn.id, type=ws_conn.type, 
-                            encoded=message)
-      response_list = self.broker.treat_message(request)
-      
-      # NOTE: Reply to peers (myself and other indicated by response)
-      for response in response_list:
-        logger.info("Generating response to type={}, id={}".format(response.type, response.destination_id))
+      self.on_message_treat(ws_conn, message)
 
 
 
@@ -329,9 +350,10 @@ if __name__ == "__main__":
 
   # Create web application
   repository = WSConnectionRepository()
-  broker = WSMessageBroker()
+  broker_detection = WSMessageDetectionBroker()
   application = tornado.web.Application([
-    (r'/api', WSHandler, dict(repository=repository, broker=broker, secret_key=settings.SECRET_KEY)),
+    (r'/api', WSHandler, dict(repository=repository, 
+                              broker_detection=broker_detection, secret_key=settings.SECRET_KEY)),
   ])
  
 
@@ -343,7 +365,7 @@ if __name__ == "__main__":
   # Checks latest activity on every connection
   PeriodicCallback(repository.keep_alive_connection_repository, 
                     KEEP_ALIVE_CONNECTION_PERIOD).start()
-  PeriodicCallback(broker.logs_update, 
+  PeriodicCallback(broker_detection.logs_update, 
                     LOGS_UPDATE_PERIOD).start()
 
   IOLoop.instance().start()

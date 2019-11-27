@@ -98,7 +98,7 @@ class WSResponseMessage(WSMessage):
 
 
 
-class WSMessageBroker:
+class WSMessageDetectionBroker:
   
   # repository = LogMessageRepository()
   __log_message_dict = {}
@@ -113,17 +113,17 @@ class WSMessageBroker:
     self.__log_message_dict[sn] = log_message
 
 
-  def treat_message(self, req: WSRequestMessage):
-    """
-    treating message
-    """
-    if req.type == WSRequestMessage.DETECTOR:
-      logger.info("Treating detector message")
-      return self.treat_message_detector(req)
-    elif req.type == WSRequestMessage.USER:
-      logger.info("Treating user message")
-    elif req.type == WSRequestMessage.INHIBITOR:
-      logger.info("Treating inhibitor message")
+  # def treat_message(self, req: WSRequestMessage):
+  #   """
+  #   treating message
+  #   """
+  #   if req.type == WSRequestMessage.DETECTOR:
+  #     logger.info("Treating detector message")
+  #     return self.treat_message_detector(req)
+  #   elif req.type == WSRequestMessage.USER:
+  #     logger.info("Treating user message")
+  #   elif req.type == WSRequestMessage.INHIBITOR:
+  #     logger.info("Treating inhibitor message")
 
   def logs_update(self):
     """
