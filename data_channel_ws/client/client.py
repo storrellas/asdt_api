@@ -347,7 +347,8 @@ if __name__ == "__main__":
 
   
   # Read configuration
-  config = read_json_configuration('./config.json')
+  logger.info("Loading configuration from '{}' ".format(config_filename))
+  config = read_json_configuration( config_filename )
 
 
   for detector in config['detector_list']:
