@@ -347,7 +347,7 @@ if __name__ == "__main__":
 
   # connecting MongoEngine
   mongoengine.connect(settings.MONGO_DB, host=settings.MONGO_HOST, port=int(settings.MONGO_PORT))
-  logger.info("Connected MONGODB against mongodb://{}:{}/{}".format(settings.MONGO_HOST, settings.MONGO_PORT, MONGO_DB))
+  logger.info("Connected MONGODB against mongodb://{}:{}/{}".format(settings.MONGO_HOST, settings.MONGO_PORT, settings.MONGO_DB))
 
   # Create web application
   repository = WSConnectionRepository()

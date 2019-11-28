@@ -33,7 +33,22 @@ services:
     logging:
      driver: "syslog"
      options:
-       tag: "asdt"
+       tag: "asdt_api"
+  data_channel_ws_3_0:
+    image: asdt_api:3.0
+    restart: always
+    working_dir: /repo/data_channel_ws/
+    command: python3 server.py
+    ports:
+      - $WS_PORT:8081
+    environment:
+      - MONGO_HOST=$MONGO_HOST
+      - MONGO_PORT=$MONGO_PORT
+      - MONGO_DB=$MONGO_DB
+    logging:
+     driver: "syslog"
+     options:
+       tag: "asdt_ws"
   mongo_express_3_0:
     image: mongo-express:0.49
     restart: always
@@ -50,7 +65,7 @@ services:
     logging:
      driver: "syslog"
      options:
-       tag: "asdt"
+       tag: "asdt_me"
 
   # asdt_mongo:
   #   image: mongo:3.4-xenial
