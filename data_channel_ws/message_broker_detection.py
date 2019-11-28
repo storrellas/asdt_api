@@ -311,8 +311,8 @@ class WSMessageDetectionBroker:
       message['data']['owner'] = log_storage.data.owner      
       message['data']['msgCount'] = log_storage.msgCount
 
-      message['dateIni'] = log_storage.data.dateIni.iso_format()
-      message['dateFin'] = log_storage.data.dateFin.iso_format()
+      message['dateIni'] = log_storage.data.dateIni.isoformat()
+      message['dateFin'] = log_storage.data.dateFin.isoformat()
       message['maxHeight'] = log_storage.data.maxHeight
       message['distanceTraveled'] = log_storage.data.distanceTraveled
       message['distanceToDetector'] = log_storage.data.distanceToDetector
