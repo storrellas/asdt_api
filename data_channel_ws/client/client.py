@@ -37,13 +37,10 @@ logger.propagate = False
 
 # Configuration parameters
 # WS_URL = 'ws://localhost:8081/ws/v3/'
-# API_DETECTOR_AUTH_URL = 'http://localhost:8080/api/v3/detectors/authenticate/'
-# API_USER_AUTH_URL = 'http://localhost:8080/api/v3/user/authenticate/'
+# API_URL = 'http://localhost:8080'
 
 WS_URL = 'wss://asdtdev.mooo.com/ws/v3/'
-API_DETECTOR_AUTH_URL = 'https://asdtdev.mooo.com/api/v3/detectors/authenticate/'
-API_USER_AUTH_URL = 'https://asdtdev.mooo.com/api/v3/user/authenticate/'
-
+API_URL = 'https://asdtdev.mooo.com'
 
 OUTPUT_PATH = './output'
 
@@ -384,7 +381,7 @@ if __name__ == "__main__":
     # Login detector
     logger.info("Login detector with ({}/{})".format(detector_id, password))
     body = { 'id': detector_id, 'password': password }
-    result, token = client.login(API_DETECTOR_AUTH_URL, body)
+    result, token = client.login('{}/api/v3/detectors/authenticate/'.format(API_URL), body)
     if not result:
       logger.error("Login Failed. Aborting")
       sys.exit(0)
@@ -408,7 +405,7 @@ if __name__ == "__main__":
     # Login detector
     logger.info("Login user with ({}/{})".format(email, password))
     body = { 'email': email, 'password': password }
-    result, token = client.login(API_USER_AUTH_URL, body)
+    result, token = client.login('{}/api/v3/user/authenticate/'.format(API_URL), body)
     if not result:
       logger.error("Login Failed. Aborting")
       sys.exit(0)

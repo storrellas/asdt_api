@@ -294,11 +294,6 @@ class WSMessageDetectionBroker:
     user_related_list = User.objects.filter(group__in=groups_related_list)
     user_related_list = [ str(user.id) for user in user_related_list ]
 
-    print("List email ...")
-    for user in user_related_list:
-      print(User.objects.get(id=user).email)
-    print("List email ...")
-
     # Potential 
     for user_id in user_related_list:
       message = {

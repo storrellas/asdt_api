@@ -48,12 +48,8 @@ from logs.models import Log, LogRoute
 
 logger = get_logger()
 
-# Configuration - server
-
-
-
-
-EVENT_WAIT_TIMEOUT = 10 # Number of seconds before continue
+# Number of seconds to wait in thread sync
+EVENT_WAIT_TIMEOUT = 10 
 
 class WSHandlerMockup(WSHandler):
   
@@ -153,7 +149,7 @@ class WSServerThread(threading.Thread):
 
     # Create client
     self.detector_client = WSDetectorClientMockup(self.ws_url)
-    self.user_client = WSDetectorClientMockup(self.ws_url)
+    self.user_client = WSUserClientMockup(self.ws_url)
 
     # Used to signal server is ready
     self.server_idle.set()

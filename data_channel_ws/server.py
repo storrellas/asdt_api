@@ -40,8 +40,6 @@ logger.propagate = False
 
 
 # Configuration
-#API_USER_INFO = 'http://asdtdev.mooo.com/api/user/info'
-#API_USER_INFO = 'http://localhost:8080/api/v3/user/info'
 WS_PORT = 8081
 KEEP_ALIVE_CONNECTION_PERIOD=2000 # 
 LOGS_UPDATE_PERIOD=2000
@@ -54,6 +52,7 @@ class WSConnection:
   host = None
   id = None
   type = None
+  friendly_name = None
   logged = False
   ws_handler = None
   msg = None
@@ -63,10 +62,11 @@ class WSConnection:
   DETECTOR = 'DETECTOR'
   INHIBITOR = 'INHIBITOR'
 
-  def __init__(self, ws_handler = None, host = None, id = None, type = None):
+  def __init__(self, ws_handler = None, host = None, id = None, type = None, friendly_name = None):
     self.ws_handler = ws_handler
     self.host = host
     self.id = id
+    self.friendly_name = friendly_name
     self.type = type
     self.last_msg = datetime.datetime.now()
   
@@ -266,9 +266,16 @@ class WSHandler(WebSocketHandler):
 
 
       # Append new connection to repository
-      logger.info("Client type='{}' id='{}' login ok!".format(type_id, instance_id))
+      friendly_name = ''
+      if type_id == WSConnection.DETECTOR:
+        friendly_name = model.name
+      elif type_id == WSConnection.USER:
+        friendly_name = model.email
+      elif type_id == WSConnection.INHIBITOR:
+        friendly_name = model.name
+      logger.info("Client type='{}' id='{}' friendly_name={} login ok!".format(type_id, instance_id, friendly_name))
       ws_conn = WSConnection(ws_handler=self, host=self.request.host, 
-                          id=instance_id, type=type_id.upper())
+                          id=instance_id, type=type_id.upper(), friendly_name=friendly_name)
       self.repository.add( ws_conn )
 
       # Reply login
@@ -288,7 +295,8 @@ class WSHandler(WebSocketHandler):
     """
     Treat a message coming from peer
     """
-    logger.info("Message from peer type='{}' id='{}'".format(ws_conn.type, ws_conn.id) ) 
+    logger.info("Message from peer type='{}' id='{}' friendly_name={}" \
+                  .format(ws_conn.type, ws_conn.id, ws_conn.friendly_name) ) 
 
     # Treat message
     response_list = []
