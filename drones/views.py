@@ -28,17 +28,13 @@ class DroneModelView(APIView):
     permission_classes = (IsAuthenticated, )
 
     def get(self, request, log_id = None):
-        queryset = DroneModel.objects.fields(id=0).all()
+      queryset = DroneModel.objects.fields(id=0).all()
 
-        # Transform to queryset
-        data = []
-        for item in queryset:
-          data.append(item.as_dict())
-        data = { 
-            'success': True,
-            'data': data
-        } 
-        return Response(data)
+      # Transform to queryset
+      data = []
+      for item in queryset:
+        data.append(item.as_dict())
+      return Response(data)
 
 
 class DroneSerializer(serializers.Serializer):
