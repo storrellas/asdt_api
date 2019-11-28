@@ -40,7 +40,7 @@ logger.propagate = False
 # API_URL = 'http://localhost:8080'
 
 WS_URL = 'wss://asdtdev.mooo.com/api/'
-#API_URL = 'https://asdtdev.mooo.com'
+API_URL = 'https://asdtdev.mooo.com'
 
 OUTPUT_PATH = './output'
 
@@ -147,6 +147,7 @@ class WSClient:
 
   # Instance Type
   name = 'Undefined'
+  id = None
 
   def __init__(self, ws_url = None, id = None):
     self.ws_url = ws_url
@@ -218,8 +219,8 @@ class WSClient:
       logger.info("connection closed {} id={}".format( self.is_ws_connected(), self.id ) )
       # Close if its not done
       if self.ws is not None:
-        self.ws.close()
-        self.ws = None
+        self.close()
+      self.ws = None
 
   # async def run(self):
   #   print("Running")
@@ -242,7 +243,9 @@ class WSClient:
     Closes client
     """
     # Encode package
-    self.ws.close()
+    logger.info("Closing connection")
+    if self.ws is not None:
+      self.ws.close()
     self.ws = None
     self.set_ws_connected( False )
 
@@ -265,7 +268,6 @@ class WSDetectorClient(WSClient):
     self.drone_flight_list = drone_flight_list
     
 
-
   def send_detection_log_periodic(self):
     """
     Generates the package sent by the detector via WS
@@ -286,7 +288,10 @@ class WSDetectorClient(WSClient):
     # Encode package
     coder = DetectorCoder()
     frame = coder.encode(detection_log)    
-    self.ws.write_message(bytes(frame), binary=True)
+    if self.is_ws_connected():
+      self.ws.write_message(bytes(frame), binary=True)
+    else:
+      logger.error("Failed to send to client")
 
 # END: WSDetectorClient
 
@@ -324,14 +329,24 @@ def read_json_configuration(filename):
 ###########################
 ## Signal handling to avoid exception when closing
 ###########################
-client = None
+client_list = []
+periodic_callback = None
 def signal_handler(sig, frame):
   logger.info('You pressed Ctrl+C!')
   logger.info('Closing WS Connection ...')
-  client.ws.close()
+  for client in client_list:
+    client.close()
   logger.info('DONE!')
   sys.exit(0)
 
+def send_detection_log_periodic_list():
+  global periodic_callback
+  for client in client_list:
+    if client.is_ws_connected() == False:
+      logger.error("Client {} id={} is closed. Aborting".format(client.name, client.id) )
+      periodic_callback.stop()
+      sys.exit(0)
+    client.send_detection_log_periodic()
 
 def generate_drone_flight_list(config):
   """
@@ -385,9 +400,9 @@ if __name__ == "__main__":
     if not result:
       logger.error("Login Failed. Aborting")
       sys.exit(0)
-    
-    # Configure IOLoop
-    PeriodicCallback(client.send_detection_log_periodic, 10).start()
+      
+    # Add client to list
+    client_list.append(client)
     
     # Add to the ioloop 
     IOLoop.instance().spawn_callback(client.connect)
@@ -409,9 +424,17 @@ if __name__ == "__main__":
     if not result:
       logger.error("Login Failed. Aborting")
       sys.exit(0)
-       
+    
+    # Add client to list
+    client_list.append(client)
+
     # Add to the ioloop 
     IOLoop.instance().spawn_callback(client.connect)
+
+
+  # Configure IOLoop
+  periodic_callback = PeriodicCallback(send_detection_log_periodic_list, 10)
+  periodic_callback.start()
 
   # Create IOLoop
   ioloop = IOLoop.instance()
