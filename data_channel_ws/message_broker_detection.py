@@ -304,8 +304,8 @@ class WSMessageDetectionBroker:
         'data' : data,
       }
       message['data'] = {}
-      message['data']['sn'] = log_storage.data.sn
-      message['data']['productId'] = log_storage.data.productId
+      message['data']['data']['sn'] = log_storage.data.sn
+      message['data']['data']['productId'] = log_storage.data.productId
       if log_storage.data.model is not None:
         message['data']['model'] = log_storage.data.model
       message['data']['owner'] = log_storage.data.owner      
