@@ -50,8 +50,11 @@ server {
     include proxy_params;
   }
   location /ws/v3/ {
-    proxy_pass http://127.0.0.1:7072/ws/v3/;
+    proxy_pass http://127.0.0.1:7071/ws/v3/;
     include proxy_params;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
   }
 }
 

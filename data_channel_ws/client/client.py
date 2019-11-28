@@ -40,9 +40,9 @@ logger.propagate = False
 # API_DETECTOR_AUTH_URL = 'http://localhost:8080/api/v3/detectors/authenticate/'
 # API_USER_AUTH_URL = 'http://localhost:8080/api/v3/user/authenticate/'
 
-WS_URL = 'ws://asdtdev.mooo.com/ws/v3/'
-API_DETECTOR_AUTH_URL = 'http://asdtdev.mooo.com/api/v3/detectors/authenticate/'
-API_USER_AUTH_URL = 'http://asdtdev.mooo.com/api/v3/user/authenticate/'
+WS_URL = 'wss://asdtdev.mooo.com/ws/v3/'
+API_DETECTOR_AUTH_URL = 'https://asdtdev.mooo.com/api/v3/detectors/authenticate/'
+API_USER_AUTH_URL = 'https://asdtdev.mooo.com/api/v3/user/authenticate/'
 
 
 OUTPUT_PATH = './output'
@@ -187,9 +187,14 @@ class WSClient:
         self.token = response_json['token']
         return (True, self.token)
     return (False, self.token)
-    # # Hacking
-    # self.token = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiZGV0ZWN0b3IiLCJpZCI6IjVkYjFiMDVmZWRkNjg1MTkwNzE5ZjkyNCIsImlhdCI6MTU3NDI1NDU3MywiZXhwIjoxNTc0Mjc2MTczLCJpc3MiOiJBU0RUIn0.XCjIUaCQIbZRGyB9T4UAXkolTCcRVEnWMzhcHLCOYppsB4KfFrkTc5rQEktw_Tc26pXh868PjxrZ4uZGTW7q8Q'
-    # return True
+    
+    # Hacking - Remote token
+    # self.token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0eXBlIjoidXNlciIsImlkIjoiNWRkZDViNDllNDc4YTExMTY2YWM5ODRlIiwiaXNzIjoiQVNEVCIsImlhdCI6MTU3NDkzMTA5NCwiZXhwIjoxNTc0OTUyNjk0fQ.y0TM4AH98imjninAYEps73LSibiM3THpS2urcNcVJNQ'
+    # return (True, self.token)
+
+    # # Hacking - Local token
+    # self.token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0eXBlIjoidXNlciIsImlkIjoiNWRkYThjN2VmMTYxYTRiZGQwNWY5OGUxIiwiaXNzIjoiQVNEVCIsImlhdCI6MTU3NDkyMjk3NSwiZXhwIjoxNTc0OTQ0NTc1fQ.87miRUY_qy4WzC-zKe6kXYdDTkKKG0BOFMPWca9kdEs'
+    # return (True, self.token)
 
   async def connect(self):    
     try:
