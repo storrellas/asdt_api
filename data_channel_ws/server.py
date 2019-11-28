@@ -43,9 +43,6 @@ logger.propagate = False
 #API_USER_INFO = 'http://asdtdev.mooo.com/api/user/info'
 #API_USER_INFO = 'http://localhost:8080/api/v3/user/info'
 WS_PORT = 8081
-MONGO_HOST = 'localhost'
-MONGO_PORT = 27017
-MONGO_DB = 'asdt'
 KEEP_ALIVE_CONNECTION_PERIOD=2000 # 
 LOGS_UPDATE_PERIOD=2000
 
@@ -349,8 +346,8 @@ if __name__ == "__main__":
   signal.signal(signal.SIGINT, signal_handler)
 
   # connecting MongoEngine
-  mongoengine.connect(MONGO_DB, host=MONGO_HOST, port=int(MONGO_PORT))
-  logger.info("Connected MONGODB against mongodb://{}:{}/{}".format(MONGO_HOST, MONGO_PORT, MONGO_DB))
+  mongoengine.connect(settings.MONGO_DB, host=settings.MONGO_HOST, port=int(settings.MONGO_PORT))
+  logger.info("Connected MONGODB against mongodb://{}:{}/{}".format(settings.MONGO_HOST, settings.MONGO_PORT, MONGO_DB))
 
   # Create web application
   repository = WSConnectionRepository()
