@@ -295,7 +295,7 @@ class WSHandler(WebSocketHandler):
     """
     Treat a message coming from peer
     """
-    logger.info("Message from peer type='{}' id='{}' friendly_name={}" \
+    logger.info("Message from peer type='{}' id='{}' friendly_name='{}'" \
                   .format(ws_conn.type, ws_conn.id, ws_conn.friendly_name) ) 
 
     # Treat message
@@ -312,8 +312,9 @@ class WSHandler(WebSocketHandler):
 
     # NOTE: Reply to peers (myself and other indicated by response)
     for response in response_list:
-      logger.info("Generating response to type={}, id={}".format(response.type, response.destination_id))
       ws_conn = self.repository.find_by_id(response.destination_id)
+      logger.info("Generating response to type='{}' id='{}' friendly_name='{}'" \
+                    .format(ws_conn.type, ws_conn.id, ws_conn.friendly_name))
       if ws_conn is not None:
         ws_conn.write_message(response.content)
 
