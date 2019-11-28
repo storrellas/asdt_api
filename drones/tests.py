@@ -18,7 +18,7 @@ logger = utils.get_logger()
 
 class TestCase(helper_tests.DeviceTestCase):
 
-  base_url = '/{}/drones/'.format(settings.PREFIX)
+  base_url = '/{}/drones/'.format(settings.PREFIX_API)
   model = Drone
 
   @classmethod
@@ -50,7 +50,7 @@ class TestCase(helper_tests.DeviceTestCase):
     self.authenticate('admin@asdt.eu', 'asdt2019')
 
     # Get Model
-    response = self.client.get('/{}/drones/model/'.format(settings.PREFIX))
+    response = self.client.get('/{}/drones/model/'.format(settings.PREFIX_API))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(len(response_json['data']) > 0)

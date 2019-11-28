@@ -21,7 +21,7 @@ logger = utils.get_logger()
 
 class TestCase(helper_tests.DeviceTestCase):
 
-  base_url = '/{}/detectors/'.format(settings.PREFIX)
+  base_url = '/{}/detectors/'.format(settings.PREFIX_API)
   model = Detector
 
   @classmethod
@@ -58,7 +58,7 @@ class TestCase(helper_tests.DeviceTestCase):
     detector = Detector.objects.get(name='detector1')
 
     # Get single
-    response = self.client.get('/{}/detectors/{}/'.format(settings.PREFIX, detector.id))
+    response = self.client.get('/{}/detectors/{}/'.format(settings.PREFIX_API, detector.id))
     self.assertTrue(response.status_code == HTTPStatus.BAD_REQUEST)
 
   def test_create_update_delete(self):

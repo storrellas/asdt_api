@@ -27,7 +27,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-PREFIX = 'api/v3'
+PREFIX_API = 'api/v3'
+PREFIX_WS = 'ws/v3'
 
 # Application definition
 INSTALLED_APPS = [

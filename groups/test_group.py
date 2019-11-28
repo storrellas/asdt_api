@@ -43,7 +43,7 @@ class TestCase(helper_tests.ASDTTestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Add groups
-    response = self.client.get('/{}/groups/{}/'.format(settings.PREFIX, group.id))
+    response = self.client.get('/{}/groups/{}/'.format(settings.PREFIX_API, group.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
 
 
@@ -55,7 +55,7 @@ class TestCase(helper_tests.ASDTTestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Add groups
-    response = self.client.get('/{}/groups/{}/'.format(settings.PREFIX, group.id))
+    response = self.client.get('/{}/groups/{}/'.format(settings.PREFIX_API, group.id))
     self.assertTrue(response.status_code == HTTPStatus.BAD_REQUEST)
 
   def test_get_all_admin(self):
@@ -64,7 +64,7 @@ class TestCase(helper_tests.ASDTTestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Get All
-    response = self.client.get('/{}/groups/all/'.format(settings.PREFIX))
+    response = self.client.get('/{}/groups/all/'.format(settings.PREFIX_API))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(len(response_json), 5)
@@ -75,7 +75,7 @@ class TestCase(helper_tests.ASDTTestCase):
     self.authenticate("master@asdt.eu", "asdt2019")
 
     # Get All
-    response = self.client.get('/{}/groups/all/'.format(settings.PREFIX))
+    response = self.client.get('/{}/groups/all/'.format(settings.PREFIX_API))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(len(response_json), 6)
@@ -87,7 +87,7 @@ class TestCase(helper_tests.ASDTTestCase):
 
     # Create group
     body = { 'name': 'TEST_GROUP' }
-    response = self.client.post('/{}/groups/'.format(settings.PREFIX), body)
+    response = self.client.post('/{}/groups/'.format(settings.PREFIX_API), body)
     self.assertTrue(response.status_code == HTTPStatus.OK)
 
     # Check created
@@ -107,7 +107,7 @@ class TestCase(helper_tests.ASDTTestCase):
     # Add group to group
     parent = Group.objects.get(name='ADMIN_CHILD_ASDT')
     body = { 'name': 'TEST_GROUP', 'parent':  parent.id }
-    response = self.client.post('/{}/groups/'.format(settings.PREFIX), body)
+    response = self.client.post('/{}/groups/'.format(settings.PREFIX_API), body)
     self.assertTrue(response.status_code == HTTPStatus.OK)
 
     # Check created
@@ -127,7 +127,7 @@ class TestCase(helper_tests.ASDTTestCase):
 
     # Update group
     body = { 'name': 'ADMIN_CHILD_ASDT_UPDATED' }
-    response = self.client.put('/{}/groups/{}/'.format(settings.PREFIX, group.id), body)
+    response = self.client.put('/{}/groups/{}/'.format(settings.PREFIX_API, group.id), body)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     self.assertTrue(Group.objects.filter(name='ADMIN_CHILD_ASDT_UPDATED').count() > 0)
 
@@ -148,7 +148,7 @@ class TestCase(helper_tests.ASDTTestCase):
 
     # Update group
     body = { 'name': 'ADMIN_CHILD_ASDT_UPDATED', 'parent': group_parent.id }
-    response = self.client.put('/{}/groups/{}/'.format(settings.PREFIX, group.id), body)
+    response = self.client.put('/{}/groups/{}/'.format(settings.PREFIX_API, group.id), body)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     self.assertTrue(Group.objects.filter(name='ADMIN_CHILD_ASDT_UPDATED').count() > 0)
 
@@ -184,7 +184,7 @@ class TestCase(helper_tests.ASDTTestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Delete Group
-    response = self.client.delete('/{}/groups/{}/'.format(settings.PREFIX, delete_group.id))
+    response = self.client.delete('/{}/groups/{}/'.format(settings.PREFIX_API, delete_group.id))
     self.assertTrue(response.status_code == HTTPStatus.NO_CONTENT)
     self.assertTrue(Group.objects.filter(name='DELETE_ASDT').count() == 0)
     self.assertTrue(Group.objects.filter(name='DELETE_CHILD_ASDT').count() == 0)
@@ -198,7 +198,7 @@ class TestCase(helper_tests.ASDTTestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Request users
-    response = self.client.get('/{}/groups/{}/users/'.format(settings.PREFIX, admin_group.id))
+    response = self.client.get('/{}/groups/{}/users/'.format(settings.PREFIX_API, admin_group.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
 
   def test_get_group_groups(self):
@@ -208,7 +208,7 @@ class TestCase(helper_tests.ASDTTestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Request groups
-    response = self.client.get('/{}/groups/{}/groups/'.format(settings.PREFIX, admin_group.id))
+    response = self.client.get('/{}/groups/{}/groups/'.format(settings.PREFIX_API, admin_group.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
 
   def test_add_user(self):
@@ -229,7 +229,7 @@ class TestCase(helper_tests.ASDTTestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Add user to group
-    response = self.client.put('/{}/groups/{}/users/{}/'.format(settings.PREFIX, group.id, user.id), {})
+    response = self.client.put('/{}/groups/{}/users/{}/'.format(settings.PREFIX_API, group.id, user.id), {})
     self.assertTrue(response.status_code == HTTPStatus.OK)
 
 
@@ -243,7 +243,7 @@ class TestCase(helper_tests.ASDTTestCase):
     self.assertEqual( user.group, group )
 
     # Delete user from group
-    response = self.client.delete('/{}/groups/{}/users/{}/'.format(settings.PREFIX, group.id, user.id), {})
+    response = self.client.delete('/{}/groups/{}/users/{}/'.format(settings.PREFIX_API, group.id, user.id), {})
     self.assertTrue(response.status_code == HTTPStatus.NO_CONTENT)
 
     # Leave it as it was
@@ -262,7 +262,7 @@ class TestCase(helper_tests.ASDTTestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Add groups
-    response = self.client.put('/{}/groups/{}/users/{}/'.format(settings.PREFIX, group.id, user.id), {})
+    response = self.client.put('/{}/groups/{}/users/{}/'.format(settings.PREFIX_API, group.id, user.id), {})
     self.assertTrue(response.status_code == HTTPStatus.BAD_REQUEST)
 
 

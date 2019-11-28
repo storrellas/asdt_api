@@ -47,7 +47,7 @@ class TestCase(helper_tests.ASDTTestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Delete Group
-    response = self.client.delete('/{}/user/{}/'.format(settings.PREFIX, instance.id))
+    response = self.client.delete('/{}/user/{}/'.format(settings.PREFIX_API, instance.id))
     self.assertTrue(response.status_code == HTTPStatus.NO_CONTENT)
 
     # Check related entities are there
@@ -65,7 +65,7 @@ class TestCase(helper_tests.ASDTTestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Delete Group
-    response = self.client.delete('/{}/detectors/{}/'.format(settings.PREFIX, instance.id))
+    response = self.client.delete('/{}/detectors/{}/'.format(settings.PREFIX_API, instance.id))
     self.assertTrue(response.status_code == HTTPStatus.NO_CONTENT)
 
     # Check related entities are there
@@ -83,7 +83,7 @@ class TestCase(helper_tests.ASDTTestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Delete Group
-    response = self.client.delete('/{}/groups/{}/'.format(settings.PREFIX, instance.id))
+    response = self.client.delete('/{}/groups/{}/'.format(settings.PREFIX_API, instance.id))
     self.assertTrue(response.status_code == HTTPStatus.NO_CONTENT)
 
     # Check related entities are there

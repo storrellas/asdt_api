@@ -43,7 +43,7 @@ class ASDTTestCase(APITestCase):
 
   def authenticate(self, user, password):
     # Get token
-    response = self.client.post('/{}/user/authenticate/'.format(settings.PREFIX), 
+    response = self.client.post('/{}/user/authenticate/'.format(settings.PREFIX_API), 
                             { "email": user, "password": password })
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())

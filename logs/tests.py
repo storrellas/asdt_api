@@ -59,7 +59,7 @@ class TestCase(helper_tests.ASDTTestCase):
     self.authenticate('admin@asdt.eu', 'asdt2019')
 
     # Get Logs
-    response = self.client.get('/{}/logs/'.format(settings.PREFIX))
+    response = self.client.get('/{}/logs/'.format(settings.PREFIX_API))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode()) 
     self.assertEqual(len(response_json), 1)
@@ -73,7 +73,7 @@ class TestCase(helper_tests.ASDTTestCase):
       "dateIni": "2019-08-01T23:00:00.000Z",
       "dateFin": "2019-11-01T00:00:00.000Z"
     }
-    response = self.client.get('/{}/logs/'.format(settings.PREFIX), url_params)
+    response = self.client.get('/{}/logs/'.format(settings.PREFIX_API), url_params)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(len(response_json), 3)
@@ -83,7 +83,7 @@ class TestCase(helper_tests.ASDTTestCase):
       "dateIni": "2019-10-01T23:00:00.000Z",
       "dateFin": "2019-11-01T00:00:00.000Z"
     }
-    response = self.client.get('/{}/logs/'.format(settings.PREFIX), url_params)
+    response = self.client.get('/{}/logs/'.format(settings.PREFIX_API), url_params)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(len(response_json), 2)
@@ -98,7 +98,7 @@ class TestCase(helper_tests.ASDTTestCase):
       "dateFin": "2019-11-01T00:00:00.000Z",
       "page": 0
     }
-    response = self.client.get('/{}/logs/'.format(settings.PREFIX), url_params)
+    response = self.client.get('/{}/logs/'.format(settings.PREFIX_API), url_params)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(len(response_json), 3)
@@ -111,17 +111,17 @@ class TestCase(helper_tests.ASDTTestCase):
       "dateFin": "2019-11-01T00:00:00.000Z",
       "page" : 1
     }
-    response = self.client.get('/{}/logs/'.format(settings.PREFIX), url_params)
+    response = self.client.get('/{}/logs/'.format(settings.PREFIX_API), url_params)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(len(response_json), 0)
 
     # Get by ID
-    response = self.client.get('/{}/logs/{}/'.format(settings.PREFIX, log_id))
+    response = self.client.get('/{}/logs/{}/'.format(settings.PREFIX_API, log_id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
 
     # Get KML
-    response = self.client.get('/{}/logs/{}/kml/'.format(settings.PREFIX, log_id))
+    response = self.client.get('/{}/logs/{}/kml/'.format(settings.PREFIX_API, log_id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     self.assertEqual(response.get('Content-Type'), 'application/xml')
 
@@ -135,7 +135,7 @@ class TestCase(helper_tests.ASDTTestCase):
       "dateFin": "2019-11-01T00:00:00.000Z",
       "sn": "1"
     }
-    response = self.client.get('/{}/logs/'.format(settings.PREFIX), url_params)
+    response = self.client.get('/{}/logs/'.format(settings.PREFIX_API), url_params)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(len(response_json), 1)
@@ -146,7 +146,7 @@ class TestCase(helper_tests.ASDTTestCase):
       "dateFin": "2019-11-01T00:00:00.000Z",
       "sn" : "6"
     }
-    response = self.client.get('/{}/logs/'.format(settings.PREFIX), url_params)
+    response = self.client.get('/{}/logs/'.format(settings.PREFIX_API), url_params)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(len(response_json), 0)
@@ -161,7 +161,7 @@ class TestCase(helper_tests.ASDTTestCase):
       "dateIni": "2019-08-01T23:00:00.000Z",
       "dateFin": "2019-11-01T00:00:00.000Z"
     }
-    response = self.client.get('/{}/logs/'.format(settings.PREFIX), url_params)
+    response = self.client.get('/{}/logs/'.format(settings.PREFIX_API), url_params)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(len(response_json), 0)

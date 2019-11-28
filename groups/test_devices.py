@@ -47,7 +47,7 @@ class TestCase(helper_tests.ASDTTestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Add inhibitor to group
-    response = self.client.put('/{}/groups/{}/devices/detectors/{}/'.format(settings.PREFIX, group.id, detector.id), {})
+    response = self.client.put('/{}/groups/{}/devices/detectors/{}/'.format(settings.PREFIX_API, group.id, detector.id), {})
     self.assertTrue(response.status_code == HTTPStatus.OK)
 
     # Check operation
@@ -57,7 +57,7 @@ class TestCase(helper_tests.ASDTTestCase):
     self.assertTrue( group in detector.groups )
 
     # Remove inhibitor from group
-    response = self.client.delete('/{}/groups/{}/devices/detectors/{}/'.format(settings.PREFIX, group.id, detector.id), {})
+    response = self.client.delete('/{}/groups/{}/devices/detectors/{}/'.format(settings.PREFIX_API, group.id, detector.id), {})
     self.assertTrue(response.status_code == HTTPStatus.NO_CONTENT)
 
     # Check operation
@@ -75,7 +75,7 @@ class TestCase(helper_tests.ASDTTestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Add inhibitor to group
-    response = self.client.put('/{}/groups/{}/devices/drones/{}/'.format(settings.PREFIX, group.id, drone.id), {})
+    response = self.client.put('/{}/groups/{}/devices/drones/{}/'.format(settings.PREFIX_API, group.id, drone.id), {})
     self.assertTrue(response.status_code == HTTPStatus.OK)
 
     # Check operation
@@ -85,7 +85,7 @@ class TestCase(helper_tests.ASDTTestCase):
     self.assertTrue( group in drone.groups )
 
     # Remove inhibitor from group
-    response = self.client.delete('/{}/groups/{}/devices/drones/{}/'.format(settings.PREFIX, group.id, drone.id), {})
+    response = self.client.delete('/{}/groups/{}/devices/drones/{}/'.format(settings.PREFIX_API, group.id, drone.id), {})
     self.assertTrue(response.status_code == HTTPStatus.NO_CONTENT)
 
     # Check operation
@@ -103,7 +103,7 @@ class TestCase(helper_tests.ASDTTestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Add inhibitor to group
-    response = self.client.put('/{}/groups/{}/devices/inhibitors/{}/'.format(settings.PREFIX, group.id, inhibitor.id), {})
+    response = self.client.put('/{}/groups/{}/devices/inhibitors/{}/'.format(settings.PREFIX_API, group.id, inhibitor.id), {})
     self.assertTrue(response.status_code == HTTPStatus.OK)
 
     # Check operation
@@ -113,7 +113,7 @@ class TestCase(helper_tests.ASDTTestCase):
     self.assertTrue( group in inhibitor.groups )
 
     # Remove inhibitor from group
-    response = self.client.delete('/{}/groups/{}/devices/inhibitors/{}/'.format(settings.PREFIX, group.id, inhibitor.id), {})
+    response = self.client.delete('/{}/groups/{}/devices/inhibitors/{}/'.format(settings.PREFIX_API, group.id, inhibitor.id), {})
     self.assertTrue(response.status_code == HTTPStatus.NO_CONTENT)
 
     # Check operation
@@ -131,7 +131,7 @@ class TestCase(helper_tests.ASDTTestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Add inhibitor to group
-    response = self.client.put('/{}/groups/{}/devices/zones/{}/'.format(settings.PREFIX, group.id, zone.id), {})
+    response = self.client.put('/{}/groups/{}/devices/zones/{}/'.format(settings.PREFIX_API, group.id, zone.id), {})
     self.assertTrue(response.status_code == HTTPStatus.OK)
 
     # Check operation
@@ -141,7 +141,7 @@ class TestCase(helper_tests.ASDTTestCase):
     self.assertTrue( group in zone.groups )
 
     # Remove inhibitor from group
-    response = self.client.delete('/{}/groups/{}/devices/zones/{}/'.format(settings.PREFIX, group.id, zone.id), {})
+    response = self.client.delete('/{}/groups/{}/devices/zones/{}/'.format(settings.PREFIX_API, group.id, zone.id), {})
     self.assertTrue(response.status_code == HTTPStatus.NO_CONTENT)
 
     # Check operation
@@ -161,19 +161,19 @@ class TestCase(helper_tests.ASDTTestCase):
 
   def test_get_group_drones(self):
     admin_group = Group.objects.get(name='ADMIN_ASDT')
-    self.get_group_devices('/{}/groups/{}/devices/drones/'.format(settings.PREFIX, admin_group.id))
+    self.get_group_devices('/{}/groups/{}/devices/drones/'.format(settings.PREFIX_API, admin_group.id))
 
   def test_get_group_detectors(self):
     admin_group = Group.objects.get(name='ADMIN_ASDT')
-    self.get_group_devices('/{}/groups/{}/devices/detectors/'.format(settings.PREFIX, admin_group.id))
+    self.get_group_devices('/{}/groups/{}/devices/detectors/'.format(settings.PREFIX_API, admin_group.id))
 
   def test_get_group_inhibitors(self):
     admin_group = Group.objects.get(name='ADMIN_ASDT')
-    self.get_group_devices('/{}/groups/{}/devices/inhibitors/'.format(settings.PREFIX, admin_group.id))
+    self.get_group_devices('/{}/groups/{}/devices/inhibitors/'.format(settings.PREFIX_API, admin_group.id))
 
   def test_get_group_zones(self):
     admin_group = Group.objects.get(name='ADMIN_ASDT')
-    self.get_group_devices('/{}/groups/{}/devices/zones/'.format(settings.PREFIX, admin_group.id))
+    self.get_group_devices('/{}/groups/{}/devices/zones/'.format(settings.PREFIX_API, admin_group.id))
 
 
 

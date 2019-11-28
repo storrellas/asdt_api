@@ -21,7 +21,7 @@ logger = utils.get_logger()
 
 class TestCase(helper_tests.DeviceTestCase):
 
-  base_url = '/{}/inhibitors/'.format(settings.PREFIX)
+  base_url = '/{}/inhibitors/'.format(settings.PREFIX_API)
   model = Inhibitor
 
   @classmethod

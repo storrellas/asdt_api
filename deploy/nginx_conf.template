@@ -40,6 +40,19 @@ server {
     proxy_pass http://127.0.0.1:9092/;
     include proxy_params;
   }
+
+  location /api/v3/ {
+    proxy_pass http://127.0.0.1:7070/api/v3/;
+    include proxy_params;
+  }
+  location /me/v3/ {
+    proxy_pass http://127.0.0.1:7071/me/v3/;
+    include proxy_params;
+  }
+  location /ws/v3/ {
+    proxy_pass http://127.0.0.1:7072/ws/v3/;
+    include proxy_params;
+  }
 }
 
 server {

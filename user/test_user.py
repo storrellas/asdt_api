@@ -37,20 +37,20 @@ class TestCase(helper_tests.ASDTTestCase):
   def test_get_token_admin(self):
     
     # Check not workin without login
-    response = self.client.get('/{}/user/me/'.format(settings.PREFIX))
+    response = self.client.get('/{}/user/me/'.format(settings.PREFIX_API))
     self.assertTrue(response.status_code == HTTPStatus.FORBIDDEN)
 
     # Get Token
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Check user info
-    response = self.client.get('/{}/user/me/'.format(settings.PREFIX))
+    response = self.client.get('/{}/user/me/'.format(settings.PREFIX_API))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['email'], 'admin@asdt.eu')
 
     # Check tools
-    response = self.client.get('/{}/user/me/tools/'.format(settings.PREFIX))
+    response = self.client.get('/{}/user/me/tools/'.format(settings.PREFIX_API))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['SETTING'], True)
@@ -59,20 +59,20 @@ class TestCase(helper_tests.ASDTTestCase):
   def test_get_token_viewer(self):
     
     # Check not workin without login
-    response = self.client.get('/{}/user/me/'.format(settings.PREFIX))
+    response = self.client.get('/{}/user/me/'.format(settings.PREFIX_API))
     self.assertTrue(response.status_code == HTTPStatus.FORBIDDEN)
 
     # Get Token
     self.authenticate("viewer@asdt.eu", "asdt2019")
 
     # Check user info
-    response = self.client.get('/{}/user/me/'.format(settings.PREFIX))
+    response = self.client.get('/{}/user/me/'.format(settings.PREFIX_API))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['email'], 'viewer@asdt.eu')
 
     # Check tools
-    response = self.client.get('/{}/user/me/tools/'.format(settings.PREFIX))
+    response = self.client.get('/{}/user/me/tools/'.format(settings.PREFIX_API))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(response_json['SETTING'], False)
@@ -90,12 +90,12 @@ class TestCase(helper_tests.ASDTTestCase):
       "role": "EMPOWERED",
       "hasGroup": False
     }
-    response = self.client.post('/{}/user/'.format(settings.PREFIX), body)
+    response = self.client.post('/{}/user/'.format(settings.PREFIX_API), body)
     response_json = json.loads(response.content.decode())
 
     # Get token
     self.client.credentials(HTTP_AUTHORIZATION='')
-    response = self.client.post('/{}/user/authenticate/'.format(settings.PREFIX), 
+    response = self.client.post('/{}/user/authenticate/'.format(settings.PREFIX_API), 
                                 { "email": "user@test.eu", "password": "asdt2019" })
     self.assertTrue(response.status_code == HTTPStatus.OK)
 
@@ -119,14 +119,14 @@ class TestCase(helper_tests.ASDTTestCase):
       "hasGroup": True,
       "group": group.id
     }
-    response = self.client.post('/{}/user/'.format(settings.PREFIX), body)
+    response = self.client.post('/{}/user/'.format(settings.PREFIX_API), body)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['group'] == str(group.id))
 
     # Get token
     self.client.credentials(HTTP_AUTHORIZATION='')
-    response = self.client.post('/{}/user/authenticate/'.format(settings.PREFIX), 
+    response = self.client.post('/{}/user/authenticate/'.format(settings.PREFIX_API), 
                                 { "email": "user2@test.eu", "password": "asdt2019" })
     self.assertTrue(response.status_code == HTTPStatus.OK)
 
@@ -150,7 +150,7 @@ class TestCase(helper_tests.ASDTTestCase):
       "role": "EMPOWERED",
       "hasGroup": False
     }
-    response = self.client.post('/{}/user/'.format(settings.PREFIX), body)
+    response = self.client.post('/{}/user/'.format(settings.PREFIX_API), body)
     self.assertTrue(response.status_code == HTTPStatus.FORBIDDEN)
 
   def test_create_user_group_not_allowed(self):
@@ -170,7 +170,7 @@ class TestCase(helper_tests.ASDTTestCase):
       "hasGroup": True,
       "group": group.id
     }
-    response = self.client.post('/{}/user/'.format(settings.PREFIX), body)
+    response = self.client.post('/{}/user/'.format(settings.PREFIX_API), body)
     self.assertTrue(response.status_code == HTTPStatus.BAD_REQUEST)
 
   def test_list_admin(self):
@@ -179,7 +179,7 @@ class TestCase(helper_tests.ASDTTestCase):
     self.authenticate("admin@asdt.eu", "asdt2019")
 
     # Get list of users
-    response = self.client.get('/{}/user/'.format(settings.PREFIX))
+    response = self.client.get('/{}/user/'.format(settings.PREFIX_API))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(len(response_json), 3)
@@ -190,7 +190,7 @@ class TestCase(helper_tests.ASDTTestCase):
     self.authenticate("master@asdt.eu", "asdt2019")
 
     # Get list of users
-    response = self.client.get('/{}/user/'.format(settings.PREFIX))
+    response = self.client.get('/{}/user/'.format(settings.PREFIX_API))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(len(response_json), 7)
@@ -201,7 +201,7 @@ class TestCase(helper_tests.ASDTTestCase):
     self.authenticate("admin_child@asdt.eu", "asdt2019")
 
     # Get list of users
-    response = self.client.get('/{}/user/'.format(settings.PREFIX))
+    response = self.client.get('/{}/user/'.format(settings.PREFIX_API))
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertEqual(len(response_json), 2)
@@ -214,7 +214,7 @@ class TestCase(helper_tests.ASDTTestCase):
     user = User.objects.get(email='admin_child@asdt.eu')
 
     # Get list of users
-    response = self.client.get('/{}/user/{}/'.format(settings.PREFIX, user.id))
+    response = self.client.get('/{}/user/{}/'.format(settings.PREFIX_API, user.id))
     self.assertTrue(response.status_code == HTTPStatus.OK)
 
   def test_update(self):
@@ -235,14 +235,14 @@ class TestCase(helper_tests.ASDTTestCase):
       "password": "asdt2018",
       "group": str(group.id)
     }
-    response = self.client.put('/{}/user/{}/'.format(settings.PREFIX, user.id), body)
+    response = self.client.put('/{}/user/{}/'.format(settings.PREFIX_API, user.id), body)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['email'] == 'albert@asdt.eu')
 
     # Get token
     self.client.credentials(HTTP_AUTHORIZATION='')
-    response = self.client.post('/{}/user/authenticate/'.format(settings.PREFIX), 
+    response = self.client.post('/{}/user/authenticate/'.format(settings.PREFIX_API), 
                                 { "email": "albert@asdt.eu", "password": "asdt2018" })
     self.assertTrue(response.status_code == HTTPStatus.OK)
 
@@ -270,7 +270,7 @@ class TestCase(helper_tests.ASDTTestCase):
     body = {
       "group": str(group.id)
     }
-    response = self.client.put('/{}/user/{}/'.format(settings.PREFIX, user.id), body)
+    response = self.client.put('/{}/user/{}/'.format(settings.PREFIX_API, user.id), body)
     self.assertTrue(response.status_code == HTTPStatus.OK)
     response_json = json.loads(response.content.decode())
     self.assertTrue(response_json['email'] == 'sergi@asdt.eu')
@@ -294,7 +294,7 @@ class TestCase(helper_tests.ASDTTestCase):
     user = User.objects.create(email='test_delete@asdt.eu', hasGroup=True, group=group)
 
     # Delete user
-    response = self.client.delete('/{}/user/{}/'.format(settings.PREFIX, user.id))
+    response = self.client.delete('/{}/user/{}/'.format(settings.PREFIX_API, user.id))
     self.assertTrue(response.status_code == HTTPStatus.NO_CONTENT)
     self.assertTrue( User.objects.filter(email='test_delete@asdt.eu').count() == 0 )
 

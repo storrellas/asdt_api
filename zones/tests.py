@@ -22,7 +22,7 @@ logger = utils.get_logger()
 
 class TestCase(helper_tests.DeviceTestCase):
 
-  base_url = '/{}/zones/'.format(settings.PREFIX)
+  base_url = '/{}/zones/'.format(settings.PREFIX_API)
   model = Zone
 
   @classmethod
