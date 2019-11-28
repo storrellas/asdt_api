@@ -39,8 +39,8 @@ logger.propagate = False
 # WS_URL = 'ws://localhost:8081/ws/v3/'
 # API_URL = 'http://localhost:8080'
 
-WS_URL = 'wss://asdtdev.mooo.com/ws/v3/'
-API_URL = 'https://asdtdev.mooo.com'
+WS_URL = 'wss://asdtdev.mooo.com/api/'
+#API_URL = 'https://asdtdev.mooo.com'
 
 OUTPUT_PATH = './output'
 

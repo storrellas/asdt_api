@@ -55,6 +55,12 @@ class Detector(ASDTDocument):
         'lon': self.location.lon,
         'height': self.location.height
       }
+    else:
+      item['location'] = {
+        'lat': 0, 
+        'lon': 0,
+        'height': 0
+      }
     groups_dict = []
     for group in self.groups:
       groups_dict.append(str(group.id))

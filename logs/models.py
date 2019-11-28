@@ -77,8 +77,14 @@ class Log(ASDTDocument):
     item['maxHeight'] = self.maxHeight
     item['distanceTraveled'] = self.distanceTraveled
     item['distanceToDetector'] = self.distanceToDetector
-    item['driverLocation'] = {'lat': self.driverLocation.lat, 'lon': self.driverLocation.lon }
-    item['homeLocation'] = {'lat': self.homeLocation.lat, 'lon': self.homeLocation.lon }
+    if self.driverLocation is not None:
+      item['driverLocation'] = {'lat': self.driverLocation.lat, 'lon': self.driverLocation.lon }
+    else:
+      item['driverLocation'] = {'lat': 0, 'lon': 0 }
+    if self.homeLocation is not None:
+      item['homeLocation'] = {'lat': self.homeLocation.lat, 'lon': self.homeLocation.lon }
+    else:
+      item['homeLocation'] = {'lat': 0, 'lon': 0 }
     detectors_list = []
     for detector in self.detectors:
       detectors_list.append(str(detector.id))

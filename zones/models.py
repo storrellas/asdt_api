@@ -35,8 +35,11 @@ class Zone(ASDTDocument):
   def as_dict(self):
     item = {}
     item['id'] = str(self.id)
-    item['name'] = self.name    
-    item['center'] = { 'lat': self.center.lat, 'lon': self.center.lon}
+    item['name'] = self.name
+    if self.center is not None: 
+      item['center'] = { 'lat': self.center.lat, 'lon': self.center.lon}
+    else:
+      item['center'] = { 'lat': 0, 'lon': 0}
     item['radius'] = self.radius
     perimeter_dict = []
     for permiter in self.perimiter:      

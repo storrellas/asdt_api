@@ -30,6 +30,8 @@ class Inhibitor(ASDTDocument):
     item['name'] = self.name
     if self.location is not None:    
       item['location'] = { 'lat': self.location.lat, 'lon': self.location.lon}
+    else:
+      item['location'] = { 'lat': 0, 'lon': 0}
     item['frequencies'] = self.frequencies
     groups_dict = []
     for group in self.groups:
