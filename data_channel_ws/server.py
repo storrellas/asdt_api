@@ -283,11 +283,11 @@ class WSHandler(WebSocketHandler):
 
 
     except Exception as e:
-      logger.error("Detector token decode failed")
+      logger.error("'{}' token decode failed".format(message))
       logger.info("Exception " + str(e))
       self.close()
     except jwt.ExpiredSignatureError as e:
-      logger.error("Detector token expired")
+      logger.error("'{}' token expired".format(message))
       logger.info("Expired " + str(e))
       self.close()
 
