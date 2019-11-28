@@ -34,6 +34,7 @@ logger = get_logger()
 logger.propagate = False
 
 class LogStorageDataMessage(LogMessage):
+  id = None
   dateIni = datetime.datetime.now()
   dateFin = datetime.datetime.now()
   # Coming from detector
@@ -164,6 +165,9 @@ class WSMessageDetectionBroker:
                             fHeight=item.fHeight, aHeight=item.aHeight)
       log.route.append( route_item )
     log.save()
+
+    # Store assigned id
+    log_storage.id = log.id
   
   def calculate_distance(self, location1, location2):
     location_tuple_1 = (location1.lat, location1.lon)
@@ -296,13 +300,18 @@ class WSMessageDetectionBroker:
 
     # Potential 
     for user_id in user_related_list:
-      message = {
-        'deviceType' : 'detector',
-        'messageType' : 'drone log',
-        'deviceId' : str(detector.id),
-        'deviceName' : str(detector.name),
-        'data' : data,
-      }
+      message = {}
+      message['_id'] = str(log_storage.id)
+      message['deviceType'] = 'detector'
+      message['messageType'] = str(detector.id)
+      message['deviceName'] = str(detector.name)
+
+      message['dateIni'] = log_storage.data.dateIni.isoformat()
+      message['dateFin'] = log_storage.data.dateFin.isoformat()
+      message['maxHeight'] = log_storage.data.maxHeight
+      message['distanceTraveled'] = log_storage.data.distanceTraveled
+      message['distanceToDetector'] = log_storage.data.distanceToDetector
+
       message['data'] = {}
       message['data']['sn'] = log_storage.data.sn
       message['data']['productId'] = log_storage.data.productId
@@ -311,11 +320,7 @@ class WSMessageDetectionBroker:
       message['data']['owner'] = log_storage.data.owner      
       message['data']['msgCount'] = log_storage.msgCount
 
-      message['dateIni'] = log_storage.data.dateIni.isoformat()
-      message['dateFin'] = log_storage.data.dateFin.isoformat()
-      message['maxHeight'] = log_storage.data.maxHeight
-      message['distanceTraveled'] = log_storage.data.distanceTraveled
-      message['distanceToDetector'] = log_storage.data.distanceToDetector
+      
 
       response = WSResponseMessage(destination_id=user_id, type=WSResponseMessage.USER, content=json.dumps(message))
       response_list.append( response )

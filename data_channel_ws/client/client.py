@@ -36,11 +36,11 @@ logger = get_logger()
 logger.propagate = False
 
 # Configuration parameters
-# WS_URL = 'ws://localhost:8081/ws/v3/'
-# API_URL = 'http://localhost:8080'
+WS_URL = 'ws://localhost:8081/ws/v3/'
+API_URL = 'http://localhost:8080'
 
-WS_URL = 'ws://asdtdev.mooo.com/ws/v3/'
-API_URL = 'https://asdtdev.mooo.com'
+# WS_URL = 'ws://asdtdev.mooo.com/ws/v3/'
+# API_URL = 'https://asdtdev.mooo.com'
 
 OUTPUT_PATH = './output'
 
@@ -343,7 +343,7 @@ def signal_handler(sig, frame):
 def send_detection_log_periodic_list():
   global periodic_callback
   for client in client_list:
-    if client.is_ws_connected():
+    if client.is_ws_connected() and client.name == 'Detector':
       client.send_detection_log_periodic()
     else:
       pass
