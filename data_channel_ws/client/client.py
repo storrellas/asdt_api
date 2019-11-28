@@ -39,7 +39,7 @@ logger.propagate = False
 # WS_URL = 'ws://localhost:8081/ws/v3/'
 # API_URL = 'http://localhost:8080'
 
-WS_URL = 'wss://asdtdev.mooo.com/api/'
+WS_URL = 'ws://asdtdev.mooo.com/ws/v3/'
 API_URL = 'https://asdtdev.mooo.com'
 
 OUTPUT_PATH = './output'
@@ -291,7 +291,8 @@ class WSDetectorClient(WSClient):
     if self.is_ws_connected():
       self.ws.write_message(bytes(frame), binary=True)
     else:
-      logger.error("Failed to send to client")
+      logger.error("Failed to send to client. Exiting ...")            
+      sys.exit(0)
 
 # END: WSDetectorClient
 
@@ -317,12 +318,12 @@ def read_json_configuration(filename):
   # Configuration parameters
   config = {}
   try:
-      with open(filename) as json_file:
-        config = json.load(json_file)
-        return config
+    with open(filename) as json_file:
+      config = json.load(json_file)
+      return config
   except FileNotFoundError:
-      logger.error("Config file not found")
-      sys.exit(0)
+    logger.error("Config file not found")
+    sys.exit(0)
 
 
 
@@ -342,11 +343,12 @@ def signal_handler(sig, frame):
 def send_detection_log_periodic_list():
   global periodic_callback
   for client in client_list:
-    if client.is_ws_connected() == False:
-      logger.error("Client {} id={} is closed. Aborting".format(client.name, client.id) )
-      periodic_callback.stop()
-      sys.exit(0)
-    client.send_detection_log_periodic()
+    if client.is_ws_connected():
+      client.send_detection_log_periodic()
+    else:
+      pass
+      #logger.error("Client {} id={} is closed. Aborting".format(client.name, client.id) )
+    
 
 def generate_drone_flight_list(config):
   """
@@ -397,7 +399,9 @@ if __name__ == "__main__":
     logger.info("Login detector with ({}/{})".format(detector_id, password))
     body = { 'id': detector_id, 'password': password }
     result, token = client.login('{}/api/v3/detectors/authenticate/'.format(API_URL), body)
-    if not result:
+    if result:
+      logger.info("Log in ok!")
+    else:
       logger.error("Login Failed. Aborting")
       sys.exit(0)
       
@@ -421,7 +425,9 @@ if __name__ == "__main__":
     logger.info("Login user with ({}/{})".format(email, password))
     body = { 'email': email, 'password': password }
     result, token = client.login('{}/api/v3/user/authenticate/'.format(API_URL), body)
-    if not result:
+    if result:
+      logger.info("Log in ok!")
+    else:
       logger.error("Login Failed. Aborting")
       sys.exit(0)
     

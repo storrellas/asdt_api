@@ -304,10 +304,19 @@ class WSMessageDetectionBroker:
         'data' : data,
       }
       message['data'] = {}
-      message['data']['model'] = log_storage.data.model
-      message['data']['owner'] = log_storage.data.owner
-      message['data']['distanceTraveled'] = log_storage.data.distanceTraveled
+      message['data']['sn'] = log_storage.data.sn
+      message['data']['productId'] = log_storage.data.productId
+      if log_storage.data.model is not None:
+        message['data']['model'] = log_storage.data.model
+      message['data']['owner'] = log_storage.data.owner      
       message['data']['msgCount'] = log_storage.msgCount
+
+      message['dateIni'] = log_storage.data.dateIni.iso_format()
+      message['dateFin'] = log_storage.data.dateFin.iso_format()
+      message['maxHeight'] = log_storage.data.maxHeight
+      message['distanceTraveled'] = log_storage.data.distanceTraveled
+      message['distanceToDetector'] = log_storage.data.distanceToDetector
+
       response = WSResponseMessage(destination_id=user_id, type=WSResponseMessage.USER, content=json.dumps(message))
       response_list.append( response )
 
