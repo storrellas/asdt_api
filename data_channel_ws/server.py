@@ -313,9 +313,11 @@ class WSHandler(WebSocketHandler):
     # NOTE: Reply to peers (myself and other indicated by response)
     for response in response_list:
       ws_conn = self.repository.find_by_id(response.destination_id)
-      logger.info("Generating response to type='{}' id='{}' friendly_name='{}'" \
-                    .format(ws_conn.type, ws_conn.id, ws_conn.friendly_name))
+      logger.info("Sending response to type='{}' id='{}'" \
+                    .format(response.type, response.destination_id))
       if ws_conn is not None:
+        logger.info("Sending response to type='{}' id='{}' friendly_name='{}'" \
+              .format(ws_conn.type, ws_conn.id, ws_conn.friendly_name))
         ws_conn.write_message(response.content)
 
   def on_message(self, message):
