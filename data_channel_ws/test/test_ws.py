@@ -57,7 +57,7 @@ MONGO_DB = 'asdt'
 # Configuration - client
 API_DETECTOR_AUTH_URL = 'http://localhost:8080/api/v3/detectors/authenticate/'
 API_USER_AUTH_URL = 'http://localhost:8080/api/v3/user/authenticate/'
-WS_URL = 'ws://localhost:8081/api'
+WS_URL = 'ws://localhost:8081/{}/'.format(settings.PREFIX_WS)
 
 EVENT_WAIT_TIMEOUT = 10 # Number of seconds before continue
 
@@ -122,7 +122,7 @@ class WSServerThread(threading.Thread):
     self.repository = WSConnectionRepository()
     self.broker_detection = WSMessageDetectionBroker()
     application = tornado.web.Application([
-      (r'/api', WSHandlerMockup, dict(repository=self.repository, broker_detection=self.broker_detection, 
+      (r'/{}/'.format(settings.PREFIX_WS), WSHandlerMockup, dict(repository=self.repository, broker_detection=self.broker_detection, 
                                       secret_key=settings.SECRET_KEY, server_idle=self.server_idle)),
     ])
 
