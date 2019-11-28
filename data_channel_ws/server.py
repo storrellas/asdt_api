@@ -353,13 +353,13 @@ if __name__ == "__main__":
   repository = WSConnectionRepository()
   broker_detection = WSMessageDetectionBroker()
   application = tornado.web.Application([
-    (r'/api', WSHandler, dict(repository=repository, 
+    (r'/{}/'.format(settings.PREFIX_WS), WSHandler, dict(repository=repository, 
                               broker_detection=broker_detection, secret_key=settings.SECRET_KEY)),
   ])
  
 
   # Starting WS Server
-  logger.info("Started Data Channel WS 0.0.0.0@{}".format(WS_PORT))
+  logger.info("Started Data Channel WS 0.0.0.0@{}:/{}/".format(WS_PORT,settings.PREFIX_WS))
   http_server = tornado.httpserver.HTTPServer(application)
   http_server.listen(WS_PORT)
 

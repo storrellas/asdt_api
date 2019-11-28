@@ -36,7 +36,7 @@ logger = get_logger()
 logger.propagate = False
 
 # Configuration parameters
-WS_URL = 'ws://localhost:8081/api'
+WS_URL = 'ws://localhost:8081/ws/v3/'
 API_DETECTOR_AUTH_URL = 'http://localhost:8080/api/v3/detectors/authenticate/'
 API_USER_AUTH_URL = 'http://localhost:8080/api/v3/user/authenticate/'
 OUTPUT_PATH = './output'
