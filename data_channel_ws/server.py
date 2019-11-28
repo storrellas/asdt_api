@@ -229,8 +229,8 @@ class WSHandler(WebSocketHandler):
     # self.write_message("Hello World")
     pass
 
- def check_origin(self, origin):
-    return True
+  def check_origin(self, origin):
+      return True
 
   def on_message_register_client(self, ws_conn, message):
     """
