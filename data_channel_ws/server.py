@@ -268,11 +268,11 @@ class WSHandler(WebSocketHandler):
       # Append new connection to repository
       friendly_name = ''
       if type_id == WSConnection.DETECTOR:
-        friendly_name = model.name
+        friendly_name = model.objects.get(id=instance_id).name
       elif type_id == WSConnection.USER:
-        friendly_name = model.email
+        friendly_name = model.objects.get(id=instance_id).email
       elif type_id == WSConnection.INHIBITOR:
-        friendly_name = model.name
+        friendly_name = model.objects.get(id=instance_id).name
       logger.info("Client type='{}' id='{}' friendly_name={} login ok!".format(type_id, instance_id, friendly_name))
       ws_conn = WSConnection(ws_handler=self, host=self.request.host, 
                           id=instance_id, type=type_id.upper(), friendly_name=friendly_name)
