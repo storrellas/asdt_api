@@ -49,10 +49,9 @@ from logs.models import Log, LogRoute
 logger = get_logger()
 
 # Configuration - server
-WS_PORT = 8081
 
-# URL To connect WS
-WS_URL = 'ws://localhost:8081/{}/'.format(settings.PREFIX_WS)
+
+
 
 EVENT_WAIT_TIMEOUT = 10 # Number of seconds before continue
 
@@ -114,16 +113,25 @@ class WSServerThread(threading.Thread):
   # Thread synchro
   server_idle = None
 
-  # Tornado
+
+  # Config for client/server
+  ws_url = None
+  ws_port = None
+
+  # Tornado - internal variables
   ioloop = None
   detector_client = None
   user_client = None
   repository = None
   broker_detection = None
 
-  def __init__(self):
+
+
+  def __init__(self, ws_port, ws_url):
     super().__init__()
     self.server_idle = threading.Event()
+    self.ws_port = ws_port
+    self.ws_url = ws_url
 
   def run(self):
     # Store ioloop instance
@@ -139,13 +147,13 @@ class WSServerThread(threading.Thread):
     ])
 
     # Starting WS Server
-    logger.info("Started Data Channel WS 0.0.0.0@{}".format(WS_PORT))
+    logger.info("Started Data Channel WS 0.0.0.0@{}".format(self.ws_port))
     http_server = tornado.httpserver.HTTPServer(application)
-    http_server.listen(WS_PORT)
+    http_server.listen(self.ws_port)
 
     # Create client
-    self.detector_client = WSDetectorClientMockup(WS_URL)
-    self.user_client = WSDetectorClientMockup(WS_URL)
+    self.detector_client = WSDetectorClientMockup(self.ws_url)
+    self.user_client = WSDetectorClientMockup(self.ws_url)
 
     # Used to signal server is ready
     self.server_idle.set()

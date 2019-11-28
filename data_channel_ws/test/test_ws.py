@@ -54,7 +54,9 @@ logger = get_logger()
 API_DETECTOR_AUTH_URL = 'http://localhost:8080/api/v3/detectors/authenticate/'
 API_USER_AUTH_URL = 'http://localhost:8080/api/v3/user/authenticate/'
 
-
+# URL To connect WS
+WS_PORT = 8081
+WS_URL = 'ws://localhost:{}/{}/'.format(WS_PORT, settings.PREFIX_WS)
 
 class TestCase(unittest.TestCase):
 
@@ -75,7 +77,7 @@ class TestCase(unittest.TestCase):
     asyncio.set_event_loop_policy(AnyThreadEventLoopPolicy())
 
     # Start thread
-    cls.ioloop_thread = WSServerThread()
+    cls.ioloop_thread = WSServerThread(WS_PORT, WS_URL)
     cls.ioloop_thread.start()
 
     # Wait until WS Server is running
