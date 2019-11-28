@@ -13,8 +13,6 @@ import unittest
 import threading
 import datetime
 from time import sleep
-from http import HTTPStatus
-import json
 
 # Testing files
 from common import DetectorCoder, LogMessage, LogLocationMessage
@@ -33,179 +31,28 @@ from tornado.ioloop import IOLoop, PeriodicCallback
 from tornado.websocket import WebSocketHandler
 
 # Project import
-from mongo_dummy import MongoDummy
 from django.conf import settings
 from message_broker_detection import WSMessageDetectionBroker
 from common import DetectorCoder, LogMessage, LogLocationMessage
 
-# Detector client/server
-from client import WSDetectorClient, DroneFlight
-from server import WSHandler, WSConnectionRepository
+# # Detector client/server
+# from client import WSDetectorClient, DroneFlight
+# from server import WSHandler, WSConnectionRepository
 
 # Import models
 from detectors.models import Detector
 from user.models import User
 from logs.models import Log, LogRoute
 
+# Imports for test
+from client import DroneFlight
+from ws_thread import WSHandlerMockup, WSUserClientMockup, WSDetectorClientMockup, WSServerThread
+
 logger = get_logger()
 
-# Configuration - server
-WS_PORT = 8081
-MONGO_HOST = 'localhost'
-MONGO_PORT = 27017
-MONGO_DB = 'asdt'
 # Configuration - client
 API_DETECTOR_AUTH_URL = 'http://localhost:8080/api/v3/detectors/authenticate/'
 API_USER_AUTH_URL = 'http://localhost:8080/api/v3/user/authenticate/'
-WS_URL = 'ws://localhost:8081/{}/'.format(settings.PREFIX_WS)
-
-EVENT_WAIT_TIMEOUT = 10 # Number of seconds before continue
-
-class WSHandlerMockup(WSHandler):
-  
-  server_idle = None
-
-  def initialize(self, repository, broker_detection, secret_key, server_idle):
-    super().initialize(repository, broker_detection, secret_key)
-    self.server_idle = server_idle
-
-  def on_message(self, message):    
-    super().on_message(message)
-    self.server_idle.set()
-
-  def on_close(self):    
-    super().on_close()
-    self.server_idle.set()
-
-class WSDetectorClientMockup(WSDetectorClient):
-  
-  client_idle = None
-
-  def __init__(self, ws_url = None, drone_flight = None):
-    super().__init__(ws_url, drone_flight)
-    self.client_idle = threading.Event()
-
-  async def connect(self):
-    await super().connect()
-    # Signal client is ready
-    self.client_idle.set()
-
-  def on_message_callback(self, msg):    
-    super().on_message_callback(msg)
-    self.client_idle.set()
-
-class WSServerThread(threading.Thread):
-  """
-  Runs WS Server in a separated thread
-  """
-
-  # Thread synchro
-  server_idle = None
-
-  # Tornado
-  ioloop = None
-  detector_client = None
-  user_client = None
-  repository = None
-  broker_detection = None
-
-  def __init__(self):
-    super().__init__()
-    self.server_idle = threading.Event()
-
-  def run(self):
-    # Store ioloop instance
-    self.ioloop = IOLoop.instance()
-
-
-    # Create web application
-    self.repository = WSConnectionRepository()
-    self.broker_detection = WSMessageDetectionBroker()
-    application = tornado.web.Application([
-      (r'/{}/'.format(settings.PREFIX_WS), WSHandlerMockup, dict(repository=self.repository, broker_detection=self.broker_detection, 
-                                      secret_key=settings.SECRET_KEY, server_idle=self.server_idle)),
-    ])
-
-    # Starting WS Server
-    logger.info("Started Data Channel WS 0.0.0.0@{}".format(WS_PORT))
-    http_server = tornado.httpserver.HTTPServer(application)
-    http_server.listen(WS_PORT)
-
-    # Create client
-    self.detector_client = WSDetectorClientMockup(WS_URL)
-    self.user_client = WSDetectorClientMockup(WS_URL)
-
-    # Used to signal server is ready
-    self.server_idle.set()
-
-    # Start instance
-    self.ioloop.start()
-
-  def wait_for_server(self):
-    """
-    Blocking function to test whether WS Server is ready
-    """
-    self.server_idle.wait(EVENT_WAIT_TIMEOUT)
-    if self.server_idle.isSet() == False:
-      return False
-    self.server_idle.clear()
-    return True
-
-  def wait_for_detector_client(self):
-    """
-    Blocking function to test whether WS Server is ready
-    """
-    self.detector_client.client_idle.wait(EVENT_WAIT_TIMEOUT)
-    if self.detector_client.client_idle.isSet() == False:
-      return False
-    self.detector_client.client_idle.clear()
-    return True
-
-  def wait_for_user_client(self):
-    """
-    Blocking function to test whether WS Server is ready
-    """
-    self.user_client.client_idle.wait(EVENT_WAIT_TIMEOUT)
-    if self.user_client.client_idle.isSet() == False:
-      return False
-    self.user_client.client_idle.clear()
-    return True
-
-  def login_detector_client(self, url, detector_id, password):
-    return self.detector_client.login(url, {'id': detector_id, 'password': password})
-
-  def login_user_client(self, url, email, password):
-    return self.user_client.login(url, {'email': email, 'password': password})
-
-  def launch_detector_client(self):
-    """
-    Launches client
-    """
-    self.ioloop.spawn_callback(self.detector_client.connect)
-    self.wait_for_detector_client()
-
-  def launch_user_client(self):
-    """
-    Launches client
-    """
-    self.ioloop.spawn_callback(self.user_client.connect)
-    self.wait_for_user_client()
-
-  def request_terminate(self):
-    """
-    Requests for WS Server termination
-    """
-    logger.info('Closing WS Server ...')
-    # Call callback in the next ioloo iteration
-    self.ioloop.spawn_callback(self._terminate)
-    
-  def _terminate(self):
-    """
-    WS Server termination
-    """
-    logger.info("Terminated ioloop")
-    self.ioloop.stop()
-    logger.info('DONE!')
 
 
 
@@ -221,8 +68,8 @@ class TestCase(unittest.TestCase):
     super().setUpClass()
 
     # Open mongo connection
-    mongoengine.connect(MONGO_DB, host=MONGO_HOST, port=int(MONGO_PORT))
-    logger.info("Connected MONGODB against mongodb://{}:{}/{}".format(MONGO_HOST, MONGO_PORT, MONGO_DB))
+    mongoengine.connect(settings.MONGO_DB, host=settings.MONGO_HOST, port=int(settings.MONGO_PORT))
+    logger.info("Connected MONGODB against mongodb://{}:{}/{}".format(settings.MONGO_HOST, settings.MONGO_PORT, settings.MONGO_DB))
 
     # See http://www.tornadoweb.org/en/stable/asyncio.html#tornado.platform.asyncio.AnyThreadEventLoopPolicy
     asyncio.set_event_loop_policy(AnyThreadEventLoopPolicy())
