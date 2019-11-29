@@ -13,6 +13,8 @@ from http import HTTPStatus
 import jwt
 import datetime
 from geopy.distance import geodesic
+import threading
+
 
 # Mongoengine connect
 import mongoengine
@@ -58,6 +60,7 @@ class LogStorageMessage:
   lastUpdate = datetime.datetime.now()
   sendInfo = False
   msgCount = 0
+  lastDetector = None
   data = LogStorageDataMessage()
 
   def __init__(self, ):
@@ -103,9 +106,11 @@ class WSMessageDetectionBroker:
   
   # repository = LogMessageRepository()
   __log_message_dict = {}
+  __lock = threading.Lock()
 
   # Maximum time without detections to consider a flight is finished
-  maxElapsedTime = 100000
+  #maxElapsedTime = 100000
+  maxElapsedTime = 1000
 
   def get_log(self, sn):
     return self.__log_message_dict[sn] if sn in self.__log_message_dict else None
@@ -113,11 +118,17 @@ class WSMessageDetectionBroker:
   def set_log(self, sn, log_message):
     self.__log_message_dict[sn] = log_message
 
-  def logs_update(self):
+  def check_log_alive(self):
     """
     Update logs in DB
     NOTE: We should move this to the former
     """
+    response_list = []
+    sn_list_to_remove = []
+    # Acquire lock
+    self.__lock.acquire()
+
+    # Iterate on messages
     for sn in self.__log_message_dict.keys():
       log_message = self.__log_message_dict[sn]
       now = datetime.datetime.now()
@@ -125,8 +136,18 @@ class WSMessageDetectionBroker:
       if delta_time.total_seconds() * 1000 > self.maxElapsedTime:
         logger.info("Saving logs automatically as considering flight as finished {}" .format(delta_time.total_seconds() * 1000))
         self.save_log(log_message)
+        sn_list_to_remove.append(sn)
         # Remove from dictionary
-        self.__log_message_dict.pop(sn, None)
+        response_partial = self.generate_response_list(log_message.lastDetector, log_message, log_message.data, "fly finishes")
+        response_list.extend(response_partial)
+    # Remove sn from dict
+    # NOTE: We cannot do that in the other loop because it changes the __log_message_dict
+    for sn in sn_list_to_remove:
+      self.__log_message_dict.pop(sn, None)
+
+    # Release lock
+    self.__lock.release()
+    return response_list
         
 
   def save_log(self, log_storage):
@@ -196,7 +217,8 @@ class WSMessageDetectionBroker:
     if content.sn:
       log_storage.data.sn = content.sn
     if not detector in log_storage.data.detectors:
-      log_storage.data.detectors.append(detector)   
+      log_storage.data.detectors.append(detector)
+      log_storage.lastDetector = detector 
     if content.driverLocation:
       log_storage.data.driverLocation = content.driverLocation
     if content.homeLocation:
@@ -224,6 +246,9 @@ class WSMessageDetectionBroker:
       # Get detector object
       detector = Detector.objects.get(id=req.source_id)
       logger.info("Identified detector as {}".format(detector.name))
+
+      # Acquire Lock
+      self.__lock.acquire()
 
       # Log Storage
       log_storage = None
@@ -267,9 +292,11 @@ class WSMessageDetectionBroker:
         # Add log_storage to dict
         self.__log_message_dict[req.content.sn] = log_storage
 
-      
       # Store log locally
       self.save_log(log_storage)
+
+      # Relese Lock
+      self.__lock.release()
 
       # Send info if requested
       # print(req.content.__dict__)
@@ -289,7 +316,7 @@ class WSMessageDetectionBroker:
     finally:
       return response_list
 
-  def generate_response_list(self, detector, log_storage, data):
+  def generate_response_list(self, detector, log_storage, data, status = None):
     response_list = []
     # groups related to detector
     groups_related_list = Group.objects.filter(devices__detectors__in=[detector.id])
@@ -319,6 +346,9 @@ class WSMessageDetectionBroker:
         message['data']['model'] = log_storage.data.model
       message['data']['owner'] = log_storage.data.owner      
       message['data']['msgCount'] = log_storage.msgCount
+
+      if status:
+        message['data']['status'] = status
 
       
 

@@ -42,7 +42,7 @@ logger.propagate = False
 # Configuration
 WS_PORT = 8081
 KEEP_ALIVE_CONNECTION_PERIOD=2000 # 
-LOGS_UPDATE_PERIOD=2000
+CHECK_LOG_ALIVE_NOTIFY_PERIOD=2000
 
 
 class WSConnection:
@@ -62,7 +62,8 @@ class WSConnection:
   DETECTOR = 'DETECTOR'
   INHIBITOR = 'INHIBITOR'
 
-  def __init__(self, ws_handler = None, host = None, id = None, type = None, friendly_name = None):
+  def __init__(self, ws_handler = None, host = None, id = None, \
+                  type = None, friendly_name = None):
     self.ws_handler = ws_handler
     self.host = host
     self.id = id
@@ -79,6 +80,10 @@ class WSConnectionRepository:
   """
 
   __ws_conn_list = []
+  broker = None
+
+  def __init__(self, broker = None):
+    self.broker = broker
 
   def add(self, detector_conn: WSConnection):
     """
@@ -167,6 +172,19 @@ class WSConnectionRepository:
       if detector_conn.type == WSConnection.USER \
           and detector_conn.id in user_related_list:
         detector_conn.ws_handler.write_message(msg)
+
+  def check_log_alive_notify(self):
+    response_list = self.broker.check_log_alive()
+    for response in response_list:
+      ws_conn = self.find_by_id(response.destination_id)
+      logger.info("Generating response for type='{}' id='{}'" \
+                    .format(response.type, response.destination_id))
+      if ws_conn is not None:
+        logger.info("Sending response to type='{}' id='{}' friendly_name='{}'" \
+              .format(ws_conn.type, ws_conn.id, ws_conn.friendly_name))
+        ws_conn.write_message(response.content)
+      else:
+        logger.info("Not connected")
 
 class WSHandler(WebSocketHandler):
 
@@ -335,13 +353,13 @@ class WSHandler(WebSocketHandler):
     else:
       self.on_message_treat(ws_conn, message)
 
-
-
   def on_close(self):    
     ws_conn = self.repository.find_by_handler(self)    
     if ws_conn is not None:
       logger.info("Closed connection. Removing type='{}' id='{}' host={}".format(ws_conn.id, ws_conn.type, ws_conn.host))
       self.repository.remove(ws_conn)
+
+# END: WSHandler
 
 
 
@@ -366,8 +384,8 @@ if __name__ == "__main__":
   logger.info("Connected MONGODB against mongodb://{}:{}/{}".format(settings.MONGO_HOST, settings.MONGO_PORT, settings.MONGO_DB))
 
   # Create web application
-  repository = WSConnectionRepository()
   broker_detection = WSMessageDetectionBroker()
+  repository = WSConnectionRepository(broker_detection)
   application = tornado.web.Application([
     (r'/{}/'.format(settings.PREFIX_WS), WSHandler, dict(repository=repository, 
                               broker_detection=broker_detection, secret_key=settings.SECRET_KEY)),
@@ -382,8 +400,8 @@ if __name__ == "__main__":
   # Checks latest activity on every connection
   PeriodicCallback(repository.keep_alive_connection_repository, 
                     KEEP_ALIVE_CONNECTION_PERIOD).start()
-  PeriodicCallback(broker_detection.logs_update, 
-                    LOGS_UPDATE_PERIOD).start()
+  PeriodicCallback(repository.check_log_alive_notify, 
+                    CHECK_LOG_ALIVE_NOTIFY_PERIOD).start()
 
   IOLoop.instance().start()
 

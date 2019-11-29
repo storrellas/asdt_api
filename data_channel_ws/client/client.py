@@ -58,7 +58,7 @@ class DroneFlight:
 
   # Count number of detections
   current_detection = 0
-  max_detection = 0
+  max_detection = 3
   
   def __init__(self, sn, lat, lon, timeout = 0, gpx_file = None):
     self.sn = sn
@@ -86,7 +86,7 @@ class DroneFlight:
     if self.max_detection > 0:
       if self.current_detection >= self.max_detection:
         logger.info("Reached max number of segments/detections")
-        return
+        return None
     self.current_detection = self.current_detection + 1
 
     if self.input_gpx is None:
@@ -278,7 +278,9 @@ class WSDetectorClient(WSClient):
       if (now - drone_flight.last_detection_timestamp).total_seconds() * 1000 > drone_flight.timeout:
         detection_log = drone_flight.get_detection_log()
         # Send detection
-        self.send_detection_log(detection_log)
+        if detection_log:
+          self.send_detection_log(detection_log)
+        # update to avoid logs
         drone_flight.last_detection_timestamp = now
 
   def send_detection_log(self, detection_log):
